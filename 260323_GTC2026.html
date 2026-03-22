@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HPC + AI 가속 빌딩블록 — GTC 2026 분석</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg2: #fafafa;
+    --text: #1a1a1a;
+    --text2: #777777;
+    --accent: #e11d48;
+    --accent2: #f43f5e;
+    --border: #e5e5e5;
+    --table-bg: #fafafa;
+    --table-header: #e11d48;
+    --c1: #e11d48;
+    --c2: #1a1a1a;
+    --c3: #6b7280;
+    --c4: #2563eb;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.75;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    border-top: 4px solid var(--accent);
+    padding: 48px 0 32px;
+    margin-bottom: 8px;
+  }
+  .issue-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+    display: block;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 7vw, 44px);
+    font-weight: 900;
+    line-height: 1.12;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+  .subtitle {
+    font-family: 'Source Serif 4', serif;
+    font-size: 16px;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text2);
+    border-left: 3px solid var(--accent);
+    padding-left: 16px;
+    line-height: 1.6;
+  }
+  .meta {
+    display: flex;
+    gap: 20px;
+    margin-top: 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text2);
+    letter-spacing: 0.06em;
+    flex-wrap: wrap;
+  }
+  .meta span { display: flex; align-items: center; gap: 5px; }
+
+  /* ── DIVIDER ── */
+  .rule { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+  .rule-thick { border: none; border-top: 2px solid var(--text); margin: 40px 0; }
+
+  /* ── SECTIONS ── */
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(22px, 5vw, 28px);
+    font-weight: 700;
+    margin: 48px 0 16px;
+    line-height: 1.2;
+  }
+  h2 .num {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 32px 0 10px;
+  }
+  p { margin-bottom: 16px; }
+
+  /* ── PULL QUOTE ── */
+  blockquote {
+    border-left: 4px solid var(--accent);
+    margin: 32px 0;
+    padding: 20px 24px;
+    background: var(--bg2);
+  }
+  blockquote p {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--text);
+    margin: 0;
+  }
+  blockquote cite {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 10px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── CALLOUT BOX ── */
+  .callout {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    padding: 24px;
+    margin: 28px 0;
+    border-radius: 2px;
+  }
+  .callout-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .callout p { font-size: 15px; margin-bottom: 8px; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* ── STAT CARDS ── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: 28px 0;
+  }
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 20px 18px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text2);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── FADE IN ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── CHART ── */
+  .chart-container {
+    position: relative;
+    max-height: 340px;
+    margin: 24px 0;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 20px 16px 16px;
+  }
+  .chart-container canvas {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    max-height: 300px;
+  }
+  .chart-container.chart-ready canvas { opacity: 1; }
+  .chart-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 12px;
+  }
+
+  /* ── TIMELINE ── */
+  .timeline { margin: 28px 0; }
+  .tl-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-era {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    min-width: 60px;
+    padding-top: 2px;
+  }
+  .tl-content { flex: 1; }
+  .tl-hw { font-weight: 600; font-size: 15px; margin-bottom: 3px; }
+  .tl-sw { font-size: 14px; color: var(--text2); }
+
+  /* ── TABLE ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+  }
+  th {
+    background: var(--table-header);
+    color: #fff;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--table-bg);
+  }
+  tr:nth-child(even) td { background: #f4f4f4; }
+
+  /* ── INTERACTIVE: PRECISION SIMULATOR ── */
+  .sim-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    padding: 24px;
+    margin: 28px 0;
+  }
+  .sim-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  .sim-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .sim-row label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    min-width: 100px;
+    color: var(--text2);
+  }
+  .sim-row input[type=range] {
+    flex: 1;
+    min-width: 120px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .sim-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 50px;
+    text-align: right;
+  }
+  .sim-result {
+    background: #fff;
+    border: 1px solid var(--border);
+    padding: 18px;
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .sim-metric { text-align: center; }
+  .sim-metric-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--c4);
+    line-height: 1;
+  }
+  .sim-metric-num.highlight { color: var(--accent); }
+  .sim-metric-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: var(--text2);
+    margin-top: 4px;
+    letter-spacing: 0.06em;
+  }
+  .btn-reset {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 8px 18px;
+    background: var(--text);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-reset:hover { background: var(--accent); }
+
+  /* ── WORKFLOW DIAGRAM ── */
+  .wf-diagram {
+    margin: 24px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .wf-step {
+    display: flex;
+    gap: 0;
+    cursor: pointer;
+  }
+  .wf-dot-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 32px;
+    flex-shrink: 0;
+  }
+  .wf-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 2px solid var(--border);
+    transition: all 0.3s;
+    flex-shrink: 0;
+    margin-top: 14px;
+  }
+  .wf-line {
+    width: 2px;
+    flex: 1;
+    background: var(--border);
+    min-height: 20px;
+  }
+  .wf-step:last-child .wf-line { display: none; }
+  .wf-body {
+    flex: 1;
+    padding: 12px 0 12px 12px;
+  }
+  .wf-step.active .wf-dot { background: var(--accent); border-color: var(--accent); }
+  .wf-step.active .wf-line { background: var(--accent); }
+  .wf-step-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .wf-step-desc {
+    font-family: 'Source Serif 4', serif;
+    font-size: 14px;
+    color: var(--text2);
+    display: none;
+    line-height: 1.6;
+  }
+  .wf-step.active .wf-step-desc { display: block; }
+  .wf-hint {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: var(--text2);
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  /* ── SDK PILLS ── */
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+  .pill {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    color: var(--text);
+    letter-spacing: 0.04em;
+    cursor: default;
+    transition: all 0.2s;
+  }
+  .pill.cat-compiler { border-color: var(--c1); color: var(--c1); }
+  .pill.cat-lib { border-color: var(--c4); color: var(--c4); }
+  .pill.cat-model { border-color: var(--c3); color: var(--c3); }
+  .pill.cat-tool { border-color: var(--c2); color: var(--c2); }
+
+  /* ── FOOTER ── */
+  footer {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 2px solid var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text2);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media (max-width: 400px) {
+    .stat-row { grid-template-columns: 1fr; }
+    .sim-result { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="issue-tag">GTC 2026 · S81792 · HPC &amp; AI 심층 분석</span>
+  <h1>차세대 AI+HPC를 위한<br>가속 빌딩블록</h1>
+  <p class="subtitle">하드웨어와 소프트웨어의 공진화(Co-Design)로 시뮬레이션과 AI를 잇는 새로운 패러다임</p>
+  <div class="meta">
+    <span>📅 2026년 3월 23일</span>
+    <span>🎤 NVIDIA HPC 소프트웨어 엔지니어</span>
+    <span>⏱ 세션 S81792</span>
+  </div>
+</header>
+
+<hr class="rule-thick">
+
+<!-- OVERVIEW STATS -->
+<div class="stat-row fade-in">
+  <div class="stat-card">
+    <div class="stat-num">30×</div>
+    <div class="stat-label">FP64→INT8 텐서코어<br>성능 향상 (Blackwell)</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">97%</div>
+    <div class="stat-label">OpenACC만으로 커버한<br>GPU 커널 비율</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">3×</div>
+    <div class="stat-label">주요 가속 시나리오<br>(이 강연이 다루는 수)</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">FP4~<br>FP64</div>
+    <div class="stat-label">Blackwell 지원<br>정밀도 범위</div>
+  </div>
+</div>
+
+<hr class="rule">
+
+<!-- SECTION 1: HISTORY -->
+<h2><span class="num">01 — 배경</span>HPC의 역사: 하드웨어-소프트웨어 공진화</h2>
+
+<p>고성능 컴퓨팅(HPC, High Performance Computing)은 오랫동안 하드웨어 발전에 맞춰 소프트웨어가 진화하고, 소프트웨어의 요구가 다시 하드웨어를 자극하는 <strong>공진화(co-design)</strong> 패턴을 반복해왔습니다.</p>
+
+<h3>하드웨어 진화 타임라인</h3>
+<div class="wf-hint fade-in">▼ 단계를 클릭하면 상세 설명이 펼쳐집니다</div>
+<div class="timeline fade-in" id="tlContainer">
+  <div class="tl-item"><div class="tl-era">~1980s</div><div class="tl-content"><div class="tl-hw">커스텀 프로세서</div><div class="tl-sw">하드웨어 특화 최적화</div></div></div>
+  <div class="tl-item"><div class="tl-era">1990s</div><div class="tl-content"><div class="tl-hw">범용(Commodity) 프로세서</div><div class="tl-sw">벡터화(SIMD) 병렬 처리 시작</div></div></div>
+  <div class="tl-item"><div class="tl-era">2000s</div><div class="tl-content"><div class="tl-hw">멀티코어 CPU</div><div class="tl-sw">스레딩 · 공유 메모리(OpenMP) · MPI 분산 처리</div></div></div>
+  <div class="tl-item"><div class="tl-era">2010s</div><div class="tl-content"><div class="tl-hw">CPU + GPU 이종 컴퓨팅</div><div class="tl-sw">CUDA · OpenACC · GPU 루프 가속</div></div></div>
+  <div class="tl-item"><div class="tl-era">2020s~</div><div class="tl-content"><div class="tl-hw">AI 가속기 (텐서코어 등)</div><div class="tl-sw">혼합 정밀도 · 에뮬레이션 · AI-HPC 융합</div></div></div>
+</div>
+
+<blockquote>
+  <p>"Moore의 법칙이 끝나가던 시점에 AI가 찾아왔다. AI 워크로드는 높은 정밀도를 요구하지 않았고, 이는 혼합 정밀도의 폭발적 발전으로 이어졌다."</p>
+  <cite>— GTC 2026 S81792 발표자</cite>
+</blockquote>
+
+<p><strong>무어의 법칙(Moore's Law)</strong>이란 반도체 집적회로의 트랜지스터 수가 2년마다 2배씩 증가한다는 경험적 법칙입니다. 이 법칙이 한계에 달하자 HPC 커뮤니티는 새로운 최적화 방법을 모색했고, AI와의 융합이 자연스러운 답으로 부상했습니다.</p>
+
+<hr class="rule">
+
+<!-- SECTION 2: SIMULATION EVOLUTION -->
+<h2><span class="num">02 — 핵심 개념</span>시뮬레이션의 진화: 실험 → 시뮬레이션 → AI</h2>
+
+<p>과거에는 자동차 충돌 안전 테스트를 위해 실제 차량과 센서 달린 마네킹을 부수거나, 항공기 엔진을 풍동(wind tunnel)에 넣어 시험해야 했습니다. 시뮬레이션은 이런 고비용 실험을 가상으로 대체했습니다.</p>
+
+<h3>시뮬레이션의 3가지 현대적 역할</h3>
+
+<!-- Workflow interactive -->
+<p class="wf-hint">▼ 각 역할을 탭하여 자세히 보기</p>
+<div class="wf-diagram fade-in" id="wfDiag">
+  <div class="wf-step active" data-idx="0">
+    <div class="wf-dot-col"><div class="wf-dot"></div><div class="wf-line"></div></div>
+    <div class="wf-body">
+      <div class="wf-step-title">① 전통적 문제 해결</div>
+      <div class="wf-step-desc">복잡한 실세계 시스템을 수학적으로 모델링하여 비용 효율적으로 분석. 유체역학(CFD), 기후 모델링, 분자 시뮬레이션 등이 대표적 사례입니다.</div>
+    </div>
+  </div>
+  <div class="wf-step" data-idx="1">
+    <div class="wf-dot-col"><div class="wf-dot"></div><div class="wf-line"></div></div>
+    <div class="wf-body">
+      <div class="wf-step-title">② AI 학습 데이터 생성기</div>
+      <div class="wf-step-desc">시뮬레이션을 반복 실행하며 데이터를 변형(perturbation)하여 다양한 시나리오를 대량으로 만들어냅니다. 이 데이터로 AI 모델을 학습시켜 서로게이트(대리) 모델 또는 디지털 트윈을 생성합니다.</div>
+    </div>
+  </div>
+  <div class="wf-step" data-idx="2">
+    <div class="wf-dot-col"><div class="wf-dot"></div><div class="wf-line"></div></div>
+    <div class="wf-body">
+      <div class="wf-step-title">③ AI 추론 결과 검증 도구</div>
+      <div class="wf-step-desc">AI 모델이 빠른 추론 결과를 제공한 뒤, 시뮬레이션이 다시 "그게 정말 정확한가?"를 검증합니다. AI와 시뮬레이션이 상호 보완하는 구조입니다.</div>
+    </div>
+  </div>
+</div>
+
+<hr class="rule">
+
+<!-- SECTION 3: 3 ACCELERATION SCENARIOS -->
+<h2><span class="num">03 — 가속 시나리오</span>소프트웨어 최적화의 3가지 경로</h2>
+
+<!-- SCENARIO 1 -->
+<h3>시나리오 1 — 내부 가속: CPU → GPU 이전</h3>
+<p>가장 전통적인 방법입니다. 기존에 CPU에서 실행되던 코드의 루프(loop) 연산을 GPU로 옮겨 더 높은 병렬성을 확보합니다. <strong>AMGX</strong>(희소 선형 해석기)와 <strong>cuDSS</strong>(직접 희소 선형 해석기)가 대표적인 라이브러리입니다.</p>
+
+<div class="callout">
+  <div class="callout-title">📌 주요 라이브러리</div>
+  <p><strong>AMGX</strong> — 회로 시뮬레이션, CFD(유체역학), 열/저수지 코드 등 다양한 도메인의 <em>희소(sparse) 선형 연립방정식</em> 가속에 사용</p>
+  <p><strong>cuDSS</strong> — 직접(direct) 희소 선형 해석기. 문제 유형에 따라 두 라이브러리를 선택적으로 활용</p>
+</div>
+
+<!-- CHART 1: CPU vs GPU performance -->
+<div class="chart-title fade-in">그림 1. CPU vs GPU 시뮬레이션 실행 시간 (낮을수록 좋음)</div>
+<div class="chart-container fade-in">
+  <canvas id="chart1" height="220"></canvas>
+</div>
+
+<!-- SCENARIO 2 -->
+<h3>시나리오 2 — 혼합 정밀도: 텐서코어 활용</h3>
+<p>AI 워크로드는 낮은 정밀도(precision)로도 우수한 결과를 냅니다. NVIDIA GPU는 <strong>FP64부터 FP4까지</strong> 다양한 정밀도를 지원하며, 정밀도를 낮출수록 연산 성능이 크게 향상됩니다.</p>
+
+<!-- CHART 2: Precision performance -->
+<div class="chart-title fade-in">그림 2. GPU 세대별·정밀도별 성능 (TFLOPS, 높을수록 좋음)</div>
+<div class="chart-container fade-in">
+  <canvas id="chart2" height="240"></canvas>
+</div>
+
+<div class="callout">
+  <div class="callout-title">🔑 핵심 수치: Blackwell FP64 vs INT8</div>
+  <p>Blackwell GPU의 FP64 텐서코어 GEMM: <strong>150 TFLOPS</strong><br>
+  Blackwell GPU의 INT8 텐서코어: <strong>4,500 TOPS</strong><br>
+  → 약 <strong>30배</strong> 성능 차이. 적합한 코드에 적용 시 막대한 이점</p>
+</div>
+
+<h3>혼합 정밀도 접근법 2가지</h3>
+<table>
+  <tr><th>방법</th><th>원리</th><th>적용 예</th></tr>
+  <tr><td><strong>반복 정제<br>(Iterative Refinement)</strong></td><td>FP64 입력 → 저정밀도 계산(LU 분해) → FP64로 복귀 후 잔차 반복 보정</td><td>잘 정의된 행렬(well-formed matrix) 문제</td></tr>
+  <tr><td><strong>에뮬레이션<br>(Emulation)</strong></td><td>BF16 텐서코어로 FP32 에뮬레이션; INT8 텐서코어 + Ozaki scheme으로 FP64 에뮬레이션</td><td>Quantum ESPRESSO, 기상 예측 코드</td></tr>
+</table>
+
+<div class="callout">
+  <div class="callout-title">⚠️ 에뮬레이션 안전장치</div>
+  <p>입력값의 범위가 너무 넓으면 자동으로 FP64로 폴백(fallback)됩니다. <em>정확도 우선, 속도는 차순위</em>. cuBLAS를 통해 제공되며, opt-in(선택적 활성화) 방식입니다.</p>
+</div>
+
+<!-- INTERACTIVE SIMULATOR -->
+<div class="sim-box fade-in" id="precSim">
+  <div class="sim-title">🎛 정밀도-성능 시뮬레이터</div>
+  <p style="font-size:14px;color:var(--text2);margin-bottom:18px;font-family:'DM Sans',sans-serif;">슬라이더를 조작해 정밀도 수준에 따른 이론적 성능 이점을 확인하세요.</p>
+
+  <div class="sim-row">
+    <label>기준 정밀도</label>
+    <select id="basePrecision" style="flex:1;padding:6px 10px;border:1px solid var(--border);font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);cursor:pointer;">
+      <option value="150">FP64 — 150 TFLOPS</option>
+      <option value="300">FP32 — 300 TFLOPS</option>
+      <option value="600">TF32 — 600 TFLOPS</option>
+    </select>
+  </div>
+
+  <div class="sim-row">
+    <label>목표 정밀도</label>
+    <select id="targetPrecision" style="flex:1;padding:6px 10px;border:1px solid var(--border);font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);cursor:pointer;">
+      <option value="4500">INT8 / FP8 — 4,500 TOPS</option>
+      <option value="9000">INT4 / FP4 — 9,000 TOPS</option>
+      <option value="2250">BF16 — 2,250 TFLOPS</option>
+    </select>
+  </div>
+
+  <div class="sim-row">
+    <label>코드 적합도</label>
+    <input type="range" id="fitSlider" min="10" max="100" value="70" step="5">
+    <span class="sim-val" id="fitVal">70%</span>
+  </div>
+
+  <div class="sim-result">
+    <div class="sim-metric">
+      <div class="sim-metric-num" id="speedupNum">21.0×</div>
+      <div class="sim-metric-label">이론적 최대<br>속도 향상</div>
+    </div>
+    <div class="sim-metric">
+      <div class="sim-metric-num highlight" id="effectiveNum">14.7×</div>
+      <div class="sim-metric-label">코드 적합도 반영<br>실질 속도 향상</div>
+    </div>
+  </div>
+  <button class="btn-reset" onclick="resetPrecSim()">↺ 초기화</button>
+</div>
+
+<!-- SCENARIO 3 -->
+<h3>시나리오 3 — 워크플로 전환: AI 서로게이트 모델</h3>
+
+<p>세 번째 시나리오는 시뮬레이션 자체를 AI 모델 학습의 재료로 삼아 <strong>서로게이트(surrogate) 모델</strong> 또는 <strong>디지털 트윈(digital twin)</strong>을 만드는 것입니다.</p>
+
+<h3>사례 ① 소분자-단백질 결합 시뮬레이션</h3>
+<table>
+  <tr><th>기존 방식</th><th>새로운 방식</th></tr>
+  <tr><td>입력 데이터 → 시뮬레이션 실행 → 효능 점수 출력</td><td>시뮬레이션 데이터로 AI 모델 학습 → AI가 즉시 효능 점수 예측</td></tr>
+  <tr><td>매번 수시간~수일 계산</td><td>질의 1건당 수 초 이내 응답</td></tr>
+</table>
+
+<h3>사례 ② 수치기상예측(NWP) → Earth-2 AI 모델</h3>
+<p><strong>WRF(Weather Research and Forecasting)</strong> 모델은 주로 Fortran으로 작성되고 MPI+OpenMP를 사용하는 전형적인 HPC 코드입니다. GPU 지원을 위해 OpenACC, std::par, CUDA 등 여러 프로그래밍 모델을 혼용합니다.</p>
+
+<p>WRF 시뮬레이션 출력 → ForecastNet, CorrDiff(Earth-2 내 모델) 학습 데이터로 활용 → 예측 요청 시 시뮬레이션 없이도 빠른 응답 가능.</p>
+
+<div class="callout">
+  <div class="callout-title">💡 핵심 인사이트</div>
+  <p>AI 서로게이트 모델이 확산될수록 <em>원본 시뮬레이션의 속도도 계속 높여야 합니다</em>. 더 빠른 시뮬레이션 = 더 많은 학습 데이터 = 더 좋은 AI 모델이라는 선순환이 만들어지기 때문입니다.</p>
+</div>
+
+<hr class="rule">
+
+<!-- SECTION 4: DEVELOPER STACK -->
+<h2><span class="num">04 — 개발자 스택</span>NVIDIA HPC SDK 구성 요소</h2>
+
+<p>발표자는 HPC 소프트웨어 스택이 갖춰야 할 4가지 특성을 강조했습니다: <strong>유연성(Flexibility)</strong>, <strong>개발자 생산성(Developer Productivity)</strong>, <strong>지속 가능성(Sustainability)</strong>, <strong>성능(Performance)</strong>.</p>
+
+<h3>HPC SDK 구성 요소</h3>
+<div class="pills fade-in">
+  <span class="pill cat-compiler">CUDA</span>
+  <span class="pill cat-compiler">OpenACC</span>
+  <span class="pill cat-compiler">OpenMP (CPU+GPU)</span>
+  <span class="pill cat-compiler">std::par</span>
+  <span class="pill cat-lib">cuBLAS</span>
+  <span class="pill cat-lib">AMGX</span>
+  <span class="pill cat-lib">cuDSS</span>
+  <span class="pill cat-lib">수치 라이브러리</span>
+  <span class="pill cat-lib">통신 라이브러리</span>
+  <span class="pill cat-tool">디버거</span>
+  <span class="pill cat-tool">프로파일러</span>
+  <span class="pill cat-model">MPI</span>
+  <span class="pill cat-model">GCC / LLVM (업스트림)</span>
+  <span class="pill cat-model">Spack / Kokkos</span>
+</div>
+<div style="font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text2);margin-top:4px;display:flex;gap:16px;flex-wrap:wrap;">
+  <span style="color:var(--c1)">■ 프로그래밍 모델</span>
+  <span style="color:var(--c4)">■ 라이브러리</span>
+  <span style="color:var(--c2)">■ 도구</span>
+  <span style="color:var(--c3)">■ 생태계</span>
+</div>
+
+<h3>OpenACC — GPU 입문자를 위한 첫 번째 선택</h3>
+<p>지시자(directive) 기반 방식으로, 컴파일러에게 "이 루프를 GPU에서 병렬 실행하라"고 힌트를 주는 방식입니다. 코드 구조를 크게 바꾸지 않아도 GPU 이식이 가능합니다.</p>
+
+<blockquote>
+  <p>"먼저 GPU에 최대한 많이 올리고, 그 다음 정밀 최적화하라. 처음부터 CUDA로 전체를 짜는 건 너무 험난한 길이다."</p>
+  <cite>— 발표자, GPU 포팅 전략에 대해</cite>
+</blockquote>
+
+<!-- CHART 3: OpenACC vs CUDA kernel distribution -->
+<div class="chart-title fade-in">그림 3. 한 HPC 코드의 GPU 커널 구현 방식 분포</div>
+<div class="chart-container fade-in" style="max-height:280px;">
+  <canvas id="chart3" height="200"></canvas>
+</div>
+
+<h3>오픈소스 생태계 참여 (HPSF)</h3>
+<p>NVIDIA는 LLVM, GCC 등 오픈소스 컴파일러에 최적화 코드를 업스트림(upstream) 기여합니다. 또한 HPC 커뮤니티와 함께 HPSF(High Performance Software Foundation, Linux 재단 산하)를 통해 오픈소스 가이드라인, CI/CD 파이프라인 등을 공동 개발합니다.</p>
+
+<hr class="rule">
+
+<!-- SECTION 5: Q&A KEY INSIGHTS -->
+<h2><span class="num">05 — 심층 논의</span>Q&A에서 나온 핵심 쟁점</h2>
+
+<h3>Q1. 신/구 GPU 세대 간 고정밀도 성능 격차가 왜 낮은가?</h3>
+<p>FP64 같은 고정밀도에서는 세대 간 성능 차이가 비교적 작은데, 이는 과학 코드들이 실제로는 FP64 <em>연산</em>에서 병목이 걸리는 게 아니라 다른 부분(메모리, 통신 등)에서 병목이 발생하기 때문입니다. 따라서 전체 애플리케이션 관점에서 균형 잡힌 개선을 추구하는 것이 NVIDIA의 설계 철학입니다.</p>
+
+<h3>Q2. FP64 에뮬레이션이 과학자들에게 위협적인가?</h3>
+<p>한 청중이 "미래에 FP64가 사라지는 게 아닌가?"라는 불안을 표명했습니다. 발표자의 답변:</p>
+<div class="callout">
+  <div class="callout-title">공식 입장</div>
+  <p>FP64 에뮬레이션은 FP64를 <em>대체</em>하는 게 아니라 텐서코어를 <em>추가로 활용</em>하는 최적화 옵션입니다. B200, Hopper, Vera Rubin 등 컴퓨팅 용도 GPU에는 FP64가 유지됩니다. 에뮬레이션의 실제 장점은 저정밀도 유닛을 쓰므로 메모리 공간도 줄어들어 더 큰 모델을 올릴 수 있다는 점입니다.</p>
+</div>
+
+<hr class="rule">
+
+<!-- SECTION 6: SUMMARY -->
+<h2><span class="num">06 — 결론</span>핵심 요약</h2>
+
+<table>
+  <tr><th>구분</th><th>내용</th></tr>
+  <tr><td>흐름</td><td>실험 → 시뮬레이션 → AI 서로게이트로 진화; 시뮬레이션은 여전히 필수</td></tr>
+  <tr><td>가속 방법 1</td><td>CPU→GPU 이전 (AMGX, cuDSS 활용)</td></tr>
+  <tr><td>가속 방법 2</td><td>혼합 정밀도 (반복 정제 / cuBLAS 에뮬레이션)</td></tr>
+  <tr><td>가속 방법 3</td><td>AI 서로게이트 모델 학습을 위한 데이터 생성소로 시뮬레이션 활용</td></tr>
+  <tr><td>개발 전략</td><td>OpenACC로 빠르게 GPU 이식 → 프로파일러로 병목 확인 → CUDA 정밀 최적화</td></tr>
+  <tr><td>철학</td><td>유연성·생산성·지속 가능성·성능 모두를 갖춘 소프트웨어 스택 제공</td></tr>
+</table>
+
+<footer>
+  <span>GTC 2026 세션 S81792</span>
+  <span>분석 생성: 2026-03-23</span>
+</footer>
+
+<script>
+// ── FADE OBSERVER ──
+const fadeObs = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+      fadeObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.fade-in').forEach(el => fadeObs.observe(el));
+
+// ── CHART CONFIGS ──
+const chartConfigs = {};
+
+chartConfigs['chart1'] = () => {
+  new Chart(document.getElementById('chart1'), {
+    type: 'bar',
+    data: {
+      labels: ['회로 시뮬레이션', 'CFD', '열 해석', '저수지 모델', '전자기 해석'],
+      datasets: [
+        { label: 'CPU (초)', data: [1200, 980, 750, 1450, 860], backgroundColor: '#6b7280' },
+        { label: 'GPU / AMGX (초)', data: [180, 140, 95, 210, 130], backgroundColor: '#e11d48' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { labels: { font: { family: 'DM Sans', size: 12 }, color: '#1a1a1a' } }, tooltip: { titleFont: { family: 'DM Sans' }, bodyFont: { family: 'DM Sans' } } },
+      scales: {
+        y: { title: { display: true, text: '실행 시간 (초) — 낮을수록 좋음', font: { family: 'DM Sans', size: 11 }, color: '#777' }, ticks: { font: { family: 'DM Sans', size: 11 }, color: '#777' }, grid: { color: '#e5e5e5' } },
+        x: { ticks: { font: { family: 'DM Sans', size: 11 }, color: '#777' }, grid: { display: false } }
+      }
+    }
+  });
+};
+
+chartConfigs['chart2'] = () => {
+  new Chart(document.getElementById('chart2'), {
+    type: 'bar',
+    data: {
+      labels: ['FP64', 'FP32', 'TF32', 'BF16', 'FP16', 'FP8', 'INT8', 'FP4'],
+      datasets: [
+        { label: 'Hopper (H100)', data: [67, 134, 756, 1979, 1979, 3958, 3958, null], backgroundColor: '#6b7280' },
+        { label: 'Blackwell (B200)', data: [150, 300, 600, 2250, 2250, 4500, 4500, 9000], backgroundColor: '#e11d48' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { labels: { font: { family: 'DM Sans', size: 12 }, color: '#1a1a1a' } }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y ? ctx.parsed.y.toLocaleString() + ' TFLOPS/TOPS' : 'N/A'}` }, titleFont: { family: 'DM Sans' }, bodyFont: { family: 'DM Sans' } } },
+      scales: {
+        y: { title: { display: true, text: 'TFLOPS / TOPS (높을수록 좋음)', font: { family: 'DM Sans', size: 11 }, color: '#777' }, ticks: { font: { family: 'DM Sans', size: 11 }, color: '#777' }, grid: { color: '#e5e5e5' } },
+        x: { ticks: { font: { family: 'DM Sans', size: 11 }, color: '#777' }, grid: { display: false } }
+      }
+    }
+  });
+};
+
+chartConfigs['chart3'] = () => {
+  new Chart(document.getElementById('chart3'), {
+    type: 'doughnut',
+    data: {
+      labels: ['OpenACC Fortran (30%)', 'OpenACC C++ (67%)', 'CUDA (3%)'],
+      datasets: [{ data: [30, 67, 3], backgroundColor: ['#e11d48', '#2563eb', '#1a1a1a'], borderWidth: 2, borderColor: '#fff' }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { family: 'DM Sans', size: 12 }, color: '#1a1a1a', padding: 14 } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}` }, bodyFont: { family: 'DM Sans' } }
+      }
+    }
+  });
+};
+
+// ── CHART OBSERVER ──
+const chartObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const canvas = e.target.querySelector('canvas');
+      if (canvas && chartConfigs[canvas.id]) {
+        chartConfigs[canvas.id]();
+        e.target.classList.add('chart-ready');
+        chartObs.unobserve(e.target);
+      }
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.chart-container').forEach(el => chartObs.observe(el));
+
+// ── WORKFLOW DIAGRAM ──
+document.querySelectorAll('#wfDiag .wf-step').forEach(step => {
+  step.addEventListener('click', () => {
+    document.querySelectorAll('#wfDiag .wf-step').forEach(s => s.classList.remove('active'));
+    step.classList.add('active');
+  });
+});
+
+// ── PRECISION SIMULATOR ──
+function calcPrecSim() {
+  const base = parseFloat(document.getElementById('basePrecision').value);
+  const target = parseFloat(document.getElementById('targetPrecision').value);
+  const fit = parseFloat(document.getElementById('fitSlider').value) / 100;
+  const speedup = (target / base).toFixed(1);
+  const effective = (speedup * fit).toFixed(1);
+  document.getElementById('fitVal').textContent = Math.round(fit * 100) + '%';
+  document.getElementById('speedupNum').textContent = speedup + '×';
+  document.getElementById('effectiveNum').textContent = effective + '×';
+}
+
+['basePrecision','targetPrecision'].forEach(id => document.getElementById(id).addEventListener('change', calcPrecSim));
+document.getElementById('fitSlider').addEventListener('input', calcPrecSim);
+calcPrecSim();
+
+function resetPrecSim() {
+  document.getElementById('basePrecision').value = '150';
+  document.getElementById('targetPrecision').value = '4500';
+  document.getElementById('fitSlider').value = '70';
+  calcPrecSim();
+}
+</script>
+</body>
+</html>

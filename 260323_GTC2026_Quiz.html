@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시험 문제 — HPC+AI 가속 빌딩블록 (GTC 2026 S81792)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff; --bg2: #fafafa; --text: #1a1a1a; --text2: #777777;
+    --accent: #e11d48; --accent2: #f43f5e; --border: #e5e5e5;
+    --green: #16a34a; --red: #dc2626; --blue: #2563eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px; line-height: 1.7;
+    max-width: 680px; margin: 0 auto; padding: 0 20px 80px;
+  }
+  header {
+    border-top: 4px solid var(--accent);
+    padding: 44px 0 28px;
+    margin-bottom: 8px;
+  }
+  .tag {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 12px;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 6vw, 36px); font-weight: 900;
+    line-height: 1.15; margin-bottom: 16px;
+  }
+  .desc { font-size: 14px; color: var(--text2); margin-bottom: 24px; }
+  .score-board {
+    display: flex; gap: 20px; align-items: center;
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 16px 20px; margin-bottom: 32px; flex-wrap: wrap;
+  }
+  .score-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 40px; font-weight: 900; color: var(--accent); line-height: 1;
+  }
+  .score-info { font-size: 13px; color: var(--text2); }
+  .progress-bar {
+    height: 4px; background: var(--border); margin: 0 0 36px; border-radius: 2px;
+  }
+  .progress-fill {
+    height: 100%; background: var(--accent); border-radius: 2px;
+    transition: width 0.4s ease; width: 0%;
+  }
+
+  /* QUESTION */
+  .q-block {
+    margin-bottom: 36px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .q-block.answered-correct { border-color: var(--green); }
+  .q-block.answered-wrong { border-color: var(--red); }
+  .q-header {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 18px 20px 14px;
+    background: var(--bg);
+  }
+  .q-num {
+    min-width: 28px; height: 28px;
+    background: var(--accent); color: #fff;
+    font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .q-meta { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .badge {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 3px 9px; border-radius: 2px;
+  }
+  .badge-easy { background: #dcfce7; color: #16a34a; }
+  .badge-med { background: #fef9c3; color: #b45309; }
+  .badge-hard { background: #fee2e2; color: #dc2626; }
+  .badge-type { background: #e0e7ff; color: #3730a3; }
+  .q-text { font-size: 15px; font-weight: 500; line-height: 1.6; }
+
+  /* OPTIONS */
+  .q-options { padding: 0 20px 18px; }
+  .opt {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 11px 14px; margin-bottom: 8px;
+    border: 1px solid var(--border); background: var(--bg2);
+    cursor: pointer; transition: all 0.15s; border-radius: 2px;
+    font-size: 14px; line-height: 1.5;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .opt:hover { border-color: var(--accent); background: #fff5f7; }
+  .opt.selected { border-color: var(--accent); background: #fff5f7; }
+  .opt.correct { border-color: var(--green) !important; background: #f0fdf4 !important; }
+  .opt.wrong { border-color: var(--red) !important; background: #fff1f2 !important; }
+  .opt-letter {
+    min-width: 22px; height: 22px;
+    border: 1px solid var(--border); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; flex-shrink: 0;
+    margin-top: 1px; transition: all 0.15s;
+  }
+  .opt.selected .opt-letter { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .opt.correct .opt-letter { background: var(--green); color: #fff; border-color: var(--green); }
+  .opt.wrong .opt-letter { background: var(--red); color: #fff; border-color: var(--red); }
+
+  /* SHORT ANSWER */
+  .short-input {
+    width: 100%; padding: 10px 14px;
+    border: 1px solid var(--border); background: var(--bg2);
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    outline: none; transition: border-color 0.2s; border-radius: 2px;
+  }
+  .short-input:focus { border-color: var(--accent); }
+  .short-input.correct { border-color: var(--green); background: #f0fdf4; }
+  .short-input.wrong { border-color: var(--red); background: #fff1f2; }
+
+  /* OX */
+  .ox-row { display: flex; gap: 12px; padding: 0 20px 18px; }
+  .ox-btn {
+    flex: 1; padding: 14px; text-align: center;
+    border: 2px solid var(--border); background: var(--bg2);
+    font-size: 28px; cursor: pointer; border-radius: 2px;
+    transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+  }
+  .ox-btn:hover { border-color: var(--accent); }
+  .ox-btn.selected { border-color: var(--accent); background: #fff5f7; }
+  .ox-btn.correct { border-color: var(--green) !important; background: #f0fdf4 !important; }
+  .ox-btn.wrong { border-color: var(--red) !important; background: #fff1f2 !important; }
+
+  /* SUBMIT & EXPLAIN */
+  .q-footer { padding: 0 20px 18px; }
+  .btn-check {
+    padding: 9px 22px; background: var(--text); color: #fff;
+    border: none; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+    cursor: pointer; border-radius: 2px; transition: background 0.2s;
+  }
+  .btn-check:hover { background: var(--accent); }
+  .btn-check:disabled { background: var(--border); color: var(--text2); cursor: default; }
+  .explanation {
+    margin-top: 14px; padding: 16px;
+    background: var(--bg2); border-left: 3px solid var(--accent);
+    font-size: 14px; line-height: 1.65; display: none;
+  }
+  .explanation.show { display: block; }
+  .exp-verdict {
+    font-weight: 600; font-size: 13px; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .exp-verdict.correct { color: var(--green); }
+  .exp-verdict.wrong { color: var(--red); }
+
+  /* FINAL PANEL */
+  .final-panel {
+    display: none; padding: 32px 24px;
+    background: var(--bg2); border: 2px solid var(--accent);
+    margin-top: 40px; text-align: center;
+  }
+  .final-panel.show { display: block; }
+  .final-score {
+    font-family: 'Playfair Display', serif;
+    font-size: 60px; font-weight: 900; color: var(--accent); line-height: 1;
+  }
+  .final-msg { font-size: 18px; font-weight: 500; margin: 12px 0 20px; }
+  .btn-retry {
+    padding: 12px 28px; background: var(--accent); color: #fff;
+    border: none; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase;
+    cursor: pointer; border-radius: 2px; transition: background 0.2s;
+  }
+  .btn-retry:hover { background: var(--accent2); }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 8px 0 32px; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="tag">시험 문제지 · GTC 2026 S81792</span>
+  <h1>HPC+AI 가속 빌딩블록<br>이해도 확인 퀴즈</h1>
+  <p class="desc">객관식 6문제 · 단답형 2문제 · OX 2문제 | 총 10문제 | 난이도: 쉬움 30% / 보통 50% / 어려움 20%</p>
+</header>
+
+<div class="score-board">
+  <div class="score-num" id="scoreNum">0</div>
+  <div>
+    <div style="font-weight:600;font-size:15px;">/ <span id="totalAnswered">0</span>문제 답변</div>
+    <div class="score-info">정답 <span id="correctCount">0</span>개 | 오답 <span id="wrongCount">0</span>개</div>
+  </div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<!-- Q1 -->
+<div class="q-block" id="q1">
+  <div class="q-header">
+    <div class="q-num">1</div>
+    <div>
+      <div class="q-meta">
+        <span class="badge badge-type">객관식</span>
+        <span class="badge badge-easy">쉬움</span>
+      </div>
+      <div class="q-text">이 강연에서 HPC 역사에서 가장 먼저 등장한 소프트웨어 병렬화 기법은 무엇이라고 설명했는가?</div>
+    </div>
+  </div>
+  <div class="q-options">
+    <div class="opt" data-q="1" data-val="A"><span class="opt-letter">A</span>MPI 분산 처리</div>
+    <div class="opt" data-q="1" data-val="B"><span class="opt-letter">B</span>스레딩(Threading)</div>
+    <div class="opt" data-q="1" data-val="C"><span class="opt-letter">C</span>벡터화(Vectorization)</div>
+    <div class="opt" data-q="1" data-val="D"><span class="opt-letter">D</span>GPU 루프 오프로드</div>
+  </div>
+  <div class="q-footer">
+    <button class="btn-check" data-q="1" disabled onclick="checkQ(1)">정답 확인</button>
+    <div class="explanation" id="exp1">
+      <div class="exp-verdict" id="verd1"></div>
+      <strong>정답: C — 벡터화(Vectorization)</strong><br>
+      발표자는 HPC 병렬화의 첫 번째 단계로 벡터화를 꼽았습니다. 핵심 목표는 "사이클당 더 많은 작업을 처리"하는 것이었으며, 이후 스레딩 → MPI 분산 → GPU 루프 가속 순서로 발전했습니다.
+    </div>
+  </div>
+</div>
+
+<!-- Q2 -->
+<div class="q-block" id="q2">
+  <div class="q-header">
+    <div class="q-num">2</div>
+    <div>
+      <div class="q-meta">
+        <span class="badge badge-type">OX</span>
+        <span class="badge badge-easy">쉬움</span>
+      </div>
+      <div class="q-text">cuBLAS의 FP64 에뮬레이션은 기본값(default)으로 활성화되어 있다.</div>
+    </div>
+  </div>
+  <div class="ox-row">
+    <div class="ox-btn" data-q="2" data-val="O" onclick="selectOX(2,'O')">⭕</div>
+    <div class="ox-btn" data-q="2" data-val="X" onclick="selectOX(2,'X')">❌</div>
+  </div>
+  <div class="q-footer">
+    <button class="btn-check" data-q="2" disabled onclick="checkQ(2)">정답 확인</button>
+    <div class="explanation" id="exp2">
+      <div class="exp-verdict" id="verd2"></div>
+      <strong>정답: X (거짓)</strong><br>
+      발표자는 FP64 에뮬레이션이 "opt-in(선택적 활성화)" 방식이며 기본값은 비활성화라고 명확히 밝혔습니다. 또한 입력값 범위가 넓을 경우 자동으로 FP64로 폴백됩니다.
+    </div>
+  </div>
+</div>
+
+<!-- Q3 -->
+<div class="q-block" id="q3">
+  <div class="q-header">
+    <div class="q-num">3</div>
+    <div>
+      <div class="q-meta">
+        <span class="badge badge-type">객관식</span>
+        <span class="badge badge-med">보통</span>
+      </div>
+      <div class="q-text">Blackwell GPU에서 FP64 텐서코어 GEMM과 INT8 텐서코어 성능을 비교했을 때 약 몇 배 차이가 났는가?</div>
+    </div>
+  </div>
+  <div class="q-options">
+    <div class="opt" data-q="3" data-val="A"><span class="opt-letter">A</span>약 5배</div>
+    <div class="opt" data-q="3" data-val="B"><span class="opt-letter">B</span>약 10배</div>
+    <div class="opt" data-q="3" data-val="C"><span class="opt-letter">C</span>약 30배</div>
+    <div class="opt" data-q="3" data-val="D"><span class="opt-letter">D</span>약 100배</div>
+  </div>
+  <div class="q-footer">
+    <button class="btn-check" data-q="3" disabled onclick="checkQ(3)">정답 확인</button>
+    <div class="explanation" id="exp3">
+      <div class="exp-verdict" id="verd3"></div>
+      <strong>정답: C — 약 30배</strong><br>
+      FP64 텐서코어 GEMM은 150 TFLOPS, INT8 텐서코어는 4,500 TOPS로 약 30배 차이가 납니다. 발표자는 이를 "내 코드에 적용할 수 있다면 엄청난 성과"라고 표현했습니다.
+    </div>
+  </div>
+</div>
+
+<!-- Q4 -->
+<div class="q-block" id="q4">
+  <div class="q-header">
+    <div class="q-num">4</div>
+    <div>
+      <div class="q-meta">
+        <span class="badge badge-type">단답형</span>
+        <span class="badge badge-easy">쉬움</span>
+      </div>
+      <div class="q-text">강연에서 소개된 희소(sparse) 선형 연립방정식을 GPU에서 가속하는 라이브러리의 이름을 쓰시오. (대소문자 무관)</div>
+    </div>
+  </div>
+  <div class="q-options">
+    <input type="text" class="short-input" id="short4" placeholder="라이브러리 이름 입력" oninput="shortInputChange(4)">
+  </div>
+  <div class="q-footer">
+    <button class="btn-check" data-q="4" disabled onclick="checkShort(4, ['amgx', 'amg-x'])">정답 확인</button>
+    <div class="explanation" id="exp4">
+      <div class="exp-verdict" id="verd4"></div>
+      <strong>정답: AMGX</strong><br>
+      AMGX(Algebraic MultiGrid on X)는 희소 선형 해석기(sparse linear solver) 라이브러리로, 회로 시뮬레이션·CFD·열 해석·저수지 모델 등 다양한 도메인에서 활용됩니다. cuDSS는 직접(direct) 희소 해석기로 별개의 도구입니다.
+    </div>
+  </div>
+</div>
+
+<!-- Q5 -->
+<div class="q-block" id="q5">
+  <div class="q-header">
+    <div class="q-num">5</div>
+    <div>
+      <div class="q-meta">
+        <span class="badge badge-type">객관식</span>
+        <span class="badge badge-med">보통</span>
+      </div>
+      <div class="q-text">발표자가 "GPU로 처음 이식할 때 가장 먼저 사용하라"고 추천한 프로그래밍 모델은?</div>
+    </div>
+  </div>
+  <div class="q-options">
+    <div class="opt" data-q="5" data-val="A"><span class="opt-letter">A</span>CUDA (저수준 직접 작성)</div>
+    <div class="opt" data-q="5" data-val="B"><span class="opt-letter">B</span>OpenACC (지시자 기반)</div>
+    <div class="opt" data-q="5" data-val="C"><span class="opt-letter">C</span>MPI (분산 처리)</div>
+    <div class="opt" data-q="5" data-val="D"><span class="opt-letter">D</span>Python NumPy</div>
+  </div>
+  <div class="q-footer">
+    <button class="btn-check" data-q="5" disabled onclick="checkQ(5)">정답 확인</button>
+    <div class="explanation" id="exp5">
+      <div class="exp-verdict" id="verd5"></div>
+      <strong>정답: B — OpenACC</strong><br>
+      OpenACC는 지시자(pragma/directive) 기반이므로 코드 구조를 크게 바꾸지 않고 빠르게 GPU에 올릴 수 있습니다. 발표자는 "먼저 최대한 많이 GPU에 올리고, 이후 프로파일러로 병목을 찾아 CUDA로 정밀 최적화하라"고 조언했습니다. 해당 사례 코드에서도 GPU 커널의 97%가 OpenACC로 커버됐고 CUDA는 3%에 불과했습니다.
+    </div>
+  </div>
+</div>
+
+<!-- Q6 -->
+<div class="q-block" id="q6">
+  <div class="q-header">
+    <div class="q-num">6</div>
+    <div>
+      <div class="q-meta">
+        <span class="badge badge-type">OX</span>
+        <span class="badge badge-med">보통</span>
+      </div>
+      <div class="q-text">AI 서로게이트 모델이 발전할수록 원본 시뮬레이션의 최적화는 덜 중요해진다.</div>
+    </div>
+  </div>
+  <div class="ox-row">
+    <div class="ox-btn" data-q="6" data-val="O" onclick="selectOX(6,'O')">⭕</div>
+    <div class="ox-btn" data-q="6" data-val="X" onclick="selectOX(6,'X')">❌</div>
+  </div>
+  <div class="q-footer">
+    <button class="btn-check" data-q="6" disabled onclick="checkQ(6)">정답 확인</button>
+    <div class="explanation" id="exp6">
+      <div class="exp-verdict" id="verd6"></div>
+      <strong>정답: X (거짓)</strong><br>
+      발표자는 오히려 반대라고 강조했습니다. 더 빠른 시뮬레이션 = 더 많은 학습 데이터 생성 = 더 좋은 AI 모델이라는 선순환이 만들어지므로, AI 시대에도 시뮬레이션 최적화는 계속 중요합니다.
+    </div>
+  </div>
+</div>
+
+<!-- Q7 -->
+<div class="q-block" id="q7">
+  <div class="q-header">
+    <div class="q-num">7</div>
+    <div>
+      <div class="q-meta">
+        <span class="badge badge-type">객관식</span>
+        <span class="badge badge-med">보통</span>
+      </div>
+      <div class="q-text">반복 정제(Iterative Refinement) 혼합 정밀도 알고리즘의 순서로 올바른 것은?</div>
+    </div>
+  </div>
+  <div class="q-options">
+    <div class="opt" data-q="7" data-val="A"><span class="opt-letter">A</span>FP32 입력 → FP64 계산 → FP32 보정</div>
+    <div class="opt" data-q="7" data-val="B"><span class="opt-letter">B</span>FP64 입력 → 저정밀도 계산(LU 분해) → FP64 복귀 후 잔차 반복 보정</div>
+    <div class="opt" data-q="7" data-val="C"><span class="opt-letter">C</span>INT8 입력 → FP64 계산 → INT8 출력</div>
+    <div class="opt" data-q="7" data-val="D"><span class="opt-letter">D</span>FP64 입력 → FP64 계산 → 오차 제거 없이 출력</div>
+  </div>
+  <div class="q-footer">
+    <button class="btn-check" data-q="7" disabled onclick="checkQ(7)">정답 확인</button>
+    <div class="explanation" id="exp7">
+      <div class="exp-verdict" id="verd7"></div>
+      <strong>정답: B</strong><br>
+      64비트 입력을 받아 낮은 정밀도로 내려 LU 분해를 빠르게 수행한 뒤 FP64로 되돌아와 잔차(residual)를 반복적으로 계산해 필요한 정확도에 도달할 때까지 정제합니다. 이 방식은 과거 HPC에서도 사용되던 검증된 기법입니다.
+    </div>
+  </div>
+</div>
+
+<!-- Q8 -->
+<div class="q-block" id="q8">
+  <div class="q-header">
+    <div class="q-num">8</div>
+    <div>
+      <div class="q-meta">
+        <span class="badge badge-type">단답형</span>
+        <span class="badge badge-med">보통</span>
+      </div>
+      <div class="q-text">NVIDIA의 Earth-2 프로젝트에서 기상 예측을 위해 활용된 수치기상예측(NWP) 코드의 이름을 쓰시오. (영문 약어)</div>
+    </div>
+  </div>
+  <div class="q-options">
+    <input type="text" class="short-input" id="short8" placeholder="코드 이름 입력 (영문)" oninput="shortInputChange(8)">
+  </div>
+  <div class="q-footer">
+    <button class="btn-check" data-q="8" disabled onclick="checkShort(8, ['wrf', 'warf'])">정답 확인</button>
+    <div class="explanation" id="exp8">
+      <div class="exp-verdict" id="verd8"></div>
+      <strong>정답: WRF (Weather Research and Forecasting)</strong><br>
+      WRF는 주로 Fortran으로 작성된 기상 연구 및 예측 NWP 모델로, MPI+OpenMP를 사용합니다. GPU 지원을 위해 OpenACC, std::par, CUDA 등 다양한 프로그래밍 모델이 혼용됩니다.
+    </div>
+  </div>
+</div>
+
+<!-- Q9 -->
+<div class="q-block" id="q9">
+  <div class="q-header">
+    <div class="q-num">9</div>
+    <div>
+      <div class="q-meta">
+        <span class="badge badge-type">객관식</span>
+        <span class="badge badge-hard">어려움</span>
+      </div>
+      <div class="q-text">cuBLAS의 FP64 에뮬레이션에서 사용하는 텐서코어 유형과 수학적 체계(scheme)로 올바른 조합은?</div>
+    </div>
+  </div>
+  <div class="q-options">
+    <div class="opt" data-q="9" data-val="A"><span class="opt-letter">A</span>BF16 텐서코어 + Ozaki scheme</div>
+    <div class="opt" data-q="9" data-val="B"><span class="opt-letter">B</span>INT8 텐서코어 + Ozaki scheme</div>
+    <div class="opt" data-q="9" data-val="C"><span class="opt-letter">C</span>FP16 텐서코어 + LU 분해</div>
+    <div class="opt" data-q="9" data-val="D"><span class="opt-letter">D</span>INT4 텐서코어 + Kahan summation</div>
+  </div>
+  <div class="q-footer">
+    <button class="btn-check" data-q="9" disabled onclick="checkQ(9)">정답 확인</button>
+    <div class="explanation" id="exp9">
+      <div class="exp-verdict" id="verd9"></div>
+      <strong>정답: B — INT8 텐서코어 + Ozaki scheme</strong><br>
+      발표자가 명시한 내용입니다. FP32 에뮬레이션은 BF16 텐서코어(IEEE 준수)를 사용하고, FP64 에뮬레이션은 INT8 텐서코어와 Ozaki scheme을 함께 사용합니다. Ozaki scheme은 부동소수점 연산을 정수 연산으로 정확하게 분해하는 수치 알고리즘입니다.
+    </div>
+  </div>
+</div>
+
+<!-- Q10 -->
+<div class="q-block" id="q10">
+  <div class="q-header">
+    <div class="q-num">10</div>
+    <div>
+      <div class="q-meta">
+        <span class="badge badge-type">객관식</span>
+        <span class="badge badge-hard">어려움</span>
+      </div>
+      <div class="q-text">Q&A에서 "신세대 GPU가 구세대 대비 FP64 성능 향상 폭이 낮은 정밀도보다 작다"는 지적에 대해 발표자가 제시한 근본 이유는?</div>
+    </div>
+  </div>
+  <div class="q-options">
+    <div class="opt" data-q="10" data-val="A"><span class="opt-letter">A</span>NVIDIA가 FP64 유닛 개발에 투자를 줄였기 때문</div>
+    <div class="opt" data-q="10" data-val="B"><span class="opt-letter">B</span>과학 코드들은 FP64 연산이 아닌 다른 부분(메모리·통신 등)에서 병목이 발생하므로, 균형 잡힌 전체 애플리케이션 성능을 기준으로 설계하기 때문</div>
+    <div class="opt" data-q="10" data-val="C"><span class="opt-letter">C</span>FP64는 이미 완성된 기술이라 개선 여지가 없기 때문</div>
+    <div class="opt" data-q="10" data-val="D"><span class="opt-letter">D</span>에뮬레이션으로 FP64를 대체하면 되기 때문</div>
+  </div>
+  <div class="q-footer">
+    <button class="btn-check" data-q="10" disabled onclick="checkQ(10)">정답 확인</button>
+    <div class="explanation" id="exp10">
+      <div class="exp-verdict" id="verd10"></div>
+      <strong>정답: B</strong><br>
+      발표자는 아키텍처를 설계할 때 애플리케이션 전체를 관점으로 삼는다고 밝혔습니다. 과학 코드들은 FP64 연산 자체보다 메모리 대역폭, 통신, I/O 등 다른 요인에서 병목이 발생합니다. 따라서 FP64 성능만 극단적으로 올리는 것보다 전체 성능 균형을 맞추는 쪽이 실제 애플리케이션 속도 향상에 더 효과적입니다.
+    </div>
+  </div>
+</div>
+
+<!-- FINAL PANEL -->
+<div class="final-panel" id="finalPanel">
+  <div class="final-score" id="finalScore">0 / 10</div>
+  <div class="final-msg" id="finalMsg"></div>
+  <button class="btn-retry" onclick="retryAll()">↺ 다시 풀기</button>
+</div>
+
+<script>
+const answers = { 1:'C', 2:'X', 3:'C', 4:null, 5:'B', 6:'X', 7:'B', 8:null, 9:'B', 10:'B' };
+const selected = {};
+let correct = 0, wrong = 0, answered = 0;
+
+// MCQ selection
+document.querySelectorAll('.opt').forEach(opt => {
+  opt.addEventListener('click', () => {
+    const q = opt.dataset.q;
+    if (document.getElementById('q' + q).classList.contains('answered-correct') ||
+        document.getElementById('q' + q).classList.contains('answered-wrong')) return;
+    document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    selected[q] = opt.dataset.val;
+    document.querySelector(`.btn-check[data-q="${q}"]`).disabled = false;
+  });
+});
+
+function selectOX(q, val) {
+  const block = document.getElementById('q' + q);
+  if (block.classList.contains('answered-correct') || block.classList.contains('answered-wrong')) return;
+  document.querySelectorAll(`.ox-btn[data-q="${q}"]`).forEach(b => b.classList.remove('selected'));
+  document.querySelector(`.ox-btn[data-q="${q}"][data-val="${val}"]`).classList.add('selected');
+  selected[q] = val;
+  document.querySelector(`.btn-check[data-q="${q}"]`).disabled = false;
+}
+
+function shortInputChange(q) {
+  const val = document.getElementById('short' + q).value.trim();
+  document.querySelector(`.btn-check[data-q="${q}"]`).disabled = val.length === 0;
+}
+
+function checkQ(q) {
+  if (selected[q] === undefined) return;
+  const isCorrect = selected[q] === answers[q];
+  resolveQ(q, isCorrect, selected[q]);
+}
+
+function checkShort(q, validAnswers) {
+  const raw = document.getElementById('short' + q).value.trim().toLowerCase().replace(/\s/g,'');
+  const isCorrect = validAnswers.some(a => raw === a);
+  resolveQ(q, isCorrect, raw);
+  document.getElementById('short' + q).classList.add(isCorrect ? 'correct' : 'wrong');
+  // Highlight correct option if MCQ structure existed
+}
+
+function resolveQ(q, isCorrect, userVal) {
+  const block = document.getElementById('q' + q);
+  if (block.classList.contains('answered-correct') || block.classList.contains('answered-wrong')) return;
+
+  block.classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
+  document.querySelector(`.btn-check[data-q="${q}"]`).disabled = true;
+
+  // Highlight options
+  if (answers[q] !== null) {
+    document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o => {
+      if (o.dataset.val === answers[q]) o.classList.add('correct');
+      else if (o.dataset.val === userVal && !isCorrect) o.classList.add('wrong');
+      o.style.cursor = 'default';
+    });
+    document.querySelectorAll(`.ox-btn[data-q="${q}"]`).forEach(b => {
+      if (b.dataset.val === answers[q]) b.classList.add('correct');
+      else if (b.dataset.val === userVal && !isCorrect) b.classList.add('wrong');
+      b.style.cursor = 'default';
+    });
+  }
+
+  const verd = document.getElementById('verd' + q);
+  verd.textContent = isCorrect ? '✓ 정답입니다!' : '✗ 오답입니다';
+  verd.className = 'exp-verdict ' + (isCorrect ? 'correct' : 'wrong');
+  document.getElementById('exp' + q).classList.add('show');
+
+  if (isCorrect) correct++; else wrong++;
+  answered++;
+  updateScore();
+  if (answered === 10) showFinal();
+}
+
+function updateScore() {
+  document.getElementById('scoreNum').textContent = correct;
+  document.getElementById('totalAnswered').textContent = answered;
+  document.getElementById('correctCount').textContent = correct;
+  document.getElementById('wrongCount').textContent = wrong;
+  document.getElementById('progressFill').style.width = (answered / 10 * 100) + '%';
+}
+
+function showFinal() {
+  const panel = document.getElementById('finalPanel');
+  panel.classList.add('show');
+  document.getElementById('finalScore').textContent = correct + ' / 10';
+  const msgs = ['더 복습이 필요합니다. 강의 내용을 다시 확인해보세요!', '조금 더 노력하면 완벽할 것 같아요!', '잘 하셨어요! 핵심 내용을 잘 이해하고 있습니다.', '훌륭합니다! HPC+AI 전문가 수준이네요! 🎉'];
+  const idx = correct <= 4 ? 0 : correct <= 6 ? 1 : correct <= 8 ? 2 : 3;
+  document.getElementById('finalMsg').textContent = msgs[idx];
+  panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function retryAll() {
+  location.reload();
+}
+</script>
+</body>
+</html>
