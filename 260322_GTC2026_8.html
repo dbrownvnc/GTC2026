@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NVIDIA DOCA 네트워킹 심층 분석 | GTC 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg2: #fafafa;
+    --text: #1a1a1a;
+    --text2: #777777;
+    --accent: #e11d48;
+    --accent2: #f43f5e;
+    --chart1: #e11d48;
+    --chart2: #1a1a1a;
+    --chart3: #6b7280;
+    --chart4: #2563eb;
+    --table-bg: #fafafa;
+    --table-header: #e11d48;
+    --border: #e5e5e5;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Source Serif 4', Georgia, serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.75;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+
+  /* ── 헤더 ── */
+  .masthead {
+    border-top: 4px solid var(--accent);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0;
+  }
+  .masthead-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .masthead-date {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text2);
+    letter-spacing: .06em;
+  }
+  .hero {
+    padding: 36px 0 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
+  }
+  .hero-category {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-category::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  h1.hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 7vw, 42px);
+    font-weight: 900;
+    line-height: 1.12;
+    letter-spacing: -.02em;
+    margin-bottom: 18px;
+    color: var(--text);
+  }
+  h1.hero-title span { color: var(--accent); }
+  .hero-lead {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text2);
+    font-style: italic;
+    font-weight: 300;
+    border-left: 3px solid var(--accent);
+    padding-left: 16px;
+  }
+
+  /* ── 섹션 구조 ── */
+  h2 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    color: var(--text);
+    margin: 44px 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+    position: relative;
+  }
+  h2::before {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0;
+    width: 36px; height: 2px;
+    background: var(--accent);
+  }
+  h3 {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 26px 0 8px;
+  }
+  p { margin-bottom: 14px; }
+
+  /* ── 콜아웃 ── */
+  .callout {
+    background: var(--bg2);
+    border-left: 4px solid var(--accent);
+    padding: 14px 18px;
+    margin: 22px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 15px;
+  }
+  .callout strong { color: var(--accent); }
+  .tag {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .tag.blue { background: var(--chart4); }
+  .tag.gray { background: var(--chart3); }
+
+  /* ── 테이블 ── */
+  .tbl-wrap { overflow-x: auto; margin: 18px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead tr { background: var(--table-header); color: #fff; }
+  thead th { padding: 10px 12px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-align: left; }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:nth-child(even) { background: var(--table-bg); }
+  tbody td { padding: 9px 12px; vertical-align: top; }
+
+  /* ── 페이드 인 ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── 차트 ── */
+  .chart-container {
+    position: relative;
+    max-height: 340px;
+    margin: 20px 0;
+    background: var(--bg2);
+    border-radius: 8px;
+    padding: 16px 12px 8px;
+    border: 1px solid var(--border);
+  }
+  .chart-container canvas {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    max-height: 300px;
+  }
+  .chart-container.chart-ready canvas { opacity: 1; }
+  .chart-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  /* ── 스택 레이어 다이어그램 ── */
+  .stack-diagram { display: flex; flex-direction: column; gap: 4px; margin: 18px 0; }
+  .stack-layer {
+    border-radius: 6px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .stack-layer:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--accent); }
+  .stack-layer .layer-name {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .06em;
+  }
+  .stack-layer .layer-desc { font-size: 13px; margin-top: 3px; }
+  .layer-detail { display: none; font-size: 13px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.25); }
+  .stack-layer.open .layer-detail { display: block; }
+  .l1 { background: #e11d48; color: #fff; }
+  .l2 { background: #1a1a1a; color: #fff; }
+  .l3 { background: #2563eb; color: #fff; }
+  .l4 { background: #6b7280; color: #fff; }
+  .l5 { background: var(--bg2); color: var(--text); border: 1px solid var(--border); }
+  .stack-hint { font-size: 12px; color: var(--text2); font-style: italic; margin-bottom: 6px; }
+
+  /* ── 인터랙티브: 멀티플레인 시뮬레이터 ── */
+  .sim-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+  }
+  .sim-card h3 { margin-top: 0; font-size: 16px; }
+  .sim-row { display: flex; align-items: center; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+  .sim-label { font-family: var(--font-mono); font-size: 12px; min-width: 100px; color: var(--text2); }
+  input[type=range] {
+    flex: 1; min-width: 100px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .sim-val {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    min-width: 60px;
+    text-align: right;
+  }
+  .sim-result {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-top: 14px;
+  }
+  .sim-metric { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed var(--border); font-size: 14px; }
+  .sim-metric:last-child { border-bottom: none; }
+  .sim-metric .label { color: var(--text2); }
+  .sim-metric .value { font-family: var(--font-mono); font-weight: 600; color: var(--text); }
+  .sim-metric .value.good { color: #16a34a; }
+  .sim-metric .value.warn { color: #d97706; }
+  .reset-btn {
+    margin-top: 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: .06em;
+    transition: background .15s, color .15s;
+  }
+  .reset-btn:hover { background: var(--accent); color: #fff; }
+
+  /* ── 네트워크 타입 비교 카드 ── */
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0; }
+  .compare-card { border-radius: 8px; padding: 16px; }
+  .compare-card.ns { background: #f5f3ff; border: 1.5px solid #7c3aed; }
+  .compare-card.ew { background: #f0fdf4; border: 1.5px solid #16a34a; }
+  .compare-card .cc-title { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 10px; }
+  .compare-card.ns .cc-title { color: #7c3aed; }
+  .compare-card.ew .cc-title { color: #16a34a; }
+  .cc-item { font-size: 13px; margin: 5px 0; display: flex; gap: 6px; }
+  .cc-item::before { content: '▸'; flex-shrink: 0; }
+  .compare-card.ns .cc-item::before { color: #7c3aed; }
+  .compare-card.ew .cc-item::before { color: #16a34a; }
+  @media (max-width: 420px) { .compare-grid { grid-template-columns: 1fr; } }
+
+  /* ── 고객사 카드 ── */
+  .customer-list { display: flex; flex-direction: column; gap: 12px; margin: 18px 0; }
+  .customer-card { display: flex; gap: 14px; padding: 14px; background: var(--bg2); border-radius: 8px; border: 1px solid var(--border); align-items: flex-start; }
+  .customer-logo {
+    width: 44px; height: 44px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+    letter-spacing: .04em;
+  }
+  .google-logo { background: #4285f4; color: #fff; }
+  .crusoe-logo { background: #1a1a1a; color: #fff; }
+  .coreweave-logo { background: #e11d48; color: #fff; }
+  .customer-info .co-name { font-weight: 700; font-size: 15px; margin-bottom: 3px; }
+  .customer-info .co-tech { font-family: var(--font-mono); font-size: 11px; color: var(--accent); font-weight: 600; margin-bottom: 4px; }
+  .customer-info .co-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+  /* ── 퀴즈 구분선 ── */
+  .quiz-divider {
+    margin: 52px 0 0;
+    border: none;
+    border-top: 3px solid var(--text);
+    position: relative;
+  }
+  .quiz-divider::after {
+    content: '📝 시험문제';
+    position: absolute;
+    top: -14px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg);
+    padding: 0 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: .1em;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .quiz-section { margin-top: 32px; }
+  .quiz-item {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .quiz-num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .quiz-q { font-size: 15px; font-weight: 600; line-height: 1.55; margin-bottom: 10px; }
+  .quiz-choices { list-style: none; font-size: 14px; }
+  .quiz-choices li { padding: 4px 0; }
+  .quiz-choices li::before { content: attr(data-label) '. '; font-weight: 600; color: var(--text2); }
+  .answer-toggle {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 5px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--text2);
+    margin-top: 10px;
+    transition: border-color .15s, color .15s;
+  }
+  .answer-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .answer-box {
+    display: none;
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: #fff;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .answer-box .ans-label { font-family: var(--font-mono); font-size: 10px; color: var(--accent); font-weight: 600; margin-bottom: 4px; }
+  .difficulty { font-family: var(--font-mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 7px; border-radius: 2px; float: right; }
+  .diff-easy { background: #dcfce7; color: #16a34a; }
+  .diff-mid { background: #fef9c3; color: #a16207; }
+  .diff-hard { background: #fee2e2; color: #dc2626; }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text2);
+    text-align: center;
+    letter-spacing: .06em;
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <span class="masthead-label">NVIDIA GTC 2026 · S81857</span>
+  <span class="masthead-date">2026.03.22</span>
+</div>
+
+<div class="hero fade-in">
+  <div class="hero-category">AI Infrastructure · Networking</div>
+  <h1 class="hero-title">AI 팩토리를 위한<br><span>초고속 네트워킹</span><br>DOCA로 완성하다</h1>
+  <p class="hero-lead">NVIDIA DOCA 소프트웨어 스택이 어떻게 BlueField·ConnectX 하드웨어를 결합해 수십만 GPU 규모의 AI 클라우드를 완성하는지 심층 분석합니다.</p>
+</div>
+
+<!-- ──────────────────────────────────────────── -->
+<h2>1. 배경: 왜 네트워킹이 결정적인가?</h2>
+<p>NVIDIA는 AI 컴퓨팅을 <strong>"슈퍼카"</strong>에, 네트워킹을 <strong>"레이스 트랙"</strong>에 비유합니다. 아무리 빠른 GPU 클러스터(슈퍼카)가 있어도, 데이터를 제때 공급하는 고속 네트워크(트랙)가 없으면 성능을 발휘할 수 없습니다. NVIDIA AI Networking은 이 트랙의 역할을 합니다.</p>
+
+<h2>2. 두 가지 네트워크 유형</h2>
+<p>AI 팩토리에는 서로 다른 요구사항을 가진 두 네트워크가 공존합니다.</p>
+
+<div class="compare-grid fade-in">
+  <div class="compare-card ns">
+    <div class="cc-title">North-South 네트워크</div>
+    <div class="cc-item">스토리지·테넌트 접근</div>
+    <div class="cc-item">느슨하게 결합된 앱</div>
+    <div class="cc-item">TCP/IP, 마이크로서비스</div>
+    <div class="cc-item">가변 트래픽, 지터 허용</div>
+    <div class="cc-item">BlueField DPU로 구현</div>
+  </div>
+  <div class="compare-card ew">
+    <div class="cc-title">East-West 네트워크</div>
+    <div class="cc-item">GPU-GPU 직접 통신</div>
+    <div class="cc-item">긴밀하게 결합된 앱</div>
+    <div class="cc-item">최대 대역폭·최저 지연</div>
+    <div class="cc-item">버스트 트래픽, 격리 필수</div>
+    <div class="cc-item">ConnectX SuperNIC으로 구현</div>
+  </div>
+</div>
+
+<div class="chart-container fade-in" style="margin-top:24px;">
+  <div class="chart-title">두 네트워크 특성 비교 (5점 척도)</div>
+  <canvas id="radarChart" height="240"></canvas>
+</div>
+
+<!-- ──────────────────────────────────────────── -->
+<h2>3. 핵심 하드웨어</h2>
+<div class="tbl-wrap fade-in">
+<table>
+  <thead>
+    <tr><th>하드웨어</th><th>역할</th><th>담당 네트워크</th><th>주요 기능</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>BlueField DPU</strong></td><td>클라우드 인프라 프로세서</td><td>North-South</td><td>멀티테넌시, 제로트러스트, VPC 오프로드</td></tr>
+    <tr><td><strong>ConnectX SuperNIC</strong></td><td>GPU 컴퓨팅 패브릭 기반</td><td>East-West</td><td>최고 대역폭, 최저 지연, 멀티플레인</td></tr>
+    <tr><td><strong>BlueField 4 Astra</strong></td><td>통합 관리 컨트롤러</td><td>양쪽 통합</td><td>최초의 North+East-West 통합 제로트러스트</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout fade-in">
+  <strong>Bluefield Astra란?</strong> Vera Rubin 세대에서 처음 도입된 기술로, BlueField가 모든 ConnectX SuperNIC을 중앙 관리하게 됩니다. 업계 최초로 North-South·East-West 네트워크를 단일 제로트러스트 아키텍처로 통합합니다.
+</div>
+
+<!-- ──────────────────────────────────────────── -->
+<h2>4. DOCA 소프트웨어 스택</h2>
+<p>하드웨어의 모든 능력을 현실화하는 것이 DOCA 소프트웨어 스택입니다. 아래 레이어를 <strong>클릭</strong>해 각 레이어의 역할을 확인하세요.</p>
+
+<p class="stack-hint">▸ 각 레이어를 탭/클릭하면 세부 설명이 펼쳐집니다</p>
+
+<div class="stack-diagram fade-in">
+  <div class="stack-layer l1" onclick="toggleLayer(this)">
+    <div class="layer-name">🔧 오케스트레이션 — DPF (DOCA Platform Framework)</div>
+    <div class="layer-desc">수천 개의 BlueField를 한 번에 관리·배포</div>
+    <div class="layer-detail">수천 대의 BlueField에 서비스(HBN, Weave, X-Plane)를 분 단위로 배포하고 동적 생명주기를 관리합니다. 오픈소스로 GitHub에 공개되어 있으며 완성된 제품으로도 사용 가능합니다.</div>
+  </div>
+  <div class="stack-layer l2" onclick="toggleLayer(this)">
+    <div class="layer-name">🌐 턴키 서비스 — DOCA HBN · DOCA Weave</div>
+    <div class="layer-desc">North-South VPC(HBN) + East-West VPC(Weave)</div>
+    <div class="layer-detail"><strong>HBN:</strong> BGP·EVPN 기반 분산 라우팅으로 North-South 멀티테넌트 VPC 구현. 컨트롤러 불필요 (Controllerless). <strong>DOCA Weave:</strong> 알고리즘적 캡슐화로 상태 공유 최소화, East-West 멀티테넌시 구현. BlueField 4 Astra에서 동작.</div>
+  </div>
+  <div class="stack-layer l3" onclick="toggleLayer(this)">
+    <div class="layer-name">🔀 가속 가상 스위치 — OVS-DOCA</div>
+    <div class="layer-desc">오픈 vSwitch를 DOCA로 완전 하드웨어 가속</div>
+    <div class="layer-detail">기존 OVS의 드롭인 대체. DPIF(데이터패스 인터페이스)를 DOCA Flow 기반으로 재구현해 BlueField/ConnectX 하드웨어에서 패킷 처리. <strong>성능:</strong> 초당 100만 연결 유지, 30만+ 연결 삽입, 라인 레이트 달성.</div>
+  </div>
+  <div class="stack-layer l4" onclick="toggleLayer(this)">
+    <div class="layer-name">🧱 프로그래머블 SDK — DOCA Flow · DOCA PCC</div>
+    <div class="layer-desc">레고 블록처럼 쌓는 네트워크 파이프라인 SDK</div>
+    <div class="layer-detail"><strong>DOCA Flow:</strong> 브리지·라우팅·연결 추적 등 파이프를 조합해 가상 스위치, 방화벽, 로드밸런서 등 어떤 네트워크 앱도 제작. 하드웨어에 완전 오프로드. <strong>DOCA PCC:</strong> 혼잡 제어 알고리즘을 하드웨어 수준에서 프로그래밍하는 라이브러리.</div>
+  </div>
+  <div class="stack-layer l5" onclick="toggleLayer(this)">
+    <div class="layer-name">⚙️ 하드웨어 — BlueField DPU · ConnectX SuperNIC</div>
+    <div class="layer-desc">모든 상위 소프트웨어의 물리적 토대</div>
+    <div class="layer-detail">BlueField(North-South)와 ConnectX(East-West) 하드웨어. Vera Rubin 세대부터 단일 GPU 서버에도 두 하드웨어가 모두 내장됩니다.</div>
+  </div>
+</div>
+
+<!-- ──────────────────────────────────────────── -->
+<h2>5. 멀티테넌시: AI 클라우드의 필수 조건</h2>
+<p>기존 단일 테넌트 환경은 물리적 분리로 격리를 구현했지만, 이는 비용이 높고 확장성이 없습니다. AI 클라우드는 기본적으로 멀티테넌트여야 합니다.</p>
+
+<div class="chart-container fade-in">
+  <div class="chart-title">멀티테넌시 구현 방식 비교</div>
+  <canvas id="barChart" height="220"></canvas>
+</div>
+
+<h3>BlueField 멀티테넌시의 3대 특성</h3>
+<div class="callout">
+  <strong>① 진정한 격리:</strong> 테넌트 간·테넌트-클라우드 제공자 간 데이터가 완전 분리<br>
+  <strong>② 라인 레이트 성능:</strong> 격리에 따른 오버헤드 없이 최대 대역폭 유지<br>
+  <strong>③ 하드 격리:</strong> BlueField가 신뢰할 수 없는 서버 앞단의 보안 게이트 역할
+</div>
+
+<!-- ──────────────────────────────────────────── -->
+<h2>6. 멀티플레인: 10만 GPU 이상 확장의 답</h2>
+<p>기존 아키텍처는 NIC 하나당 스위치 하나에 연결됩니다. 이 구조는 100,000 GPU 이상 확장 시 한계에 부딪히고, 스위치 하나가 끊기면 GPU 전체가 단절됩니다.</p>
+
+<div class="callout fade-in">
+  <strong>멀티플레인이란?</strong> ConnectX 8부터 지원. 하나의 NIC 업링크를 2·4·8개의 독립 플레인으로 분할해 서로 다른 스위치에 연결합니다. 한 플레인이 끊겨도 나머지로 자동 재분산(폴트 톨러런스). 애플리케이션에는 단일 포트로 보여 투명하게 동작합니다.
+</div>
+
+<!-- 멀티플레인 시뮬레이터 -->
+<div class="sim-card fade-in">
+  <h3>🎛️ 멀티플레인 확장성 시뮬레이터</h3>
+  <p style="font-size:13px;color:var(--text2);margin-bottom:14px;">파라미터를 조정해 네트워크 구성에 따른 확장성과 내결함성을 확인하세요.</p>
+
+  <div class="sim-row">
+    <span class="sim-label">GPU 수 (K)</span>
+    <input type="range" id="gpuCount" min="10" max="500" value="100" step="10">
+    <span class="sim-val" id="gpuCountVal">100K</span>
+  </div>
+  <div class="sim-row">
+    <span class="sim-label">플레인 수</span>
+    <input type="range" id="planeCount" min="1" max="8" value="4" step="1">
+    <span class="sim-val" id="planeCountVal">4</span>
+  </div>
+  <div class="sim-row">
+    <span class="sim-label">단일 링크 BW (Tbps)</span>
+    <input type="range" id="bwPerLink" min="0.4" max="3.2" value="1.6" step="0.4">
+    <span class="sim-val" id="bwPerLinkVal">1.6</span>
+  </div>
+
+  <div class="sim-result" id="simResult">
+    <!-- JS로 채움 -->
+  </div>
+  <button class="reset-btn" onclick="resetSim()">↺ 초기화</button>
+</div>
+
+<!-- ──────────────────────────────────────────── -->
+<h2>7. OVS-DOCA 성능 지표</h2>
+
+<div class="chart-container fade-in">
+  <div class="chart-title">OVS-DOCA 핵심 성능 지표</div>
+  <canvas id="perfChart" height="200"></canvas>
+</div>
+
+<div class="tbl-wrap fade-in">
+<table>
+  <thead>
+    <tr><th>지표</th><th>수치</th><th>의미</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>연결 유지</td><td>100만 CPS</td><td>동시에 유지 가능한 최대 연결 수</td></tr>
+    <tr><td>연결 삽입률</td><td>30만+ /초</td><td>신규 연결을 처리하는 속도</td></tr>
+    <tr><td>데이터 처리</td><td>라인 레이트</td><td>하드웨어 최대 대역폭 100% 활용</td></tr>
+    <tr><td>지연</td><td>최저 (하드웨어 처리)</td><td>소프트웨어 스택 우회, 직접 처리</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ──────────────────────────────────────────── -->
+<h2>8. 실제 고객 사례</h2>
+
+<div class="customer-list fade-in">
+  <div class="customer-card">
+    <div class="customer-logo google-logo">GOOG</div>
+    <div class="customer-info">
+      <div class="co-name">Google</div>
+      <div class="co-tech">DOCA Flow</div>
+      <div class="co-desc">자체 VPC 오버레이와 암호화 기능을 DOCA Flow 위에 구현. ConnectX SuperNIC에서 Google Cloud 인프라 운영.</div>
+    </div>
+  </div>
+  <div class="customer-card">
+    <div class="customer-logo crusoe-logo">CRSO</div>
+    <div class="customer-info">
+      <div class="co-name">Crusoe</div>
+      <div class="co-tech">OVS-DOCA + OVN</div>
+      <div class="co-desc">OVN 중앙 SDN 솔루션과 OVS-DOCA를 결합해 BlueField DPU 기반 VPC 오버레이 구현.</div>
+    </div>
+  </div>
+  <div class="customer-card">
+    <div class="customer-logo coreweave-logo">CW</div>
+    <div class="customer-info">
+      <div class="co-name">CoreWeave</div>
+      <div class="co-tech">DOCA HBN</div>
+      <div class="co-desc">EVPN 기반 베어메탈 VPC 오버레이로 GPU 클라우드에서 베어메탈 as a Service 제공.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ──────────────────────────────────────────── -->
+<h2>9. 전체 구조 요약</h2>
+<div class="chart-container fade-in">
+  <div class="chart-title">DOCA 네트워킹 솔루션 전체 맵</div>
+  <canvas id="doughnutChart" height="220"></canvas>
+</div>
+
+<div class="tbl-wrap fade-in">
+<table>
+  <thead>
+    <tr><th>솔루션</th><th>추상화 수준</th><th>주요 용도</th><th>대상</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><span class="tag">SDK</span> DOCA Flow</td><td>저수준</td><td>커스텀 네트워크 앱 개발</td><td>개발자</td></tr>
+    <tr><td><span class="tag gray">MID</span> OVS-DOCA</td><td>중간</td><td>하드웨어 가속 가상 스위치</td><td>플랫폼 팀</td></tr>
+    <tr><td><span class="tag blue">SVC</span> DOCA HBN</td><td>고수준 (N-S)</td><td>BGP/EVPN VPC 턴키</td><td>클라우드 운영자</td></tr>
+    <tr><td><span class="tag blue">SVC</span> DOCA Weave</td><td>고수준 (E-W)</td><td>East-West VPC 턴키</td><td>클라우드 운영자</td></tr>
+    <tr><td><span class="tag">ORC</span> DPF</td><td>오케스트레이션</td><td>클러스터 규모 배포·관리</td><td>인프라 팀</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<hr class="quiz-divider">
+
+<div class="quiz-section">
+  <div style="margin-bottom:22px;">
+    <h2 style="margin-top:28px;">시험문제 10선</h2>
+    <p style="font-size:14px;color:var(--text2);">「정답 보기」를 눌러 정답과 해설을 확인하세요.</p>
+  </div>
+
+  <!-- Q1 -->
+  <div class="quiz-item fade-in">
+    <div class="quiz-num">Q1 · 객관식 <span class="difficulty diff-easy">쉬움</span></div>
+    <div class="quiz-q">NVIDIA가 AI 네트워킹 강의에서 네트워크를 비유한 것은?</div>
+    <ul class="quiz-choices">
+      <li data-label="①">슈퍼카</li>
+      <li data-label="②">레이스 트랙</li>
+      <li data-label="③">케이크</li>
+      <li data-label="④">공장 컨베이어 벨트</li>
+    </ul>
+    <button class="answer-toggle" onclick="toggleAnswer(this)">정답 보기</button>
+    <div class="answer-box">
+      <div class="ans-label">정답 및 해설</div>
+      <strong>② 레이스 트랙</strong> — 발표자는 AI 컴퓨팅을 "슈퍼카", 네트워킹을 "레이스 트랙"에 비유했습니다. 슈퍼카(GPU)가 아무리 빨라도 트랙(네트워킹)이 나쁘면 제 속도를 낼 수 없다는 의미입니다.
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="quiz-item fade-in">
+    <div class="quiz-num">Q2 · 객관식 <span class="difficulty diff-easy">쉬움</span></div>
+    <div class="quiz-q">North-South 네트워크에서 사용되는 NVIDIA 하드웨어는?</div>
+    <ul class="quiz-choices">
+      <li data-label="①">ConnectX SuperNIC</li>
+      <li data-label="②">BlueField DPU</li>
+      <li data-label="③">Spectrum 스위치</li>
+      <li data-label="④">Grace CPU</li>
+    </ul>
+    <button class="answer-toggle" onclick="toggleAnswer(this)">정답 보기</button>
+    <div class="answer-box">
+      <div class="ans-label">정답 및 해설</div>
+      <strong>② BlueField DPU</strong> — North-South 네트워크(스토리지, 테넌트 접근)는 BlueField DPU가 담당하고, East-West 네트워크(GPU 간 통신)는 ConnectX SuperNIC이 담당합니다.
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="quiz-item fade-in">
+    <div class="quiz-num">Q3 · OX형 <span class="difficulty diff-easy">쉬움</span></div>
+    <div class="quiz-q">DOCA Flow는 네트워크 파이프라인을 레고 블록처럼 조합해 가상 스위치, 방화벽 등 다양한 앱을 하드웨어에 오프로드할 수 있는 프로그래머블 SDK이다. (O / X)</div>
+    <button class="answer-toggle" onclick="toggleAnswer(this)">정답 보기</button>
+    <div class="answer-box">
+      <div class="ans-label">정답 및 해설</div>
+      <strong>O (맞다)</strong> — DOCA Flow는 브리지·라우팅·연결 추적 등 파이프를 동적으로 체이닝해 어떤 네트워크 앱도 구성할 수 있는 완전 프로그래머블 SDK입니다. 최종 결과물은 하드웨어(BlueField·ConnectX)에 완전 오프로드됩니다.
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="quiz-item fade-in">
+    <div class="quiz-num">Q4 · 객관식 <span class="difficulty diff-mid">보통</span></div>
+    <div class="quiz-q">OVS-DOCA가 달성하는 초당 연결 유지 성능은?</div>
+    <ul class="quiz-choices">
+      <li data-label="①">10만 CPS</li>
+      <li data-label="②">50만 CPS</li>
+      <li data-label="③">100만 CPS</li>
+      <li data-label="④">1,000만 CPS</li>
+    </ul>
+    <button class="answer-toggle" onclick="toggleAnswer(this)">정답 보기</button>
+    <div class="answer-box">
+      <div class="ans-label">정답 및 해설</div>
+      <strong>③ 100만 CPS</strong> — 발표 자료에 따르면 OVS-DOCA는 초당 100만 연결 유지, 30만 이상의 연결 삽입률, 라인 레이트 성능을 제공합니다.
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="quiz-item fade-in">
+    <div class="quiz-num">Q5 · 단답형 <span class="difficulty diff-mid">보통</span></div>
+    <div class="quiz-q">DOCA HBN이 사용하는 라우팅 프로토콜은 무엇입니까? (약어로 답하시오)</div>
+    <button class="answer-toggle" onclick="toggleAnswer(this)">정답 보기</button>
+    <div class="answer-box">
+      <div class="ans-label">정답 및 해설</div>
+      <strong>BGP (및 EVPN)</strong> — HBN(Host-Based Networking)은 중앙 컨트롤러 없이 BGP 프로토콜로 테넌트 도달 가능성 정보를 분산 배포합니다. EVPN은 Layer 2/3 VPN 구성에 사용됩니다.
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="quiz-item fade-in">
+    <div class="quiz-num">Q6 · 객관식 <span class="difficulty diff-mid">보통</span></div>
+    <div class="quiz-q">BlueField Astra 기술이 처음 도입되는 GPU 세대는?</div>
+    <ul class="quiz-choices">
+      <li data-label="①">Hopper</li>
+      <li data-label="②">Blackwell</li>
+      <li data-label="③">Vera Rubin</li>
+      <li data-label="④">Grace Hopper</li>
+    </ul>
+    <button class="answer-toggle" onclick="toggleAnswer(this)">정답 보기</button>
+    <div class="answer-box">
+      <div class="ans-label">정답 및 해설</div>
+      <strong>③ Vera Rubin</strong> — 발표자는 "새로운 세대인 Vera Rubin과 BlueField 4에서 Bluefield Astra를 도입한다"고 명시했습니다. 이를 통해 North-South와 East-West 관리가 처음으로 통합됩니다.
+    </div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="quiz-item fade-in">
+    <div class="quiz-num">Q7 · 객관식 <span class="difficulty diff-mid">보통</span></div>
+    <div class="quiz-q">DOCA HBN을 활용해 EVPN 기반 베어메탈 VPC를 운영하는 실제 고객사는?</div>
+    <ul class="quiz-choices">
+      <li data-label="①">Google</li>
+      <li data-label="②">Microsoft Azure</li>
+      <li data-label="③">Crusoe</li>
+      <li data-label="④">CoreWeave</li>
+    </ul>
+    <button class="answer-toggle" onclick="toggleAnswer(this)">정답 보기</button>
+    <div class="answer-box">
+      <div class="ans-label">정답 및 해설</div>
+      <strong>④ CoreWeave</strong> — CoreWeave는 HBN(가장 높은 추상화 레벨)을 사용해 EVPN 기반 베어메탈 VPC를 구성하고, GPU 클라우드에서 BaaS(Bare Metal as a Service)를 제공합니다.
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="quiz-item fade-in">
+    <div class="quiz-num">Q8 · OX형 <span class="difficulty diff-mid">보통</span></div>
+    <div class="quiz-q">멀티플레인에서 플레인 하나가 장애가 발생하면, 해당 GPU의 네트워크 연결이 완전히 끊긴다. (O / X)</div>
+    <button class="answer-toggle" onclick="toggleAnswer(this)">정답 보기</button>
+    <div class="answer-box">
+      <div class="ans-label">정답 및 해설</div>
+      <strong>X (틀리다)</strong> — 멀티플레인의 핵심 장점은 폴트 톨러런스입니다. 한 플레인이 끊기면 NIC이 자동으로 나머지 플레인으로 트래픽을 재분산합니다. 기존 단일 레일 구조에서만 하나의 연결 손실 = 전체 단절이 발생합니다.
+    </div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="quiz-item fade-in">
+    <div class="quiz-num">Q9 · 단답형 <span class="difficulty diff-hard">어려움</span></div>
+    <div class="quiz-q">DOCA Weave가 상태 공유를 최소화하기 위해 사용하는 캡슐화 방식은 무엇입니까?</div>
+    <button class="answer-toggle" onclick="toggleAnswer(this)">정답 보기</button>
+    <div class="answer-box">
+      <div class="ans-label">정답 및 해설</div>
+      <strong>알고리즘적 캡슐화 (Algorithmic Encapsulation)</strong> — 테넌트 내부(inner) IP 주소 정보를 그대로 활용해 외부(outer) 터널 IP를 계산합니다. 별도의 상태 정보를 분산 배포하지 않아도 멀티테넌트 오버레이를 구성할 수 있어 East-West 특유의 고확장·정적 특성에 최적화되어 있습니다.
+    </div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="quiz-item fade-in">
+    <div class="quiz-num">Q10 · 서술형 <span class="difficulty diff-hard">어려움</span></div>
+    <div class="quiz-q">멀티테넌시를 물리적 분리 대신 소프트웨어적 격리(BlueField VPC 오프로드)로 구현했을 때의 장점 3가지를 설명하시오.</div>
+    <button class="answer-toggle" onclick="toggleAnswer(this)">정답 보기</button>
+    <div class="answer-box">
+      <div class="ans-label">정답 및 해설</div>
+      <strong>① 비용 절감:</strong> 인프라 자원(네트워크, 스토리지)을 여러 테넌트가 공유하므로 하드웨어 수량 감소<br>
+      <strong>② 확장성:</strong> 테넌트 추가·제거 시 물리적 배선 없이 소프트웨어만으로 처리<br>
+      <strong>③ 성능 무손실:</strong> BlueField가 VPC 오프로드를 하드웨어에서 처리해 라인 레이트 성능 유지(소프트웨어 격리의 오버헤드 없음)
+    </div>
+  </div>
+
+</div><!-- /quiz-section -->
+
+<footer>GTC 2026 · S81857 · Accelerated AI Networking with DOCA · 전문 분석본</footer>
+
+<script>
+// ── 레이어 토글 ──────────────────────────────
+function toggleLayer(el) {
+  el.classList.toggle('open');
+}
+// ── 정답 토글 ────────────────────────────────
+function toggleAnswer(btn) {
+  const box = btn.nextElementSibling;
+  const open = box.style.display === 'block';
+  box.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? '정답 보기' : '정답 숨기기';
+}
+
+// ── 멀티플레인 시뮬레이터 ─────────────────────
+const DEFAULT_GPU = 100, DEFAULT_PLANE = 4, DEFAULT_BW = 1.6;
+function calcSim() {
+  const gpu = parseInt(document.getElementById('gpuCount').value);
+  const plane = parseInt(document.getElementById('planeCount').value);
+  const bw = parseFloat(document.getElementById('bwPerLink').value);
+  document.getElementById('gpuCountVal').textContent = gpu + 'K';
+  document.getElementById('planeCountVal').textContent = plane;
+  document.getElementById('bwPerLinkVal').textContent = bw.toFixed(1);
+
+  const totalBW = (bw * plane).toFixed(1);
+  const faultTol = plane === 1 ? '없음' : Math.round((1 - 1/plane)*100) + '%';
+  const scalability = gpu <= 50 ? '충분' : gpu <= 200 ? '권장: 멀티플레인 필요' : '멀티플레인 필수';
+  const switchPorts = Math.ceil(gpu * 1000 / 64 * plane);
+  const faultClass = plane >= 4 ? 'good' : plane >= 2 ? 'warn' : '';
+
+  document.getElementById('simResult').innerHTML = `
+    <div class="sim-metric"><span class="label">총 집계 대역폭</span><span class="value">${totalBW} Tbps / GPU</span></div>
+    <div class="sim-metric"><span class="label">내결함성</span><span class="value ${faultClass}">${faultTol}</span></div>
+    <div class="sim-metric"><span class="label">확장성 평가</span><span class="value ${gpu>200?'warn':gpu>100?'warn':'good'}">${scalability}</span></div>
+    <div class="sim-metric"><span class="label">GPU 규모</span><span class="value">${(gpu*1000).toLocaleString()} GPU</span></div>
+    <div class="sim-metric"><span class="label">예상 스위치 포트 수</span><span class="value">${switchPorts.toLocaleString()}+</span></div>
+  `;
+}
+function resetSim() {
+  document.getElementById('gpuCount').value = DEFAULT_GPU;
+  document.getElementById('planeCount').value = DEFAULT_PLANE;
+  document.getElementById('bwPerLink').value = DEFAULT_BW;
+  calcSim();
+}
+['gpuCount','planeCount','bwPerLink'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calcSim);
+});
+calcSim();
+
+// ── Chart.js 설정 ──────────────────────────────
+const chartConfigs = {};
+
+chartConfigs['radarChart'] = () => {
+  new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+      labels: ['대역폭', '지연 민감도', '격리 필요성', '트래픽 변동성', '스케일 요구'],
+      datasets: [
+        {
+          label: 'North-South',
+          data: [3, 2, 3, 4, 3],
+          borderColor: '#7c3aed',
+          backgroundColor: 'rgba(124,58,237,0.15)',
+          pointBackgroundColor: '#7c3aed',
+        },
+        {
+          label: 'East-West',
+          data: [5, 5, 5, 5, 5],
+          borderColor: '#16a34a',
+          backgroundColor: 'rgba(22,163,74,0.12)',
+          pointBackgroundColor: '#16a34a',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: { r: { min: 0, max: 5, ticks: { stepSize: 1, font: { size: 10 } }, pointLabels: { font: { size: 11 } } } },
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 12 } } } }
+    }
+  });
+};
+
+chartConfigs['barChart'] = () => {
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: ['물리적 분리', 'BlueField VPC 오프로드'],
+      datasets: [
+        { label: '비용 (상대값↓)', data: [90, 30], backgroundColor: '#e11d48' },
+        { label: '확장성 (점수↑)', data: [20, 95], backgroundColor: '#2563eb' },
+        { label: '성능 유지율 (%)', data: [100, 100], backgroundColor: '#6b7280' },
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+      scales: {
+        y: { beginAtZero: true, max: 110, ticks: { font: { size: 10 } } },
+        x: { ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+};
+
+chartConfigs['perfChart'] = () => {
+  new Chart(document.getElementById('perfChart'), {
+    type: 'bar',
+    data: {
+      labels: ['연결 유지 (만 CPS)', '연결 삽입률 (만/초)', '대역폭 활용 (%)'],
+      datasets: [{
+        label: 'OVS-DOCA',
+        data: [100, 30, 100],
+        backgroundColor: ['#e11d48', '#2563eb', '#1a1a1a'],
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { beginAtZero: true, max: 110, ticks: { font: { size: 10 } } },
+        y: { ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+};
+
+chartConfigs['doughnutChart'] = () => {
+  new Chart(document.getElementById('doughnutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['DOCA Flow (SDK)', 'OVS-DOCA (가상스위치)', 'DOCA HBN (N-S VPC)', 'DOCA Weave (E-W VPC)', 'DPF (오케스트레이션)'],
+      datasets: [{
+        data: [20, 20, 20, 20, 20],
+        backgroundColor: ['#e11d48','#1a1a1a','#2563eb','#16a34a','#6b7280'],
+        borderWidth: 2,
+        borderColor: '#fff',
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 14 } } },
+      cutout: '60%'
+    }
+  });
+};
+
+// ── IntersectionObserver ────────────────────────
+const fadeObs = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+      fadeObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.fade-in').forEach(el => fadeObs.observe(el));
+
+const chartObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const canvas = e.target.querySelector('canvas');
+      if (canvas && chartConfigs[canvas.id]) {
+        chartConfigs[canvas.id]();
+        e.target.classList.add('chart-ready');
+        chartObs.unobserve(e.target);
+      }
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.chart-container').forEach(el => chartObs.observe(el));
+</script>
+</body>
+</html>
