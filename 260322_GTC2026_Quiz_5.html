@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시험 문제 — AI 클라우드 플랫폼 [S81788]</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Serif+4:wght@300;400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg2: #fafafa;
+    --text: #1a1a1a;
+    --text2: #777777;
+    --accent: #e11d48;
+    --accent2: #f43f5e;
+    --blue: #2563eb;
+    --border: #e5e5e5;
+    --correct: #16a34a;
+    --wrong: #dc2626;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Source Serif 4', Georgia, serif; background: var(--bg); color: var(--text); line-height: 1.75; font-size: 16px; }
+
+  .hero {
+    background: var(--text);
+    color: #fff;
+    padding: 40px 24px 36px;
+  }
+  .hero-kicker {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--accent2); margin-bottom: 12px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 6vw, 36px);
+    font-weight: 900; line-height: 1.2; margin-bottom: 12px;
+  }
+  .hero h1 span { color: var(--accent2); }
+  .hero-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: #aaa; letter-spacing: 1px; }
+
+  .container { max-width: 680px; margin: 0 auto; padding: 0 20px; }
+
+  /* Score Board */
+  .scoreboard {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    padding: 20px; margin: 32px 0; text-align: center; border-radius: 2px;
+  }
+  .score-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px; font-weight: 900; color: var(--accent);
+  }
+  .score-label { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+  .score-bar-bg { height: 6px; background: var(--border); border-radius: 3px; margin: 14px 0 0; overflow: hidden; }
+  .score-bar { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.8s ease; width: 0%; }
+
+  /* Question Card */
+  .q-section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--text2); margin: 32px 0 16px;
+    padding-bottom: 6px; border-bottom: 1px solid var(--border);
+  }
+  .q-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 2px; margin-bottom: 20px;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  .q-header {
+    padding: 16px 18px 14px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .q-num {
+    flex-shrink: 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; font-weight: 500;
+    background: var(--accent); color: #fff;
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .q-diff {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px; letter-spacing: 1px; padding: 2px 7px;
+    border-radius: 2px; text-transform: uppercase; flex-shrink: 0; margin-top: 6px;
+  }
+  .diff-easy { background: #dcfce7; color: #15803d; }
+  .diff-med { background: #fef3c7; color: #d97706; }
+  .diff-hard { background: #fee2e2; color: #dc2626; }
+  .q-text { font-size: 15px; font-weight: 600; line-height: 1.5; flex: 1; }
+  .q-type {
+    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px;
+    color: var(--blue); text-transform: uppercase; margin-bottom: 4px;
+  }
+
+  /* Options */
+  .q-options { padding: 0 18px 16px 62px; }
+  .opt {
+    display: block; width: 100%;
+    text-align: left; padding: 10px 14px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 2px; margin-bottom: 8px;
+    font-family: 'Source Serif 4', serif; font-size: 14px;
+    cursor: pointer; transition: all 0.18s;
+    color: var(--text);
+  }
+  .opt:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: #fff5f7; }
+  .opt.correct { border-color: var(--correct); background: #f0fdf4; color: var(--correct); font-weight: 600; }
+  .opt.wrong { border-color: var(--wrong); background: #fef2f2; color: var(--wrong); }
+  .opt:disabled { cursor: default; }
+
+  /* Short Answer */
+  .q-short { padding: 0 18px 16px 62px; }
+  .short-input {
+    width: 100%; padding: 10px 12px;
+    border: 1px solid var(--border); border-radius: 2px;
+    font-family: 'Source Serif 4', serif; font-size: 14px;
+    background: var(--bg);
+    transition: border-color 0.2s;
+  }
+  .short-input:focus { outline: none; border-color: var(--accent); }
+  .short-submit {
+    margin-top: 8px; padding: 8px 16px;
+    background: var(--accent); color: #fff; border: none;
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px;
+    cursor: pointer; border-radius: 2px; transition: background 0.2s;
+  }
+  .short-submit:hover { background: var(--accent2); }
+
+  /* OX */
+  .q-ox { padding: 0 18px 16px 62px; display: flex; gap: 10px; }
+  .ox-btn {
+    flex: 1; padding: 12px;
+    font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 2px; cursor: pointer; transition: all 0.18s;
+  }
+  .ox-btn:hover:not(:disabled) { border-color: var(--accent); background: #fff5f7; }
+  .ox-btn.correct { border-color: var(--correct); background: #f0fdf4; color: var(--correct); }
+  .ox-btn.wrong { border-color: var(--wrong); background: #fef2f2; color: var(--wrong); }
+  .ox-btn:disabled { cursor: default; }
+
+  /* Feedback */
+  .q-feedback {
+    display: none;
+    margin: 0 18px 16px 62px;
+    padding: 12px 14px;
+    background: var(--bg); border-left: 3px solid var(--correct);
+    font-size: 13px; line-height: 1.55;
+    border-radius: 0 2px 2px 0;
+  }
+  .q-feedback.show { display: block; }
+  .q-feedback.wrong-fb { border-left-color: var(--wrong); }
+  .feedback-label {
+    font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 4px;
+    color: var(--correct);
+  }
+  .feedback-label.wrong-lbl { color: var(--wrong); }
+
+  /* Divider */
+  .divider { height: 1px; background: linear-gradient(to right, var(--accent), transparent); margin: 28px 0; }
+
+  /* Reset Button */
+  .btn-reset {
+    display: block; width: 100%;
+    padding: 14px; text-align: center;
+    background: var(--text); color: #fff;
+    font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1.5px;
+    text-transform: uppercase; cursor: pointer; border: none;
+    border-radius: 2px; margin: 32px 0;
+    transition: background 0.2s;
+  }
+  .btn-reset:hover { background: var(--accent); }
+
+  footer {
+    background: var(--text); color: #777; text-align: center;
+    padding: 24px 20px; font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 1px; margin-top: 40px;
+  }
+  footer strong { color: var(--accent2); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="container">
+    <div class="hero-kicker">📝 시험 문제 — S81788 세션</div>
+    <h1>AI 클라우드 플랫폼 <span>이해도 점검</span></h1>
+    <div class="hero-meta">총 10문제 &nbsp;|&nbsp; 객관식·단답형·OX &nbsp;|&nbsp; 정답 즉시 확인</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Score Board -->
+  <div class="scoreboard">
+    <div class="score-num" id="scoreNum">0</div>
+    <div class="score-label">/ <span id="totalAnswered">0</span> 문제 정답</div>
+    <div class="score-bar-bg"><div class="score-bar" id="scoreBar"></div></div>
+  </div>
+
+  <!-- ── 쉬움 (3문제) ── -->
+  <div class="q-section-label">🟢 쉬움 (난이도 하) — 3문제</div>
+
+  <!-- Q1 -->
+  <div class="q-card" id="q1">
+    <div class="q-header">
+      <div class="q-num">1</div>
+      <div>
+        <div class="q-type">객관식</div>
+        <div class="q-text">젠슨 황이 제시한 AI 인프라 스택의 비유는 무엇인가?</div>
+      </div>
+      <div class="q-diff diff-easy">쉬움</div>
+    </div>
+    <div class="q-options">
+      <button class="opt" onclick="checkMC('q1', this, false)">① 3단 피라미드</button>
+      <button class="opt" onclick="checkMC('q1', this, false)">② 4층 빌딩</button>
+      <button class="opt" onclick="checkMC('q1', this, true)">③ 5층 케이크 (five-layer cake)</button>
+      <button class="opt" onclick="checkMC('q1', this, false)">④ 7단 사다리</button>
+    </div>
+    <div class="q-feedback" id="q1-fb">
+      <div class="feedback-label">✓ 정답 해설</div>
+      젠슨 황은 에너지·칩에서 출발해 냉각·전력, 네트워킹·오케스트레이션, AI 팩토리·모델, 애플리케이션까지 5개 레이어를 '5층 케이크'로 시각화했습니다.
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="q-card" id="q2">
+    <div class="q-header">
+      <div class="q-num">2</div>
+      <div>
+        <div class="q-type">OX 문제</div>
+        <div class="q-text">Vera Rubin 아키텍처는 전년도 GB300 대비 토큰 비용을 10배 낮췄다.</div>
+      </div>
+      <div class="q-diff diff-easy">쉬움</div>
+    </div>
+    <div class="q-ox">
+      <button class="ox-btn" onclick="checkOX('q2', this, true)">⭕</button>
+      <button class="ox-btn" onclick="checkOX('q2', this, false)">❌</button>
+    </div>
+    <div class="q-feedback" id="q2-fb">
+      <div class="feedback-label">✓ 정답 해설</div>
+      세션에서 "Vera Rubin, delivering 10x lower token costs compared to just a year ago with GB300"이라고 명시적으로 발표되었습니다.
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="q-card" id="q3">
+    <div class="q-header">
+      <div class="q-num">3</div>
+      <div>
+        <div class="q-type">객관식</div>
+        <div class="q-text">OCI(Oracle Cloud Infrastructure)가 처음 서비스를 시작한 시기는?</div>
+      </div>
+      <div class="q-diff diff-easy">쉬움</div>
+    </div>
+    <div class="q-options">
+      <button class="opt" onclick="checkMC('q3', this, false)">① 2012~13년</button>
+      <button class="opt" onclick="checkMC('q3', this, false)">② 2014~15년</button>
+      <button class="opt" onclick="checkMC('q3', this, true)">③ 2016~17년</button>
+      <button class="opt" onclick="checkMC('q3', this, false)">④ 2019~20년</button>
+    </div>
+    <div class="q-feedback" id="q3-fb">
+      <div class="feedback-label">✓ 정답 해설</div>
+      발표자 Pradeep는 "OCI started around 2016-17, that's when we launched and we started off serving enterprise customers"라고 직접 언급했습니다.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <!-- ── 보통 (5문제) ── -->
+  <div class="q-section-label">🟡 보통 (난이도 중) — 5문제</div>
+
+  <!-- Q4 -->
+  <div class="q-card" id="q4">
+    <div class="q-header">
+      <div class="q-num">4</div>
+      <div>
+        <div class="q-type">객관식</div>
+        <div class="q-text">NVIDIA Bluefield DPU의 역할을 가장 잘 설명한 것은?</div>
+      </div>
+      <div class="q-diff diff-med">보통</div>
+    </div>
+    <div class="q-options">
+      <button class="opt" onclick="checkMC('q4', this, false)">① GPU 연산을 보조하는 그래픽 가속 카드</button>
+      <button class="opt" onclick="checkMC('q4', this, true)">② AI 팩토리의 운영체제를 구동하며 인프라 워크로드를 오프로드하는 프로세서</button>
+      <button class="opt" onclick="checkMC('q4', this, false)">③ 데이터 저장과 압축을 전담하는 스토리지 컨트롤러</button>
+      <button class="opt" onclick="checkMC('q4', this, false)">④ 사용자 요청을 라우팅하는 소프트웨어 로드밸런서</button>
+    </div>
+    <div class="q-feedback" id="q4-fb">
+      <div class="feedback-label">✓ 정답 해설</div>
+      Bluefield DPU는 네트워킹·스토리지·보안 등 인프라 워크로드를 호스트 CPU·GPU 대신 처리하여, GPU가 토큰 생산에만 집중할 수 있도록 합니다. DOCA 라이브러리를 통해 하드웨어 가속 엔진을 활용합니다.
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="q-card" id="q5">
+    <div class="q-header">
+      <div class="q-num">5</div>
+      <div>
+        <div class="q-type">객관식</div>
+        <div class="q-text">Oracle Acceleron의 3대 기둥(Three Pillars)에 해당하지 않는 것은?</div>
+      </div>
+      <div class="q-diff diff-med">보통</div>
+    </div>
+    <div class="q-options">
+      <button class="opt" onclick="checkMC('q5', this, false)">① 호스트 가속기 (Host Accelerators)</button>
+      <button class="opt" onclick="checkMC('q5', this, false)">② 패브릭 아키텍처 (Fabric Architecture)</button>
+      <button class="opt" onclick="checkMC('q5', this, true)">③ 스토리지 최적화 (Storage Optimization)</button>
+      <button class="opt" onclick="checkMC('q5', this, false)">④ 패브릭 가속기 (Fabric Accelerators)</button>
+    </div>
+    <div class="q-feedback" id="q5-fb">
+      <div class="feedback-label">✓ 정답 해설</div>
+      Oracle Acceleron의 세 기둥은 ① Host Accelerators ② Fabric Architecture ③ Fabric Accelerators입니다. '스토리지 최적화'는 명시된 기둥이 아닙니다.
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="q-card" id="q6">
+    <div class="q-header">
+      <div class="q-num">6</div>
+      <div>
+        <div class="q-type">OX 문제</div>
+        <div class="q-text">OCI의 Gen2 아키텍처에서 가상화 장치는 서버 내부에 위치하며, PCI 버스를 통해 호스트와 통신한다.</div>
+      </div>
+      <div class="q-diff diff-med">보통</div>
+    </div>
+    <div class="q-ox">
+      <button class="ox-btn" onclick="checkOX('q6', this, false)">⭕</button>
+      <button class="ox-btn" onclick="checkOX('q6', this, true)">❌</button>
+    </div>
+    <div class="q-feedback" id="q6-fb">
+      <div class="feedback-label">✓ 정답 해설</div>
+      Gen2는 <strong>오프박스(off-box)</strong> 가상화를 채택합니다. 가상화 장치는 서버 <em>외부</em>에 위치하며, 단순한 이더넷 와이어로만 연결됩니다. PCI 버스의 복잡한 보안 위협 면적을 제거하는 것이 핵심 설계 철학입니다.
+    </div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="q-card" id="q7">
+    <div class="q-header">
+      <div class="q-num">7</div>
+      <div>
+        <div class="q-type">단답형</div>
+        <div class="q-text">OCI의 Zipper가 해결하는 근본 문제를 한 문장으로 설명하시오. (힌트: 두 관리자 역할의 ___)</div>
+      </div>
+      <div class="q-diff diff-med">보통</div>
+    </div>
+    <div class="q-short">
+      <input type="text" class="short-input" id="q7-input" placeholder="답을 입력하세요...">
+      <button class="short-submit" onclick="checkShort('q7', ['분리', '독립', 'decouple', '보안 정책과 네트워크 정책', '네트워크 정책과 보안 정책'])">제출</button>
+    </div>
+    <div class="q-feedback" id="q7-fb">
+      <div class="feedback-label">✓ 모범 답안 및 해설</div>
+      <strong>보안 정책과 네트워크 정책의 분리(decoupling)</strong><br>
+      기존 방화벽 규칙은 보안 정책과 네트워크 정책이 혼재하여, 보안 관리자와 네트워크 관리자가 항상 공동 승인해야 했습니다. Zipper는 리소스 태그 기반으로 보안 정책을 네트워크 아키텍처와 독립적으로 강제합니다.
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="q-card" id="q8">
+    <div class="q-header">
+      <div class="q-num">8</div>
+      <div>
+        <div class="q-type">객관식</div>
+        <div class="q-text">멀티플레너 네트워크(Multi-Planar Network)가 기존 단일 패브릭 대비 가지는 가장 큰 신뢰성 이점은?</div>
+      </div>
+      <div class="q-diff diff-med">보통</div>
+    </div>
+    <div class="q-options">
+      <button class="opt" onclick="checkMC('q8', this, false)">① 물리적 스위치 장애 발생 시 자동으로 새 스위치를 주문</button>
+      <button class="opt" onclick="checkMC('q8', this, false)">② 각 평면의 대역폭을 AI가 실시간으로 최적화</button>
+      <button class="opt" onclick="checkMC('q8', this, true)">③ 한 평면의 컨트롤 시스템이 실패해도 다른 평면이 네트워크 연결을 유지</button>
+      <button class="opt" onclick="checkMC('q8', this, false)">④ 링크 장애 시 자동으로 티어 수를 늘려 경로를 복구</button>
+    </div>
+    <div class="q-feedback" id="q8-fb">
+      <div class="feedback-label">✓ 정답 해설</div>
+      멀티플레너는 각 평면이 독립적인 컨트롤 도메인을 가집니다. 한 평면의 BGP 이슈나 컨트롤 장애가 발생해도 나머지 평면이 정상 동작하므로 고가용성이 보장됩니다. 기존 단일 패브릭은 컨트롤 장애 시 전체 패브릭이 영향을 받습니다.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <!-- ── 어려움 (2문제) ── -->
+  <div class="q-section-label">🔴 어려움 (난이도 상) — 2문제</div>
+
+  <!-- Q9 -->
+  <div class="q-card" id="q9">
+    <div class="q-header">
+      <div class="q-num">9</div>
+      <div>
+        <div class="q-type">단답형 (심화)</div>
+        <div class="q-text">ASTRA(Advanced Secure Trusted Resource Architecture)가 "진정한 베어메탈(bare metal)"을 구현한다고 할 때, 기존 대비 어떤 구조적 변화가 핵심인지 설명하시오.</div>
+      </div>
+      <div class="q-diff diff-hard">어려움</div>
+    </div>
+    <div class="q-short">
+      <input type="text" class="short-input" id="q9-input" placeholder="답을 입력하세요...">
+      <button class="short-submit" onclick="checkShort('q9', ['컨트롤 플레인', 'control plane', '오프로드', 'offload', 'DPU', '호스트'])">제출</button>
+    </div>
+    <div class="q-feedback" id="q9-fb">
+      <div class="feedback-label">✓ 모범 답안 및 해설</div>
+      <strong>백엔드 네트워크의 전체 컨트롤 플레인을 호스트 CPU에서 DPU로 완전히 이전</strong><br>
+      기존에는 혼잡 제어, 멀티테넌시 메커니즘, 네트워크 드라이버가 호스트에서 실행되어 테넌트 트래픽을 잠재적으로 방해했습니다. ASTRA는 이 모든 것을 DPU로 오프로드하여, 호스트(테넌트)는 진정한 베어메탈 환경을 얻습니다. Rubin 세대부터 하드와이어드로 내장됩니다.
+    </div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="q-card" id="q10">
+    <div class="q-header">
+      <div class="q-num">10</div>
+      <div>
+        <div class="q-type">객관식 (심화)</div>
+        <div class="q-text">에이전틱(Agentic) 추론 워크로드가 클러스터 인프라에 미치는 영향에 대해 OCI와 NVIDIA가 공통으로 강조한 내용은?</div>
+      </div>
+      <div class="q-diff diff-hard">어려움</div>
+    </div>
+    <div class="q-options">
+      <button class="opt" onclick="checkMC('q10', this, false)">① 에이전틱 추론은 단일 GPU만으로도 충분하므로 소형 클러스터로 전환해야 함</button>
+      <button class="opt" onclick="checkMC('q10', this, false)">② 훈련 클러스터는 완전히 폐기되고 추론 전용 인프라로 교체되어야 함</button>
+      <button class="opt" onclick="checkMC('q10', this, true)">③ 에이전틱 추론도 대규모 클러스터가 필요하며, 특히 N/S(북남) 대역폭이 폭증해 800Gbps NIC 도입의 배경이 됨</button>
+      <button class="opt" onclick="checkMC('q10', this, false)">④ 추론은 훈련보다 보안이 덜 중요하므로 제로 트러스트 아키텍처를 단순화해야 함</button>
+    </div>
+    <div class="q-feedback" id="q10-fb">
+      <div class="feedback-label">✓ 정답 해설</div>
+      에이전틱 추론은 단일 추론이 아니라 수십~수백 회의 연쇄 추론으로 이루어집니다. 컨텍스트 길이가 길어지고 코딩 에이전트가 대형 컨텍스트를 처리하면서 N/S 대역폭 요구가 급증했습니다. 이것이 Bluefield의 800Gbps 인터페이스를 Vera Rubin 플랫폼에 도입한 직접적 이유입니다. 대규모 클러스터의 필요성은 훈련·추론 모두에 유효합니다.
+    </div>
+  </div>
+
+  <!-- Reset -->
+  <button class="btn-reset" onclick="resetAll()">↺ 모든 문제 초기화</button>
+
+</div>
+
+<footer>
+  <strong>시험 문제 — S81788</strong> &nbsp;|&nbsp; NVIDIA GTC 2026 × OCI 세션 분석 &nbsp;|&nbsp; 2026.03.22
+</footer>
+
+<script>
+let answered = {};
+let correctCount = 0;
+
+function updateScore() {
+  const total = Object.keys(answered).length;
+  correctCount = Object.values(answered).filter(Boolean).length;
+  document.getElementById('scoreNum').textContent = correctCount;
+  document.getElementById('totalAnswered').textContent = total;
+  const pct = total > 0 ? (correctCount / 10 * 100) : 0;
+  document.getElementById('scoreBar').style.width = pct + '%';
+}
+
+function checkMC(qid, btn, isCorrect) {
+  if (answered[qid] !== undefined) return;
+  answered[qid] = isCorrect;
+  const opts = btn.closest('.q-options').querySelectorAll('.opt');
+  opts.forEach(o => { o.disabled = true; });
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    opts.forEach(o => {
+      if (o.onclick.toString().includes('true')) o.classList.add('correct');
+    });
+  }
+  showFeedback(qid, isCorrect);
+  updateScore();
+}
+
+function checkOX(qid, btn, isCorrect) {
+  if (answered[qid] !== undefined) return;
+  answered[qid] = isCorrect;
+  const btns = btn.closest('.q-ox').querySelectorAll('.ox-btn');
+  btns.forEach(b => { b.disabled = true; });
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    btns.forEach(b => {
+      if (b.onclick.toString().includes('true')) b.classList.add('correct');
+    });
+  }
+  showFeedback(qid, isCorrect);
+  updateScore();
+}
+
+function checkShort(qid, keywords) {
+  if (answered[qid] !== undefined) return;
+  const input = document.getElementById(qid + '-input');
+  const val = input.value.trim().toLowerCase();
+  if (!val) { input.style.borderColor = '#dc2626'; return; }
+  const isCorrect = keywords.some(k => val.includes(k.toLowerCase()));
+  answered[qid] = isCorrect;
+  input.disabled = true;
+  input.style.borderColor = isCorrect ? 'var(--correct)' : 'var(--wrong)';
+  showFeedback(qid, isCorrect);
+  updateScore();
+}
+
+function showFeedback(qid, isCorrect) {
+  const fb = document.getElementById(qid + '-fb');
+  fb.classList.add('show');
+  if (!isCorrect) {
+    fb.classList.add('wrong-fb');
+    const lbl = fb.querySelector('.feedback-label');
+    if (lbl) { lbl.textContent = '✗ 오답 — 정답 해설'; lbl.classList.add('wrong-lbl'); }
+  }
+}
+
+function resetAll() {
+  answered = {};
+  correctCount = 0;
+  document.getElementById('scoreNum').textContent = '0';
+  document.getElementById('totalAnswered').textContent = '0';
+  document.getElementById('scoreBar').style.width = '0%';
+
+  document.querySelectorAll('.opt').forEach(o => {
+    o.disabled = false;
+    o.classList.remove('correct', 'wrong');
+  });
+  document.querySelectorAll('.ox-btn').forEach(b => {
+    b.disabled = false;
+    b.classList.remove('correct', 'wrong');
+  });
+  document.querySelectorAll('.short-input').forEach(i => {
+    i.disabled = false;
+    i.value = '';
+    i.style.borderColor = '';
+  });
+  document.querySelectorAll('.q-feedback').forEach(fb => {
+    fb.classList.remove('show', 'wrong-fb');
+    const lbl = fb.querySelector('.feedback-label');
+    if (lbl) { lbl.textContent = '✓ 정답 해설'; lbl.classList.remove('wrong-lbl'); }
+  });
+}
+</script>
+</body>
+</html>

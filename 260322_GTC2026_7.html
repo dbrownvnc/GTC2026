@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 클라우드 플랫폼의 다음 시대 — 심층 분석</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg2: #fafafa;
+    --text: #1a1a1a;
+    --text2: #777777;
+    --accent: #e11d48;
+    --accent2: #f43f5e;
+    --blue: #2563eb;
+    --gray: #6b7280;
+    --border: #e5e5e5;
+    --table-header: #e11d48;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    font-size: 16px;
+  }
+
+  /* ── HEADER ── */
+  .hero {
+    background: var(--text);
+    color: #fff;
+    padding: 48px 24px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.18;
+  }
+  .hero-kicker {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(26px, 7vw, 40px);
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+  .hero h1 span { color: var(--accent2); }
+  .hero-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #aaa;
+    letter-spacing: 1px;
+  }
+  .hero-desc {
+    margin-top: 18px;
+    font-size: 15px;
+    color: #ccc;
+    font-style: italic;
+    max-width: 520px;
+  }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 680px; margin: 0 auto; padding: 0 20px; }
+  section { margin: 48px 0; }
+
+  /* ── SECTION HEADER ── */
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(20px, 5vw, 28px);
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 16px;
+    border-left: 3px solid var(--accent);
+    padding-left: 14px;
+  }
+  h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 24px 0 10px;
+    color: var(--text);
+  }
+  p { margin-bottom: 14px; color: var(--text); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, var(--accent), transparent);
+    margin: 40px 0;
+  }
+  .divider-full {
+    height: 3px;
+    background: var(--text);
+    margin: 0;
+  }
+
+  /* ── PULLQUOTE ── */
+  .pullquote {
+    border-left: 4px solid var(--accent);
+    margin: 28px 0;
+    padding: 16px 20px;
+    background: var(--bg2);
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-style: italic;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .pullquote cite {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-style: normal;
+    color: var(--text2);
+    margin-top: 8px;
+  }
+
+  /* ── HIGHLIGHT BOX ── */
+  .highlight-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    padding: 20px;
+    margin: 24px 0;
+    border-radius: 2px;
+  }
+  .highlight-box .hb-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  /* ── STAT CARDS ── */
+  .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 16px;
+    text-align: center;
+    border-radius: 2px;
+  }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--text2);
+    margin-top: 6px;
+    text-transform: uppercase;
+  }
+
+  /* ── CHART ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+  .chart-container {
+    position: relative;
+    max-height: 340px;
+    margin: 20px 0;
+  }
+  .chart-container canvas {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    max-height: 300px;
+  }
+  .chart-container.chart-ready canvas { opacity: 1; }
+
+  /* ── AI EVOLUTION TIMELINE ── */
+  .timeline { margin: 24px 0; }
+  .tl-item {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: flex-start;
+  }
+  .tl-dot {
+    flex-shrink: 0;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .tl-dot.dim { background: var(--gray); }
+  .tl-dot.blue { background: var(--blue); }
+  .tl-content { flex: 1; }
+  .tl-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .tl-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .tl-line {
+    width: 2px; background: var(--border);
+    height: 20px; margin-left: 17px;
+    margin-bottom: 0;
+  }
+
+  /* ── PILLAR CARDS ── */
+  .pillar-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin: 20px 0; }
+  .pillar-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    padding: 18px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+  }
+  .pillar-card:hover { box-shadow: 0 4px 16px rgba(225,29,72,0.12); }
+  .pillar-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .pillar-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin: 4px 0 8px;
+  }
+  .pillar-body { font-size: 13px; color: var(--text2); line-height: 1.55; }
+  .pillar-detail { display: none; margin-top: 10px; font-size: 13px; color: var(--text); border-top: 1px solid var(--border); padding-top: 10px; }
+  .pillar-card.open .pillar-detail { display: block; }
+
+  /* ── INTERACTIVE SIMULATOR ── */
+  .sim-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--blue);
+    padding: 22px;
+    border-radius: 2px;
+    margin: 24px 0;
+  }
+  .sim-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .sim-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--text2);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .slider-row { margin-bottom: 16px; }
+  .slider-label {
+    display: flex; justify-content: space-between;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 6px;
+  }
+  .slider-label span { color: var(--accent); font-weight: 500; }
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .sim-result {
+    background: var(--text);
+    color: #fff;
+    padding: 14px 18px;
+    border-radius: 2px;
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .res-item { text-align: center; }
+  .res-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 900;
+    color: var(--accent2);
+  }
+  .res-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-top: 2px;
+  }
+  .sim-reset {
+    margin-top: 12px;
+    background: none;
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    color: var(--text2);
+    transition: all 0.2s;
+    border-radius: 2px;
+  }
+  .sim-reset:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── TABLE ── */
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; }
+  th {
+    background: var(--table-header);
+    color: #fff;
+    padding: 10px 12px;
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  tr:nth-child(even) td { background: var(--bg2); }
+
+  /* ── FLYWHEEL DIAGRAM ── */
+  .flywheel-wrap { display: flex; justify-content: center; margin: 24px 0; }
+
+  /* ── ZIPPER COMPARE ── */
+  .compare-toggle { display: flex; gap: 0; margin-bottom: 16px; }
+  .toggle-btn {
+    flex: 1;
+    padding: 10px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .toggle-btn:first-child { border-radius: 2px 0 0 2px; }
+  .toggle-btn:last-child { border-radius: 0 2px 2px 0; }
+  .toggle-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .compare-panel { display: none; }
+  .compare-panel.active { display: block; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--text);
+    color: #777;
+    text-align: center;
+    padding: 28px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    margin-top: 60px;
+  }
+  footer strong { color: var(--accent2); }
+
+  /* ── QUIZ LINK ── */
+  .quiz-banner {
+    background: var(--accent);
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    margin: 40px 0 0;
+  }
+  .quiz-banner p {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 8px;
+  }
+  .quiz-banner small {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    opacity: 0.85;
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-kicker">NVIDIA GTC 2026 — S81788 세션 분석</div>
+    <h1>AI 팩토리의 <span>운영체제</span>를 설계한다</h1>
+    <div class="hero-meta">2026.03.22 &nbsp;|&nbsp; 기술 심층 분석 &nbsp;|&nbsp; OCI × NVIDIA</div>
+    <p class="hero-desc">NVIDIA Bluefield DPU와 Oracle Acceleron이 어떻게 차세대 AI 인프라의 뼈대를 짜고 있는가.</p>
+  </div>
+</div>
+<div class="divider-full"></div>
+
+<div class="container">
+
+  <!-- ── 1. 왜 지금인가 ── -->
+  <section>
+    <div class="section-label">배경 분석</div>
+    <h2>AI는 더 이상 챗봇이 아니다</h2>
+
+    <p>엔터프라이즈에서 AI 도입은 실험 단계를 완전히 벗어나, 대규모 프로덕션 배포 단계로 진입했다. 핵심 변화는 AI의 <strong>본질 자체</strong>가 달라졌다는 점이다.</p>
+
+    <div class="timeline fade-in">
+      <div class="tl-item">
+        <div>
+          <div class="tl-dot dim">1단</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-title">단순 챗봇 (Simple Chatbot)</div>
+          <div class="tl-desc">Where / What / Why 같은 단순 질문에 단순 답변. 단발성 요청 처리.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div>
+          <div class="tl-dot dim" style="background:var(--gray)">2단</div>
+          <div class="tl-line"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-title">추론형 AI (Reasoning AI)</div>
+          <div class="tl-desc">응답 전에 복잡한 추론 수행. 사고 과정이 내재화된 형태.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div>
+          <div class="tl-dot blue">3단</div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-title">🔴 자율 디지털 노동자 (Agentic Workforce)</div>
+          <div class="tl-desc">멀티스텝 워크플로 실행, 코드 작성, 도구 활용, 자율적 작업 수행. AI가 실제로 <em>일한다</em>.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pullquote fade-in">
+      "AI는 이제 단순한 챗봇이 아니라, 멀티스텝 워크플로를 실행하고, 코드를 작성하며, 자율적 디지털 노동력으로 기능하고 있습니다."
+      <cite>— 세션 발표자, NVIDIA</cite>
+    </div>
+
+    <p>이 전환은 인프라 부담을 근본적으로 바꾼다. 단순 질의응답과 달리, 에이전틱 추론은 <strong>대규모 지속적 추론 워크로드(sustained inference workload)</strong>를 만들어 낸다. 클러스터 전체가 쉬지 않고 가동되어야 한다는 의미다.</p>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── 2. 젠슨의 5층 케이크 ── -->
+  <section>
+    <div class="section-label">아키텍처 개요</div>
+    <h2>젠슨 황의 "5층 케이크"</h2>
+
+    <p>젠슨 황은 AI 인프라 스택을 5개 계층으로 시각화했다. 원자재 에너지와 칩에서 시작해, 산업 규모의 AI 인텔리전스가 응용프로그램을 구동하는 구조다.</p>
+
+    <div class="chart-container fade-in">
+      <canvas id="layerChart" height="230"></canvas>
+    </div>
+
+    <div class="highlight-box fade-in">
+      <div class="hb-title">🔑 핵심 포인트</div>
+      <p style="font-size:14px;margin:0">OCI와 같은 CSP(클라우드 서비스 제공자)는 이 5층 케이크의 <strong>중간 레이어</strong>—네트워킹과 오케스트레이션—를 담당한다. GPU를 에너지로부터 토큰(AI 출력)으로 효율적으로 변환하는 역할이다.</p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── 3. 플라이휠 효과 ── -->
+  <section>
+    <div class="section-label">경제 구조</div>
+    <h2>AI 팩토리의 선순환: 플라이휠 효과</h2>
+
+    <p>AI 팩토리 모델은 자기강화적 경제 구조를 만들어낸다. 가장 극적인 사례: <strong>Vera Rubin</strong> 아키텍처는 전년도 GB300 대비 <strong>토큰 비용 10배 감소</strong>를 달성했다.</p>
+
+    <div class="stat-row fade-in">
+      <div class="stat-card">
+        <div class="stat-num">10×</div>
+        <div class="stat-label">Vera Rubin<br>토큰 비용 감소 (vs GB300)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">↓↓↓</div>
+        <div class="stat-label">토큰 단가 하락<br>→ 수요 폭증</div>
+      </div>
+    </div>
+
+    <!-- Flywheel SVG -->
+    <div class="flywheel-wrap fade-in">
+      <svg viewBox="0 0 340 340" width="100%" style="max-width:340px" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#e11d48"/>
+          </marker>
+        </defs>
+        <!-- Circle -->
+        <circle cx="170" cy="170" r="130" fill="none" stroke="#e5e5e5" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <circle cx="170" cy="170" r="38" fill="#1a1a1a"/>
+        <text x="170" y="165" text-anchor="middle" fill="#e11d48" font-family="Playfair Display,serif" font-size="11" font-weight="700">AI</text>
+        <text x="170" y="180" text-anchor="middle" fill="#ffffff" font-family="DM Mono,monospace" font-size="9">FACTORY</text>
+
+        <!-- Nodes -->
+        <!-- Top: Performance -->
+        <ellipse cx="170" cy="28" rx="52" ry="20" fill="#e11d48"/>
+        <text x="170" y="33" text-anchor="middle" fill="#fff" font-family="DM Mono,monospace" font-size="10">성능 향상</text>
+
+        <!-- Right: Token Cost -->
+        <ellipse cx="305" cy="200" rx="54" ry="20" fill="#1a1a1a"/>
+        <text x="305" y="195" text-anchor="middle" fill="#f43f5e" font-family="DM Mono,monospace" font-size="10">토큰 비용</text>
+        <text x="305" y="208" text-anchor="middle" fill="#fff" font-family="DM Mono,monospace" font-size="10">감소</text>
+
+        <!-- Bottom: Demand -->
+        <ellipse cx="170" cy="315" rx="54" ry="20" fill="#2563eb"/>
+        <text x="170" y="320" text-anchor="middle" fill="#fff" font-family="DM Mono,monospace" font-size="10">수요 증가</text>
+
+        <!-- Left: Reinvest -->
+        <ellipse cx="35" cy="200" rx="54" ry="20" fill="#6b7280"/>
+        <text x="35" y="195" text-anchor="middle" fill="#fff" font-family="DM Mono,monospace" font-size="10">생산성 &amp;</text>
+        <text x="35" y="208" text-anchor="middle" fill="#fff" font-family="DM Mono,monospace" font-size="10">재투자</text>
+
+        <!-- Arrows -->
+        <path d="M205,42 Q270,60 285,175" fill="none" stroke="#e11d48" stroke-width="2" marker-end="url(#arrow)"/>
+        <path d="M270,215 Q230,300 205,305" fill="none" stroke="#e11d48" stroke-width="2" marker-end="url(#arrow)"/>
+        <path d="M135,305 Q90,290 60,218" fill="none" stroke="#e11d48" stroke-width="2" marker-end="url(#arrow)"/>
+        <path d="M55,182 Q90,80 138,42" fill="none" stroke="#e11d48" stroke-width="2" marker-end="url(#arrow)"/>
+      </svg>
+    </div>
+
+    <p style="font-size:13px;color:var(--text2);text-align:center;margin-top:-8px">▲ AI 팩토리 플라이휠 — 성능 개선이 비용 감소 → 수요 확대 → 재투자로 이어지는 자기강화 사이클</p>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── 4. AI 팩토리 3요소 ── -->
+  <section>
+    <div class="section-label">운영 원칙</div>
+    <h2>AI 팩토리 운영의 3대 필수 요소</h2>
+
+    <div class="pillar-grid">
+      <div class="pillar-card fade-in" onclick="togglePillar(this)">
+        <div class="pillar-num">요소 01</div>
+        <div class="pillar-title">⚡ 성능 가속 (Performance)</div>
+        <div class="pillar-body">GPU가 인프라 오케스트레이션 부담을 지면 안 된다. 레이턴시·지터·대역폭을 타이트하게 제어해 최대 처리량을 보장해야 한다.</div>
+        <div class="pillar-detail">GPU 정지(stall)는 토큰 생산과 경제성에 직접 타격을 준다. 따라서 네트워킹·스토리지·보안 워크로드는 GPU 밖으로 완전히 분리(offload)되어야 한다.</div>
+      </div>
+      <div class="pillar-card fade-in" onclick="togglePillar(this)" style="border-left-color:var(--blue)">
+        <div class="pillar-num" style="color:var(--blue)">요소 02</div>
+        <div class="pillar-title">🛡️ 효율·복원력 (Efficiency & Resiliency)</div>
+        <div class="pillar-body">인프라 워크로드(네트워킹·스토리지·보안)와 AI GPU 워크로드를 명확히 분리. GPU는 오직 토큰 생산에만 집중해야 한다.</div>
+        <div class="pillar-detail">오케스트레이션 오버헤드는 GPU 사이클을 낭비한다. Bluefield DPU가 인프라 계층 전체를 흡수함으로써 GPU는 완전히 해방된다.</div>
+      </div>
+      <div class="pillar-card fade-in" onclick="togglePillar(this)" style="border-left-color:var(--gray)">
+        <div class="pillar-num" style="color:var(--gray)">요소 03</div>
+        <div class="pillar-title">🔐 멀티테넌시·보안 (Multi-tenancy & Security)</div>
+        <div class="pillar-body">비용 효율을 위해 인프라는 여러 테넌트가 공유해야 한다. Zero Trust는 필요조건이지만, 충분조건은 아니다.</div>
+        <div class="pillar-detail">단순한 기업 간 분리가 아니라 <em>보안 도메인</em> 단위의 격리가 필요하다. 네트워크 아키텍처에 하드와이어된 격리 프리미티브가 핵심이다.</div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--text2)">▲ 카드를 탭/클릭하면 상세 설명이 열립니다.</p>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── 5. Bluefield DPU ── -->
+  <section>
+    <div class="section-label">NVIDIA 솔루션</div>
+    <h2>Bluefield DPU — AI 팩토리의 CPU</h2>
+
+    <p>NVIDIA Bluefield DPU(Data Processing Unit)는 AI 팩토리의 <em>운영체제를 구동하는 프로세서</em>다. 네트워킹, 스토리지, 보안 워크로드를 호스트 CPU·GPU 대신 DPU가 처리한다.</p>
+
+    <div class="highlight-box fade-in">
+      <div class="hb-title">🌟 ASTRA 솔루션 (Bluefield 4 신기능)</div>
+      <p style="font-size:14px;margin:0 0 6px"><strong>Advanced Secure Trusted Resource Architecture</strong></p>
+      <ul style="font-size:13px;padding-left:18px;color:var(--text2)">
+        <li>백엔드 네트워크의 <strong>전체 컨트롤 플레인</strong>을 DPU로 오프로드</li>
+        <li>혼잡 제어(congestion control), 멀티테넌시 메커니즘, 네트워크 드라이버까지 DPU에서 실행</li>
+        <li>호스트 CPU의 테넌트 트래픽 간섭 제거 → <strong>진정한 베어메탈(bare metal) 제공</strong> 실현</li>
+        <li>Rubin 세대 시스템에 하드와이어드 내장, OCI에 배포 중</li>
+      </ul>
+    </div>
+
+    <table class="fade-in">
+      <tr><th>기능</th><th>기존 방식</th><th>Bluefield 4 + ASTRA</th></tr>
+      <tr><td>컨트롤 플레인</td><td>호스트 CPU에서 실행</td><td>DPU로 완전 오프로드</td></tr>
+      <tr><td>테넌트 격리</td><td>소프트웨어 레이어 의존</td><td>하드웨어 수준 격리</td></tr>
+      <tr><td>네트워크 드라이버</td><td>호스트 메모리 점유</td><td>DPU에서 독립 실행</td></tr>
+      <tr><td>N/S 인터페이스</td><td>기존 속도 제한</td><td>800Gbps (Vera Rubin 플랫폼)</td></tr>
+    </table>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── 6. Oracle Acceleron ── -->
+  <section>
+    <div class="section-label">OCI 솔루션</div>
+    <h2>Oracle Acceleron의 3대 기둥</h2>
+
+    <p>OCI는 2016-17년 출범 시 Gen2 베어메탈 아키텍처를 도입했다. 그러나 AI 혁명은 네트워킹 중심의 근본적 재설계를 요구했고, 그 결과가 <strong>Oracle Acceleron</strong>이다.</p>
+
+    <div class="chart-container fade-in">
+      <canvas id="acceleronChart" height="220"></canvas>
+    </div>
+
+    <h3>① ConvergeNIC</h3>
+    <p>OCI의 Gen2는 서버 <em>외부</em>에 가상화 장치를 두는 혁신적 설계였다. 호스트 NIC ↔ 오프박스 가상화 장치 간에는 단순 이더넷 프레임만 오고 가므로, 보안 위협 면적이 극히 작다.</p>
+    <p>ConvergeNIC은 이 두 장치를 <strong>하나의 칩</strong>으로 통합하되, 각 구역을 하드웨어 수준으로 격리된 FIFO 큐로 연결한다. 보안 이점은 유지하면서 전력·성능 페널티를 제거한다. NVIDIA와의 공동 하드웨어 작업으로 구현.</p>
+
+    <h3>② 멀티플레너 네트워크 (Multi-Planar Network)</h3>
+    <p>NIC 자체를 1단계 소형 스위치로 활용하여 네트워크 구조를 재설계. 기존 2~3티어 클로스(Clos) 패브릭 대신 <em>k개의 독립 평면(plane)</em>을 병렬 운용한다.</p>
+
+    <div class="sim-card fade-in">
+      <div class="sim-title">멀티플레너 vs 기존 네트워크 비교 시뮬레이터</div>
+      <div class="sim-sub">Interactive — 값을 조절해 차이를 확인하세요</div>
+      <div class="slider-row">
+        <div class="slider-label">스위치 Radix (포트 수): <span id="radixVal">64</span></div>
+        <input type="range" id="radixSlider" min="32" max="128" step="16" value="64">
+      </div>
+      <div class="slider-row">
+        <div class="slider-label">평면(Plane) 수 (멀티플레너): <span id="planeVal">4</span></div>
+        <input type="range" id="planeSlider" min="2" max="8" step="1" value="4">
+      </div>
+      <div class="slider-row">
+        <div class="slider-label">추가 티어 수 (기존 방식): <span id="tierVal">3</span></div>
+        <input type="range" id="tierSlider" min="2" max="5" step="1" value="3">
+      </div>
+      <div class="sim-result">
+        <div class="res-item">
+          <div class="res-num" id="mpGPU">—</div>
+          <div class="res-label">멀티플레너<br>연결 GPU 수</div>
+        </div>
+        <div class="res-item">
+          <div class="res-num" id="tradGPU">—</div>
+          <div class="res-label">기존 방식<br>연결 GPU 수</div>
+        </div>
+        <div class="res-item">
+          <div class="res-num" id="mpFaults" style="color:#aaa">✓</div>
+          <div class="res-label">멀티플레너<br>장애 격리</div>
+        </div>
+        <div class="res-item">
+          <div class="res-num" id="tradFaults" style="color:#f43f5e">✗</div>
+          <div class="res-label">기존 단일 패브릭<br>컨트롤 장애 시</div>
+        </div>
+      </div>
+      <button class="sim-reset" onclick="resetSim()">↺ 초기화</button>
+    </div>
+
+    <div class="highlight-box fade-in">
+      <div class="hb-title">📡 ZetaScale 10</div>
+      <p style="font-size:14px;margin:0"><strong>16 제타플롭(ZetaFlops)</strong>의 클러스터 컴퓨팅. 기가와트급 캠퍼스 전체에 걸쳐 수십만~수백만 GPU를 단일 거대 클러스터처럼 운영. 훈련 작업 하나가 여러 건물을 가로질러 실행 가능.</p>
+    </div>
+
+    <h3>③ Zipper — Zero Trust 패킷 라우팅</h3>
+    <p>기존 방화벽 규칙은 <em>보안 정책과 네트워크 정책을 뒤섞는다</em>. 보안 관리자와 네트워크 관리자 양쪽이 동시에 서명해야 하는 구조적 마찰이 있다.</p>
+
+    <div class="compare-toggle fade-in">
+      <button class="toggle-btn active" onclick="switchCompare(0)">기존 방화벽 방식</button>
+      <button class="toggle-btn" onclick="switchCompare(1)">Zipper 방식</button>
+    </div>
+    <div class="compare-panel active" id="cp0">
+      <div class="highlight-box" style="border-top-color:var(--gray)">
+        <div class="hb-title" style="color:var(--gray)">기존 방화벽 (ACL/Firewall Rules)</div>
+        <ul style="font-size:13px;padding-left:18px;color:var(--text2)">
+          <li>IP CIDR, 포트, 프로토콜 기반 규칙</li>
+          <li>보안 정책 = 네트워크 정책 <strong>혼재</strong></li>
+          <li>보안 관리자가 마음대로 규칙 변경 시 네트워크 장애 위험</li>
+          <li>네트워크 관리자가 라우팅 변경 시 보안 구멍 가능</li>
+          <li>두 부서의 공동 승인 필요 → <strong>운영 병목</strong></li>
+        </ul>
+      </div>
+    </div>
+    <div class="compare-panel" id="cp1">
+      <div class="highlight-box" style="border-top-color:var(--blue)">
+        <div class="hb-title" style="color:var(--blue)">Zipper — Zero Trust Packet Routing</div>
+        <ul style="font-size:13px;padding-left:18px;color:var(--text2)">
+          <li>리소스에 <strong>태그</strong> 기반 보안 정책 적용</li>
+          <li>네트워크 아키텍처와 <strong>완전히 독립적</strong>인 보안 레이어</li>
+          <li>예: "이 리소스는 인터넷과 통신 불가" — 라우팅 규칙 무관하게 강제</li>
+          <li>보안 관리자가 네트워크 지식 없이도 정책 설정 가능</li>
+          <li>두 관리자 역할의 <strong>명확한 분리(decoupling)</strong></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── 7. 추론 워크로드 변화 ── -->
+  <section>
+    <div class="section-label">Q&A 핵심 인사이트</div>
+    <h2>추론 워크로드와 클러스터 사이즈</h2>
+
+    <p>Q&A에서 핵심 질문이 나왔다: "추론이 주류가 되면 클러스터를 어떻게 설계해야 하나?"</p>
+
+    <div class="highlight-box fade-in">
+      <div class="hb-title">OCI의 답변 요약</div>
+      <ul style="font-size:14px;padding-left:18px">
+        <li>캠퍼스 규모의 클러스터는 <strong>훈련이 주 목적</strong>, 빌딩 단위(~10만 GPU)는 추론에도 매우 효율적</li>
+        <li>에이전틱 추론은 단일 GPU 추론이 아님 — 복잡한 멀티스텝 추론 루프 필요</li>
+        <li>SaaS 워크플로 하나를 완성하기 위해 <strong>수십~수백 회의 추론 요청</strong>이 연쇄됨</li>
+        <li>추론은 메모리·컴퓨트·로컬 스토리지 요건이 훈련과 다름 → 하드웨어 스펙 조정 필요</li>
+        <li>Bluefield N/S 인터페이스: 에이전틱 추론은 북남(North-South) 대역폭을 폭발적으로 늘림 → <strong>800Gbps NIC</strong> 도입 배경</li>
+      </ul>
+    </div>
+
+    <div class="chart-container fade-in">
+      <canvas id="inferChart" height="220"></canvas>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── 8. 요약 ── -->
+  <section>
+    <div class="section-label">결론</div>
+    <h2>핵심 요약</h2>
+
+    <table class="fade-in">
+      <tr><th>구분</th><th>핵심 기술</th><th>핵심 가치</th></tr>
+      <tr><td>NVIDIA</td><td>Bluefield 4 DPU + ASTRA</td><td>AI 팩토리 OS, 컨트롤 플레인 오프로드</td></tr>
+      <tr><td>OCI</td><td>ConvergeNIC</td><td>보안 격리 + 전력/성능 페널티 제거</td></tr>
+      <tr><td>OCI</td><td>멀티플레너 네트워크</td><td>대규모 확장 + 컨트롤 장애 격리</td></tr>
+      <tr><td>OCI</td><td>ZetaScale 10</td><td>16 ZetaFlops, 기가와트 캠퍼스급 클러스터</td></tr>
+      <tr><td>OCI</td><td>Zipper (ZTPR)</td><td>보안 정책 ↔ 네트워크 정책 분리</td></tr>
+      <tr><td>공통</td><td>Vera Rubin 플랫폼</td><td>토큰 비용 10× 감소 (vs GB300)</td></tr>
+    </table>
+
+    <div class="pullquote fade-in">
+      "AI 팩토리는 단순한 데이터센터가 아닙니다. 대규모 토큰 생산을 위한 최적화된 인프라입니다."
+      <cite>— 세션 전체 핵심 메시지</cite>
+    </div>
+  </section>
+
+</div>
+
+<!-- QUIZ BANNER -->
+<div class="quiz-banner">
+  <p>📝 이해도 점검 — 시험 문제 10선</p>
+  <small>별도 파일: accelerate_cloud_ai_quiz.html 을 확인하세요</small>
+</div>
+
+<footer>
+  <strong>S81788 세션 분석 리포트</strong> &nbsp;|&nbsp; 2026.03.22 &nbsp;|&nbsp; NVIDIA GTC × OCI
+</footer>
+
+<script>
+// ── Intersection Observer: Fade-in ──
+const fadeObs = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+      fadeObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.fade-in').forEach(el => fadeObs.observe(el));
+
+// ── Chart Configs ──
+const chartConfigs = {};
+
+// Layer Chart (5-layer cake)
+chartConfigs['layerChart'] = () => {
+  new Chart(document.getElementById('layerChart'), {
+    type: 'bar',
+    data: {
+      labels: ['에너지·칩', '냉각·전력 인프라', '네트워킹·오케스트레이션', 'AI 팩토리·모델', '애플리케이션'],
+      datasets: [{
+        label: '레이어 복잡도 (상대값)',
+        data: [30, 45, 75, 90, 100],
+        backgroundColor: ['#6b7280','#6b7280','#e11d48','#1a1a1a','#2563eb'],
+        borderRadius: 2,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.raw}점 (상대 복잡도)` } }
+      },
+      scales: {
+        x: { grid: { color: '#e5e5e5' }, ticks: { font: { family: 'DM Mono', size: 10 } } },
+        y: { ticks: { font: { family: 'Source Serif 4', size: 12 } } }
+      }
+    }
+  });
+};
+
+// Acceleron Chart
+chartConfigs['acceleronChart'] = () => {
+  new Chart(document.getElementById('acceleronChart'), {
+    type: 'radar',
+    data: {
+      labels: ['성능', '보안', '확장성', '신뢰성', '전력 효율', '멀티테넌시'],
+      datasets: [
+        {
+          label: 'Gen2 아키텍처',
+          data: [60, 70, 55, 65, 60, 55],
+          borderColor: '#6b7280',
+          backgroundColor: 'rgba(107,114,128,0.12)',
+          pointBackgroundColor: '#6b7280',
+        },
+        {
+          label: 'Oracle Acceleron',
+          data: [95, 95, 92, 90, 88, 94],
+          borderColor: '#e11d48',
+          backgroundColor: 'rgba(225,29,72,0.10)',
+          pointBackgroundColor: '#e11d48',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { labels: { font: { family: 'DM Mono', size: 11 } } } },
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { stepSize: 25, font: { family: 'DM Mono', size: 9 } },
+          pointLabels: { font: { family: 'Source Serif 4', size: 11 } },
+          grid: { color: '#e5e5e5' }
+        }
+      }
+    }
+  });
+};
+
+// Inference bandwidth chart
+chartConfigs['inferChart'] = () => {
+  new Chart(document.getElementById('inferChart'), {
+    type: 'bar',
+    data: {
+      labels: ['단순 챗봇', '추론형 AI', '에이전틱 (현재)'],
+      datasets: [
+        {
+          label: 'N/S 대역폭 요구 (상대값)',
+          data: [15, 40, 100],
+          backgroundColor: ['#6b7280','#2563eb','#e11d48'],
+          borderRadius: 2,
+        },
+        {
+          label: '컨텍스트 길이 (상대값)',
+          data: [10, 35, 95],
+          backgroundColor: ['rgba(107,114,128,0.4)','rgba(37,99,235,0.4)','rgba(225,29,72,0.4)'],
+          borderRadius: 2,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { font: { family: 'DM Mono', size: 11 } } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}` } }
+      },
+      scales: {
+        x: { ticks: { font: { family: 'Source Serif 4', size: 12 } } },
+        y: { grid: { color: '#e5e5e5' }, ticks: { font: { family: 'DM Mono', size: 10 } } }
+      }
+    }
+  });
+};
+
+// ── Chart Observer ──
+const chartObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const canvas = e.target.querySelector('canvas');
+      if (canvas && chartConfigs[canvas.id]) {
+        chartConfigs[canvas.id]();
+        e.target.classList.add('chart-ready');
+        chartObs.unobserve(e.target);
+      }
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.chart-container').forEach(el => chartObs.observe(el));
+
+// ── Pillar Toggle ──
+function togglePillar(el) {
+  el.classList.toggle('open');
+}
+
+// ── Compare Toggle ──
+function switchCompare(idx) {
+  document.querySelectorAll('.toggle-btn').forEach((b, i) => b.classList.toggle('active', i===idx));
+  document.querySelectorAll('.compare-panel').forEach((p, i) => p.classList.toggle('active', i===idx));
+}
+
+// ── Simulator ──
+function calcSim() {
+  const radix = parseInt(document.getElementById('radixSlider').value);
+  const planes = parseInt(document.getElementById('planeSlider').value);
+  const tiers = parseInt(document.getElementById('tierSlider').value);
+  document.getElementById('radixVal').textContent = radix;
+  document.getElementById('planeVal').textContent = planes;
+  document.getElementById('tierVal').textContent = tiers;
+
+  // Multi-planar: scales linearly with planes × radix^2/4
+  const mpGPUs = Math.floor((radix * radix / 4) * planes);
+  // Traditional: radix^tiers but diminishing returns from power/cost
+  const tradGPUs = Math.floor(Math.pow(radix, Math.min(tiers, 3)) / (tiers > 3 ? 8 : 4));
+
+  document.getElementById('mpGPU').textContent = mpGPUs >= 1000 ? (mpGPUs/1000).toFixed(1)+'K' : mpGPUs;
+  document.getElementById('tradGPU').textContent = tradGPUs >= 1000 ? (tradGPUs/1000).toFixed(1)+'K' : tradGPUs;
+}
+
+document.getElementById('radixSlider').addEventListener('input', calcSim);
+document.getElementById('planeSlider').addEventListener('input', calcSim);
+document.getElementById('tierSlider').addEventListener('input', calcSim);
+calcSim();
+
+function resetSim() {
+  document.getElementById('radixSlider').value = 64;
+  document.getElementById('planeSlider').value = 4;
+  document.getElementById('tierSlider').value = 3;
+  calcSim();
+}
+</script>
+</body>
+</html>
