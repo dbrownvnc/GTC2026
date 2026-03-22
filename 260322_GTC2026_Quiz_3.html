@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시험문제 — DOCA Memos & AI 추론 스토리지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg2: #fafafa;
+    --text: #1a1a1a;
+    --text2: #777777;
+    --accent: #e11d48;
+    --accent2: #f43f5e;
+    --border: #e5e5e5;
+    --correct: #16a34a;
+    --wrong: #dc2626;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --display: 'Playfair Display', Georgia, serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.75;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+
+  .masthead {
+    border-bottom: 3px solid var(--accent);
+    padding: 32px 0 16px;
+    margin-bottom: 8px;
+  }
+  .issue-line {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(24px, 7vw, 36px);
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+  .sub {
+    font-size: 14px;
+    color: var(--text2);
+    font-weight: 300;
+    font-style: italic;
+  }
+
+  /* SCORE BAR */
+  .score-bar {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    padding: 18px;
+    margin: 24px 0;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .score-display {
+    font-family: var(--display);
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .score-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .progress-wrap { flex: 1; min-width: 140px; }
+  .progress-track {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+  .btn-reset {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: none;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    margin-left: auto;
+  }
+  .btn-reset:hover { background: var(--accent); color: #fff; }
+
+  /* DIFFICULTY LEGEND */
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text2);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 4px;
+  }
+  .dot-easy { background: var(--correct); }
+  .dot-med { background: #f59e0b; }
+  .dot-hard { background: var(--accent); }
+
+  /* QUESTION CARD */
+  .q-card {
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .q-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+  .q-num {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+    min-width: 28px;
+  }
+  .q-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+  .q-type {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .q-diff {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .diff-easy { color: var(--correct); }
+  .diff-med { color: #f59e0b; }
+  .diff-hard { color: var(--accent); }
+  .q-status {
+    font-family: var(--mono);
+    font-size: 18px;
+    min-width: 24px;
+    text-align: right;
+  }
+
+  .q-body { padding: 16px; }
+  .q-text {
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.65;
+    margin-bottom: 14px;
+    color: var(--text);
+  }
+
+  /* MCQ */
+  .options { list-style: none; padding: 0; }
+  .options li {
+    margin-bottom: 8px;
+  }
+  .opt-btn {
+    width: 100%;
+    text-align: left;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    font-family: var(--serif);
+    font-size: 14px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    color: var(--text);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    line-height: 1.5;
+  }
+  .opt-btn:hover:not(:disabled) {
+    background: #fff5f7;
+    border-color: var(--accent);
+  }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.correct {
+    background: #f0fdf4;
+    border-color: var(--correct);
+    color: var(--correct);
+  }
+  .opt-btn.wrong {
+    background: #fff1f1;
+    border-color: var(--wrong);
+    color: var(--wrong);
+  }
+  .opt-btn.reveal {
+    background: #f0fdf4;
+    border-color: var(--correct);
+    color: var(--correct);
+  }
+  .opt-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    min-width: 18px;
+    color: inherit;
+  }
+
+  /* OX */
+  .ox-buttons { display: flex; gap: 10px; }
+  .ox-btn {
+    flex: 1;
+    padding: 14px;
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 900;
+    border: 2px solid var(--border);
+    background: var(--bg2);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    color: var(--text2);
+  }
+  .ox-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: #fff5f7;
+  }
+  .ox-btn:disabled { cursor: default; }
+  .ox-btn.correct { background: #f0fdf4; border-color: var(--correct); color: var(--correct); }
+  .ox-btn.wrong { background: #fff1f1; border-color: var(--wrong); color: var(--wrong); }
+  .ox-btn.reveal { background: #f0fdf4; border-color: var(--correct); color: var(--correct); }
+
+  /* SHORT ANSWER */
+  .short-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .short-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    padding: 10px 14px;
+    font-family: var(--serif);
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .short-input:focus { border-color: var(--accent); }
+  .short-input:disabled { background: #f3f3f3; }
+  .short-submit {
+    align-self: flex-start;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 9px 18px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .short-submit:hover:not(:disabled) { background: var(--accent2); }
+  .short-submit:disabled { background: var(--text2); cursor: default; }
+
+  /* ANSWER BOX */
+  .answer-box {
+    display: none;
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-left: 3px solid var(--correct);
+    background: #f0fdf4;
+    font-size: 13px;
+    font-weight: 300;
+    line-height: 1.65;
+    color: var(--text);
+  }
+  .answer-box.show { display: block; }
+  .answer-box strong { font-weight: 600; color: var(--correct); }
+  .answer-box.wrong-ans { border-left-color: var(--accent); background: #fff5f7; }
+  .answer-box.wrong-ans strong { color: var(--accent); }
+
+  .mono-inline {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: #f3f3f3;
+    padding: 1px 5px;
+    border-radius: 2px;
+  }
+
+  /* SECTION DIVIDER */
+  .s-divider {
+    margin: 32px 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .s-divider-line { flex: 1; height: 1px; background: var(--border); }
+  .s-divider-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text2);
+    white-space: nowrap;
+  }
+
+  /* FOOTER */
+  .exam-footer {
+    margin-top: 40px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text2);
+    line-height: 1.8;
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="issue-line">시험문제 — S81773 · NVIDIA GTC 2026</div>
+  <h1>DOCA Memos &<br>AI 추론 스토리지</h1>
+  <p class="sub">총 10문제 · 객관식 5 · OX 3 · 단답형 2 · 자동 채점</p>
+</header>
+
+<!-- SCORE -->
+<div class="score-bar">
+  <div>
+    <div class="score-display" id="scoreNum">0 / 0</div>
+    <div class="score-label">채점 결과</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="score-label">정답률</div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+  <button class="btn-reset" onclick="resetAll()">↺ 전체 초기화</button>
+</div>
+
+<div class="legend">
+  <span><span class="legend-dot dot-easy"></span>쉬움 (3문제)</span>
+  <span><span class="legend-dot dot-med"></span>보통 (5문제)</span>
+  <span><span class="legend-dot dot-hard"></span>어려움 (2문제)</span>
+</div>
+
+<!-- ── Q1 ── -->
+<div class="s-divider"><div class="s-divider-line"></div><div class="s-divider-label">객관식</div><div class="s-divider-line"></div></div>
+
+<div class="q-card" id="qcard-1">
+  <div class="q-header">
+    <div class="q-num">01</div>
+    <div class="q-meta">
+      <div class="q-type">객관식 · 단일 선택</div>
+      <div class="q-diff diff-easy">● 쉬움</div>
+    </div>
+    <div class="q-status" id="status-1"></div>
+  </div>
+  <div class="q-body">
+    <p class="q-text">NVIDIA가 KV 캐시를 위해 새롭게 정의한 스토리지 계층의 번호는 무엇인가?</p>
+    <ul class="options">
+      <li><button class="opt-btn" onclick="checkMCQ(1,'A','A')" id="q1-A"><span class="opt-label">A</span> G2 (시스템 메모리)</button></li>
+      <li><button class="opt-btn" onclick="checkMCQ(1,'B','A')" id="q1-B"><span class="opt-label">B</span> G3 (로컬 스토리지)</button></li>
+      <li><button class="opt-btn" onclick="checkMCQ(1,'C','A')" id="q1-C"><span class="opt-label">C</span> G3.5 (CMX)</button></li>
+      <li><button class="opt-btn" onclick="checkMCQ(1,'D','A')" id="q1-D"><span class="opt-label">D</span> G4 (네트워크 스토리지)</button></li>
+    </ul>
+    <div class="answer-box" id="ans-1">
+      <strong>정답: C — G3.5 (CMX)</strong><br>
+      NVIDIA는 기존 G1~G4 계층 사이, G3와 G4 사이에 <strong>G3.5</strong>라는 새로운 계층을 정의했다. 이것이 바로 CMX(Context Memory eXtension)이며, POD 레벨에서 여러 GPU가 공유 접근하는 KV 캐시 전용 스토리지다.
+    </div>
+  </div>
+</div>
+
+<!-- ── Q2 ── -->
+<div class="q-card" id="qcard-2">
+  <div class="q-header">
+    <div class="q-num">02</div>
+    <div class="q-meta">
+      <div class="q-type">객관식 · 단일 선택</div>
+      <div class="q-diff diff-easy">● 쉬움</div>
+    </div>
+    <div class="q-status" id="status-2"></div>
+  </div>
+  <div class="q-body">
+    <p class="q-text">100,000개(100K) 토큰의 컨텍스트를 가진 KV 캐시 하나의 크기는 대략 얼마인가?</p>
+    <ul class="options">
+      <li><button class="opt-btn" onclick="checkMCQ(2,'A','B')" id="q2-A"><span class="opt-label">A</span> 5 GB</button></li>
+      <li><button class="opt-btn" onclick="checkMCQ(2,'B','B')" id="q2-B"><span class="opt-label">B</span> 50 GB</button></li>
+      <li><button class="opt-btn" onclick="checkMCQ(2,'C','B')" id="q2-C"><span class="opt-label">C</span> 500 GB</button></li>
+      <li><button class="opt-btn" onclick="checkMCQ(2,'D','B')" id="q2-D"><span class="opt-label">D</span> 5 TB</button></li>
+    </ul>
+    <div class="answer-box" id="ans-2">
+      <strong>정답: B — 50 GB</strong><br>
+      발표에서 명시된 수치로, 100K 토큰 컨텍스트 = 약 50GB, 400K 토큰 컨텍스트 = 약 200GB의 KV 캐시 메모리가 필요하다. 이는 단일 에이전트 기준이며, 수백 개의 에이전트가 동시에 동작하면 테라바이트 단위가 된다.
+    </div>
+  </div>
+</div>
+
+<!-- ── Q3 ── -->
+<div class="q-card" id="qcard-3">
+  <div class="q-header">
+    <div class="q-num">03</div>
+    <div class="q-meta">
+      <div class="q-type">객관식 · 단일 선택</div>
+      <div class="q-diff diff-med">● 보통</div>
+    </div>
+    <div class="q-status" id="status-3"></div>
+  </div>
+  <div class="q-body">
+    <p class="q-text">DOCA Memos가 기존 파일 시스템 스토리지와 다르게 내구성(Durability)을 100% 미만으로 설계한 이유는?</p>
+    <ul class="options">
+      <li><button class="opt-btn" onclick="checkMCQ(3,'A','C')" id="q3-A"><span class="opt-label">A</span> 비용 절감을 위해 저가형 SSD를 사용하기 때문</button></li>
+      <li><button class="opt-btn" onclick="checkMCQ(3,'B','C')" id="q3-B"><span class="opt-label">B</span> 네트워크 전송 오류가 불가피하기 때문</button></li>
+      <li><button class="opt-btn" onclick="checkMCQ(3,'C','C')" id="q3-C"><span class="opt-label">C</span> KV 캐시는 원본 토큰으로 재연산 가능하여 손실 허용이 가능하기 때문</button></li>
+      <li><button class="opt-btn" onclick="checkMCQ(3,'D','C')" id="q3-D"><span class="opt-label">D</span> 암호화로 인해 일부 데이터가 필연적으로 손실되기 때문</button></li>
+    </ul>
+    <div class="answer-box" id="ans-3">
+      <strong>정답: C — KV 캐시는 재연산 가능</strong><br>
+      KV 캐시는 원본 토큰(텍스트)이 있으면 언제든 재연산(recompute)할 수 있다. 따라서 99.9%에 가까운 내구성으로도 충분히 실용적이며, 이 설계 선택 덕분에 <strong>쓰기 증폭(Write Amplification)을 1에 근접</strong>하게 낮추고, SSD 수명을 대폭 늘릴 수 있다.
+    </div>
+  </div>
+</div>
+
+<!-- ── Q4 ── -->
+<div class="q-card" id="qcard-4">
+  <div class="q-header">
+    <div class="q-num">04</div>
+    <div class="q-meta">
+      <div class="q-type">객관식 · 단일 선택</div>
+      <div class="q-diff diff-med">● 보통</div>
+    </div>
+    <div class="q-status" id="status-4"></div>
+  </div>
+  <div class="q-body">
+    <p class="q-text">DOCA Memos의 DPU 측 컴포넌트가 담당하는 주요 역할은?</p>
+    <ul class="options">
+      <li><button class="opt-btn" onclick="checkMCQ(4,'A','B')" id="q4-A"><span class="opt-label">A</span> SSD에 직접 블록을 읽고 쓰는 작업</button></li>
+      <li><button class="opt-btn" onclick="checkMCQ(4,'B','B')" id="q4-B"><span class="opt-label">B</span> KV 캐시 격리·매핑, 암호화 적용 후 CMX로 네트워크 전송</button></li>
+      <li><button class="opt-btn" onclick="checkMCQ(4,'C','B')" id="q4-C"><span class="opt-label">C</span> 추론 애플리케이션에 C API를 직접 노출</button></li>
+      <li><button class="opt-btn" onclick="checkMCQ(4,'D','B')" id="q4-D"><span class="opt-label">D</span> Kubernetes 오케스트레이션과 연동</button></li>
+    </ul>
+    <div class="answer-box" id="ans-4">
+      <strong>정답: B — KV 격리·매핑 + 암호화 + 네트워크 전송</strong><br>
+      컴퓨트 노드의 BlueField-4 DPU에서는 호스트로부터 KV 요청을 받아, 보안 격리(SNAP 기술 기반)·접근 제어·암호화를 적용한다. 이 처리가 호스트 CPU 자원을 전혀 소비하지 않으며, 이후 Spectrum-X 이더넷을 통해 CMX 스토리지 노드로 전송된다. SSD 직접 접근은 CMX 측 BlueField가 담당한다.
+    </div>
+  </div>
+</div>
+
+<!-- ── Q5 ── -->
+<div class="q-card" id="qcard-5">
+  <div class="q-header">
+    <div class="q-num">05</div>
+    <div class="q-meta">
+      <div class="q-type">객관식 · 단일 선택</div>
+      <div class="q-diff diff-med">● 보통</div>
+    </div>
+    <div class="q-status" id="status-5"></div>
+  </div>
+  <div class="q-body">
+    <p class="q-text">로컬 SSD에 KV 캐시가 분산 저장된 상황(비공유)과 달리, CMX 공유 스토리지를 사용할 때 얻는 핵심 이점은?</p>
+    <ul class="options">
+      <li><button class="opt-btn" onclick="checkMCQ(5,'A','D')" id="q5-A"><span class="opt-label">A</span> GPU 메모리 용량이 증가한다</button></li>
+      <li><button class="opt-btn" onclick="checkMCQ(5,'B','D')" id="q5-B"><span class="opt-label">B</span> 모델 파라미터를 저장하는 공간이 늘어난다</button></li>
+      <li><button class="opt-btn" onclick="checkMCQ(5,'C','D')" id="q5-C"><span class="opt-label">C</span> 각 GPU 노드의 처리 속도(Clock Speed)가 빨라진다</button></li>
+      <li><button class="opt-btn" onclick="checkMCQ(5,'D','D')" id="q5-D"><span class="opt-label">D</span> 요청을 임의의 GPU 노드로 분배할 수 있어 GPU 활용률이 100%에 근접한다</button></li>
+    </ul>
+    <div class="answer-box" id="ans-5">
+      <strong>정답: D — GPU 활용률 극대화</strong><br>
+      로컬 SSD 환경에서는 특정 KV 캐시가 특정 노드에만 있어, 해당 요청이 그 노드로만 몰리고 다른 노드는 유휴 상태가 된다. CMX를 통해 모든 KV 캐시를 공유하면 어떤 GPU 노드든 어떤 KV 캐시든 접근 가능하므로, Dynamo 라우터가 부하를 균등 분배해 GPU 활용률을 100%로 유지하고 TTFT(첫 번째 토큰 생성 시간)를 최소화한다.
+    </div>
+  </div>
+</div>
+
+<!-- ── Q6 OX ── -->
+<div class="s-divider"><div class="s-divider-line"></div><div class="s-divider-label">OX 문제</div><div class="s-divider-line"></div></div>
+
+<div class="q-card" id="qcard-6">
+  <div class="q-header">
+    <div class="q-num">06</div>
+    <div class="q-meta">
+      <div class="q-type">OX 문제</div>
+      <div class="q-diff diff-easy">● 쉬움</div>
+    </div>
+    <div class="q-status" id="status-6"></div>
+  </div>
+  <div class="q-body">
+    <p class="q-text">DOCA Memos는 컴퓨트 노드의 DPU와 스토리지 노드의 BlueField, 양쪽 모두에 소프트웨어가 배포되어 I/O 파이프라인이 분산 처리된다.</p>
+    <div class="ox-buttons">
+      <button class="ox-btn" onclick="checkOX(6,'O','O')" id="q6-O">○</button>
+      <button class="ox-btn" onclick="checkOX(6,'X','O')" id="q6-X">✕</button>
+    </div>
+    <div class="answer-box" id="ans-6">
+      <strong>정답: ○ (참)</strong><br>
+      DOCA Memos는 컴퓨트 노드(BlueField-4 DPU)와 CMX 스토리지 노드(BlueField Storage Controller) 양쪽 모두에 실행된다. 각 위치에서 최적의 작업을 수행하도록 I/O 파이프라인이 의도적으로 분리 설계됐다.
+    </div>
+  </div>
+</div>
+
+<!-- ── Q7 OX ── -->
+<div class="q-card" id="qcard-7">
+  <div class="q-header">
+    <div class="q-num">07</div>
+    <div class="q-meta">
+      <div class="q-type">OX 문제</div>
+      <div class="q-diff diff-med">● 보통</div>
+    </div>
+    <div class="q-status" id="status-7"></div>
+  </div>
+  <div class="q-body">
+    <p class="q-text">추론 애플리케이션은 DOCA Memos에서 KV 캐시 조회 전에 <code style="font-family:var(--mono);font-size:13px;">exists()</code>를 먼저 호출하여 존재 여부를 확인하는 것이 권장 모범 사례다.</p>
+    <div class="ox-buttons">
+      <button class="ox-btn" onclick="checkOX(7,'O','X')" id="q7-O">○</button>
+      <button class="ox-btn" onclick="checkOX(7,'X','X')" id="q7-X">✕</button>
+    </div>
+    <div class="answer-box" id="ans-7">
+      <strong>정답: ✕ (거짓)</strong><br>
+      <span class="mono-inline">exists()</span> 후 <span class="mono-inline">retrieve()</span> 패턴은 두 가지 이유로 지양해야 한다. 첫째, <span class="mono-inline">retrieve()</span> 자체가 조회 역할을 하며 없으면 빠르게 실패를 반환한다. 둘째, 내구성이 100% 미만이므로 <span class="mono-inline">exists()</span>가 true를 반환해도 실제 <span class="mono-inline">retrieve()</span> 시점에는 이미 삭제됐을 수 있다. 불필요한 네트워크 왕복(ping-pong)만 발생시킨다.
+    </div>
+  </div>
+</div>
+
+<!-- ── Q8 OX ── -->
+<div class="q-card" id="qcard-8">
+  <div class="q-header">
+    <div class="q-num">08</div>
+    <div class="q-meta">
+      <div class="q-type">OX 문제</div>
+      <div class="q-diff diff-hard">● 어려움</div>
+    </div>
+    <div class="q-status" id="status-8"></div>
+  </div>
+  <div class="q-body">
+    <p class="q-text">컨텍스트 "구멍(Holes)" 처리 최적화란, 중간에 특정 KV 블록이 누락되었을 때 컨텍스트 전체를 처음부터 재연산하는 것이 최선이다.</p>
+    <div class="ox-buttons">
+      <button class="ox-btn" onclick="checkOX(8,'O','X')" id="q8-O">○</button>
+      <button class="ox-btn" onclick="checkOX(8,'X','X')" id="q8-X">✕</button>
+    </div>
+    <div class="answer-box" id="ans-8">
+      <strong>정답: ✕ (거짓)</strong><br>
+      구멍(holes) 처리의 핵심은 <strong>누락된 블록만 재연산하고, 이미 캐시된 나머지 블록은 그대로 활용</strong>하는 것이다. 전체 재연산은 CMX의 강점을 완전히 포기하는 것이다. 발표에서는 VLM과 Dynamo가 이를 이미 지원한다고 밝혔다.
+    </div>
+  </div>
+</div>
+
+<!-- ── Q9 단답형 ── -->
+<div class="s-divider"><div class="s-divider-line"></div><div class="s-divider-label">단답형</div><div class="s-divider-line"></div></div>
+
+<div class="q-card" id="qcard-9">
+  <div class="q-header">
+    <div class="q-num">09</div>
+    <div class="q-meta">
+      <div class="q-type">단답형</div>
+      <div class="q-diff diff-med">● 보통</div>
+    </div>
+    <div class="q-status" id="status-9"></div>
+  </div>
+  <div class="q-body">
+    <p class="q-text">DOCA Memos 시뮬레이션에서 18 페타바이트 CMX와 1,000개 GPU 조건 기준, KV 캐시 히트율과 GPU Goodput은 각각 몇 % 이상으로 나타났는가? (숫자로 입력, 예: 히트율 XX%, Goodput XX%)</p>
+    <div class="short-wrap">
+      <input type="text" class="short-input" id="q9-input" placeholder="예: 히트율 99.8%, Goodput 96%">
+      <button class="short-submit" onclick="checkShort(9, ['99.8', '96'])" id="q9-btn">제출</button>
+    </div>
+    <div class="answer-box" id="ans-9">
+      <strong>정답: 히트율 99.8% 이상, GPU Goodput 96% 이상</strong><br>
+      시뮬레이션 조건: GPT-OSS-20B · 1,000 GPUs · 18PB CMX · 700~5,000 동시 에이전트 · 에이전트당 50 스텝 · 스텝당 2K 토큰. Goodput은 GPU가 생성한 토큰 중 <strong>진짜 신규 토큰의 비율</strong>이다. 96%는 클러스터 낭비가 4% 미만임을 의미한다.
+    </div>
+  </div>
+</div>
+
+<!-- ── Q10 단답형 ── -->
+<div class="q-card" id="qcard-10">
+  <div class="q-header">
+    <div class="q-num">10</div>
+    <div class="q-meta">
+      <div class="q-type">단답형</div>
+      <div class="q-diff diff-hard">● 어려움</div>
+    </div>
+    <div class="q-status" id="status-10"></div>
+  </div>
+  <div class="q-body">
+    <p class="q-text">DOCA Memos에서 KV 캐시를 저장할 때 사용하는 '키(Key)'는 무엇으로 구성되는가? 그리고 왜 애플리케이션이 per-KV 메타데이터를 직접 수집해서는 안 되는가? 두 가지를 간략히 서술하라.</p>
+    <div class="short-wrap">
+      <textarea class="short-input" id="q10-input" rows="3" placeholder="키 구성과 메타데이터 금지 이유를 작성하세요..."></textarea>
+      <button class="short-submit" onclick="checkShort(10, ['prefix', '해시', 'hash', '메타', '18'])" id="q10-btn">제출 및 해설 보기</button>
+    </div>
+    <div class="answer-box" id="ans-10">
+      <strong>정답 해설</strong><br>
+      <strong>① 키 구성:</strong> KV 캐시의 키는 해당 KV가 대응하는 토큰 시퀀스의 <strong>prefix 해시(prefix_hash)</strong>다. 최대 128비트 크기. 같은 키로 저장하고 나중에 동일 키로 조회하면 된다.<br><br>
+      <strong>② 메타데이터를 앱에서 수집하면 안 되는 이유:</strong> CMX는 최대 <strong>18 페타바이트</strong> 용량을 제공하므로 수백만 개의 KV 블록이 저장될 수 있다. 이 모든 KV에 대한 메타데이터를 앱(호스트)에서 직접 관리하면 DRAM이 고갈된다. DOCA Memos가 내부적으로 메타데이터를 처리하므로 앱은 단순히 key로 저장·조회만 하면 된다.
+    </div>
+  </div>
+</div>
+
+<div class="exam-footer">
+  NVIDIA GTC 2026 · DOCA Developer Day · S81773 시험문제<br>
+  본 문제는 세션 자막 및 슬라이드 내용을 기반으로 출제됨.<br>
+  분석 문서: <strong>doca_memos_analysis.html</strong> 함께 참고
+</div>
+
+<script>
+let totalAnswered = 0;
+let totalCorrect = 0;
+const totalQ = 10;
+const answered = new Set();
+
+function updateScore() {
+  document.getElementById('scoreNum').textContent = `${totalCorrect} / ${totalAnswered}`;
+  const pct = totalAnswered === 0 ? 0 : Math.round((totalCorrect / totalAnswered) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function markQuestion(qNum, isCorrect) {
+  if (answered.has(qNum)) return false;
+  answered.add(qNum);
+  totalAnswered++;
+  if (isCorrect) totalCorrect++;
+  document.getElementById(`status-${qNum}`).textContent = isCorrect ? '✅' : '❌';
+  document.getElementById(`ans-${qNum}`).classList.add('show');
+  if (!isCorrect) document.getElementById(`ans-${qNum}`).classList.add('wrong-ans');
+  updateScore();
+  return true;
+}
+
+function checkMCQ(qNum, chosen, correct) {
+  if (answered.has(qNum)) return;
+  const isCorrect = chosen === correct;
+  markQuestion(qNum, isCorrect);
+
+  // disable all buttons
+  ['A','B','C','D'].forEach(opt => {
+    const btn = document.getElementById(`q${qNum}-${opt}`);
+    if (!btn) return;
+    btn.disabled = true;
+    if (opt === correct) btn.classList.add('reveal');
+    else if (opt === chosen && !isCorrect) btn.classList.add('wrong');
+  });
+}
+
+function checkOX(qNum, chosen, correct) {
+  if (answered.has(qNum)) return;
+  const isCorrect = chosen === correct;
+  markQuestion(qNum, isCorrect);
+
+  ['O','X'].forEach(opt => {
+    const btn = document.getElementById(`q${qNum}-${opt}`);
+    if (!btn) return;
+    btn.disabled = true;
+    if (opt === correct) btn.classList.add('reveal');
+    else if (opt === chosen && !isCorrect) btn.classList.add('wrong');
+  });
+}
+
+function checkShort(qNum, keywords) {
+  if (answered.has(qNum)) return;
+  const input = document.getElementById(`q${qNum}-input`);
+  const val = input.value.trim().toLowerCase();
+  if (!val) { input.focus(); return; }
+
+  const matchCount = keywords.filter(k => val.includes(k.toLowerCase())).length;
+  const threshold = qNum === 9 ? 2 : 2;
+  const isCorrect = matchCount >= threshold;
+
+  markQuestion(qNum, isCorrect);
+  input.disabled = true;
+  document.getElementById(`q${qNum}-btn`).disabled = true;
+}
+
+function resetAll() {
+  answered.clear();
+  totalAnswered = 0;
+  totalCorrect = 0;
+  updateScore();
+
+  document.querySelectorAll('.opt-btn, .ox-btn').forEach(btn => {
+    btn.disabled = false;
+    btn.classList.remove('correct','wrong','reveal');
+  });
+  document.querySelectorAll('.short-input').forEach(el => {
+    el.disabled = false;
+    el.value = '';
+  });
+  document.querySelectorAll('.short-submit').forEach(btn => btn.disabled = false);
+  document.querySelectorAll('.answer-box').forEach(el => {
+    el.classList.remove('show','wrong-ans');
+  });
+  for (let i = 1; i <= 10; i++) {
+    const s = document.getElementById(`status-${i}`);
+    if (s) s.textContent = '';
+  }
+}
+</script>
+</body>
+</html>
