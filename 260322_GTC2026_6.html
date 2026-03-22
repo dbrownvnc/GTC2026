@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accelerate AI Through Open-Source Inference — 패널 분석</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg2: #fafafa;
+    --text: #1a1a1a;
+    --text2: #777777;
+    --accent: #e11d48;
+    --accent2: #f43f5e;
+    --border: #e5e5e5;
+    --c1: #e11d48;
+    --c2: #1a1a1a;
+    --c3: #6b7280;
+    --c4: #2563eb;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 16px;
+    line-height: 1.75;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+
+  /* ── Header ── */
+  .masthead {
+    border-bottom: 3px solid var(--text);
+    padding: 32px 0 12px;
+    margin-bottom: 8px;
+  }
+  .masthead-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .masthead h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 7vw, 46px);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-top: 8px;
+    letter-spacing: -0.5px;
+  }
+  .masthead-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text2);
+    letter-spacing: 0.5px;
+  }
+  .masthead-meta span::before { content: '· '; }
+  .masthead-meta span:first-child::before { content: ''; }
+
+  /* ── Section labels ── */
+  .section-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  /* ── Pull quote ── */
+  .pull-quote {
+    border-left: 4px solid var(--accent);
+    padding: 12px 20px;
+    margin: 28px 0;
+    background: var(--bg2);
+  }
+  .pull-quote p {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    font-style: italic;
+    line-height: 1.45;
+    color: var(--text);
+  }
+  .pull-quote cite {
+    display: block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-top: 8px;
+  }
+
+  /* ── Body text ── */
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 40px 0 14px;
+    line-height: 1.25;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 28px 0 10px;
+  }
+  p { margin-bottom: 16px; color: var(--text); }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── Tag chips ── */
+  .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+  .tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text2);
+  }
+  .tag.accent { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Divider ── */
+  hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+  .thick-hr { border-top: 2px solid var(--text); margin: 32px 0; }
+
+  /* ── Panelist cards ── */
+  .panelist-grid { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+  .panelist-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .panelist-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .panelist-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .panelist-role {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+
+  /* ── Info boxes ── */
+  .info-box {
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    margin: 24px 0;
+    background: var(--bg2);
+  }
+  .info-box-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .info-box ul {
+    padding-left: 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text);
+  }
+  .info-box ul li { margin-bottom: 4px; }
+
+  /* ── Stats row ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 24px 0;
+  }
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: var(--text2);
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Chart ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .chart-container {
+    position: relative;
+    max-height: 340px;
+    margin: 24px 0;
+  }
+  .chart-container canvas {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    max-height: 300px;
+  }
+  .chart-container.chart-ready canvas {
+    opacity: 1;
+  }
+  .chart-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 8px;
+  }
+
+  /* ── Interactive: MoE Simulator ── */
+  .sim-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 20px;
+    margin: 24px 0;
+  }
+  .sim-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .slider-row { margin-bottom: 14px; }
+  .slider-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .slider-label span {
+    font-weight: 500;
+    color: var(--accent);
+  }
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--accent);
+    cursor: pointer;
+    height: 6px;
+  }
+  .sim-results {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .sim-result-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    padding: 12px 10px;
+    text-align: center;
+  }
+  .sim-result-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .sim-result-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    color: var(--text2);
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+  }
+  .reset-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    cursor: pointer;
+    margin-top: 14px;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { background: var(--accent); color: #fff; }
+
+  /* ── Architecture toggle ── */
+  .toggle-group {
+    display: flex;
+    border: 1px solid var(--border);
+    margin: 16px 0;
+    overflow: hidden;
+  }
+  .toggle-btn {
+    flex: 1;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 8px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text2);
+    transition: all 0.2s;
+  }
+  .toggle-btn.active { background: var(--accent); color: #fff; }
+  .arch-content {
+    display: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+    padding: 16px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-top: none;
+  }
+  .arch-content.active { display: block; }
+  .arch-pros { color: #166534; font-weight: 500; }
+  .arch-cons { color: #991b1b; font-weight: 500; }
+
+  /* ── Inference technique cards ── */
+  .tech-grid { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+  .tech-card {
+    border: 1px solid var(--border);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .tech-card:hover { border-color: var(--accent); }
+  .tech-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    background: var(--bg2);
+    user-select: none;
+  }
+  .tech-card-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .tech-card-arrow {
+    color: var(--accent);
+    font-size: 16px;
+    transition: transform 0.2s;
+  }
+  .tech-card.open .tech-card-arrow { transform: rotate(180deg); }
+  .tech-card-body {
+    display: none;
+    padding: 14px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+    border-top: 1px solid var(--border);
+  }
+  .tech-card.open .tech-card-body { display: block; }
+  .tech-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    margin-left: 8px;
+    border-radius: 2px;
+  }
+  .badge-hw { background: #dbeafe; color: #1e40af; }
+  .badge-algo { background: #fce7f3; color: #9d174d; }
+  .badge-sys { background: #d1fae5; color: #065f46; }
+
+  /* ── Quiz section ── */
+  .quiz-section {
+    background: var(--bg2);
+    border: 2px solid var(--text);
+    padding: 24px 20px;
+    margin: 40px 0;
+  }
+  .quiz-header {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .quiz-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 20px;
+  }
+  .quiz-progress-bar {
+    height: 4px;
+    background: var(--border);
+    margin-bottom: 24px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .quiz-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.4s ease;
+    border-radius: 2px;
+  }
+  .quiz-q {
+    font-family: 'Source Serif 4', serif;
+    font-size: 16px;
+    line-height: 1.55;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+  .quiz-q-num {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .quiz-opt {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 11px 14px;
+    background: #fff;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    line-height: 1.5;
+  }
+  .quiz-opt:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .quiz-opt.correct { background: #f0fdf4; border-color: #16a34a; color: #15803d; }
+  .quiz-opt.wrong { background: #fff1f2; border-color: #e11d48; color: #be123c; }
+  .quiz-opt:disabled { cursor: default; }
+
+  .quiz-input-wrap { margin-bottom: 14px; }
+  .quiz-input {
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    background: #fff;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .quiz-input:focus { border-color: var(--accent); }
+  .quiz-submit {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .quiz-submit:hover { background: #be123c; }
+
+  .quiz-feedback {
+    padding: 12px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-top: 8px;
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.ok { background: #f0fdf4; color: #15803d; border-left: 3px solid #16a34a; }
+  .quiz-feedback.no { background: #fff1f2; color: #be123c; border-left: 3px solid #e11d48; }
+
+  .quiz-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+  .quiz-nav-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 9px 18px;
+    background: transparent;
+    border: 1px solid var(--text);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .quiz-nav-btn:hover { background: var(--text); color: #fff; }
+  .quiz-nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .quiz-counter {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text2);
+  }
+  .quiz-score-box {
+    text-align: center;
+    padding: 32px 20px;
+    display: none;
+  }
+  .quiz-score-box.show { display: block; }
+  .quiz-score-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 64px;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .quiz-score-msg {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text2);
+    margin-top: 8px;
+    margin-bottom: 20px;
+  }
+  .quiz-retry {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 24px;
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  /* ── Key predictions ── */
+  .prediction-list { display: flex; flex-direction: column; gap: 0; margin: 16px 0; }
+  .prediction-item {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .prediction-item:last-child { border-bottom: none; }
+  .prediction-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .prediction-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text);
+  }
+  .prediction-speaker {
+    font-size: 11px;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    border-top: 2px solid var(--text);
+    padding-top: 20px;
+    margin-top: 60px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: var(--text2);
+    letter-spacing: 0.5px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ── OX quiz style ── */
+  .ox-group { display: flex; gap: 12px; margin-bottom: 14px; }
+  .ox-btn {
+    flex: 1;
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+    padding: 14px;
+    background: #fff;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .ox-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .ox-btn.correct { background: #f0fdf4; border-color: #16a34a; color: #15803d; }
+  .ox-btn.wrong { background: #fff1f2; border-color: #e11d48; color: #be123c; }
+  .ox-btn:disabled { cursor: default; }
+</style>
+</head>
+<body>
+
+<!-- ══ MASTHEAD ══ -->
+<div class="masthead">
+  <div class="masthead-label">AI 인프라 · 패널 분석</div>
+  <h1>오픈소스 추론으로<br>가속하는 AI</h1>
+  <div class="masthead-meta">
+    <span>2026년 3월 22일</span>
+    <span>GTC 세션 S81902</span>
+    <span>패널 5인</span>
+  </div>
+</div>
+
+<!-- ══ OVERVIEW ══ -->
+<div class="section-label fade-in">개요</div>
+<p class="fade-in">NVIDIA GTC 2026에서 열린 이 패널은 <strong>AI 추론(Inference)</strong>의 현재와 미래를 다뤘다. 추론이란 이미 학습된 모델이 새로운 데이터를 처리하는 과정으로, 대규모 서비스에서 비용과 속도 모두를 결정짓는 핵심 단계다. 패널리스트들은 처리량 극대화, 초당 토큰 수 향상, 와트당 토큰 효율, 오픈소스 생태계, 주권 AI까지 폭넓게 논의했다.</p>
+
+<div class="tag-row fade-in">
+  <div class="tag accent">추론 최적화</div>
+  <div class="tag">오픈소스</div>
+  <div class="tag">소버린 AI</div>
+  <div class="tag">MoE 아키텍처</div>
+  <div class="tag">멀티모달</div>
+  <div class="tag">에이전트</div>
+</div>
+
+<!-- ══ PANELISTS ══ -->
+<hr>
+<h2 class="fade-in">패널리스트</h2>
+<div class="panelist-grid">
+  <div class="panelist-card fade-in">
+    <div class="panelist-avatar">N</div>
+    <div>
+      <div class="panelist-name">Anu Sheree Vasava (사회)</div>
+      <div class="panelist-role">Senior Technical Marketing Manager · NVIDIA</div>
+    </div>
+  </div>
+  <div class="panelist-card fade-in">
+    <div class="panelist-avatar" style="background:#2563eb">J</div>
+    <div>
+      <div class="panelist-name">Jeff Boudier</div>
+      <div class="panelist-role">Product Team · Hugging Face</div>
+    </div>
+  </div>
+  <div class="panelist-card fade-in">
+    <div class="panelist-avatar" style="background:#1a1a1a">P</div>
+    <div>
+      <div class="panelist-name">Patrick (패트릭)</div>
+      <div class="panelist-role">Research Engineer & Head of Open Source · Mistral AI</div>
+    </div>
+  </div>
+  <div class="panelist-card fade-in">
+    <div class="panelist-avatar" style="background:#6b7280">T</div>
+    <div>
+      <div class="panelist-name">Tim</div>
+      <div class="panelist-role">Co-founder · Black Forest Labs (BFL)</div>
+    </div>
+  </div>
+  <div class="panelist-card fade-in">
+    <div class="panelist-avatar" style="background:#be123c">O</div>
+    <div>
+      <div class="panelist-name">Ophir (오피르)</div>
+      <div class="panelist-role">VP Research · LTX (Lightricks)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SECTION 1: Inference Optimization ══ -->
+<div class="thick-hr"></div>
+<div class="section-label fade-in">핵심 주제 1</div>
+<h2 class="fade-in">추론 최적화 기법의 현재와 미래</h2>
+
+<p class="fade-in">패널은 현재 추론 최적화의 '나사'들을 열거하며, 이것들이 점점 더 조여질 것이라는 데 모두 동의했다. 최적화는 하드웨어 발전과 알고리즘 설계 두 축 모두에서 동시에 진행된다.</p>
+
+<div class="pull-quote fade-in">
+  <p>"하드웨어가 발전하고 알고리즘 설계도 발전한다. 두 가지가 함께 올 때, 중간에 양자화 같은 모든 것을 최대한 활용한다."</p>
+  <cite>— Ophir, LTX</cite>
+</div>
+
+<div class="tech-grid fade-in">
+  <div class="tech-card" onclick="toggleTech(this)">
+    <div class="tech-card-header">
+      <div>양자화 (Quantization) <span class="tech-badge badge-hw">하드웨어</span></div>
+      <div class="tech-card-arrow">▾</div>
+    </div>
+    <div class="tech-card-body">모델 가중치의 정밀도를 낮추는 기법. FP32 → FP16 → FP8 → FP4(NV FP4)로 진화. 4비트 양자화로도 품질 저하가 매우 적은 수준을 달성했으며, LTX-2(19B 모델)는 6GB VRAM GPU에서도 구동 가능하다는 사례가 소개됐다.</div>
+  </div>
+  <div class="tech-card" onclick="toggleTech(this)">
+    <div class="tech-card-header">
+      <div>투기적 디코딩 (Speculative Decoding) <span class="tech-badge badge-algo">알고리즘</span></div>
+      <div class="tech-card-arrow">▾</div>
+    </div>
+    <div class="tech-card-body">한 번에 하나씩 토큰을 예측하는 기존 방식 대신, 작은 드래프트 모델이 여러 토큰을 미리 생성하고 큰 모델이 이를 검증하는 방식. 처리 속도를 크게 높이며, 다양한 양자화 포맷과의 조합 테스트가 숙제로 남아 있다.</div>
+  </div>
+  <div class="tech-card" onclick="toggleTech(this)">
+    <div class="tech-card-header">
+      <div>KV 캐싱 & 메모리 관리 <span class="tech-badge badge-sys">시스템</span></div>
+      <div class="tech-card-arrow">▾</div>
+    </div>
+    <div class="tech-card-body">시스템 디자인의 캐싱 개념을 AI 추론에 적용. 이미 계산된 Key-Value 값을 재사용해 반복 연산을 줄인다. 텐서를 네트워크를 통해 스트리밍하는 메모리 오프로딩 기법과 결합하면 GPU VRAM이 부족한 환경에서도 대형 모델 구동이 가능하다.</div>
+  </div>
+  <div class="tech-card" onclick="toggleTech(this)">
+    <div class="tech-card-header">
+      <div>잠재 공간 압축 (Latent Space Compression) <span class="tech-badge badge-algo">알고리즘</span></div>
+      <div class="tech-card-arrow">▾</div>
+    </div>
+    <div class="tech-card-body">LTX, Black Forest Labs 등 확산(diffusion) 모델 기업들의 핵심 전략. 더 적은 잠재 토큰을 사용해 연산 자체를 줄이는 방식. NVIDIA의 DCGen·DCVideo도 이 방향을 채택했다. 영상 모델에서 특히 효과적이며, 품질과 효율의 균형이 관건이다.</div>
+  </div>
+  <div class="tech-card" onclick="toggleTech(this)">
+    <div class="tech-card-header">
+      <div>확산 반복 횟수 축소 <span class="tech-badge badge-algo">알고리즘</span></div>
+      <div class="tech-card-arrow">▾</div>
+    </div>
+    <div class="tech-card-body">이미지·영상 생성 확산 모델은 기본적으로 20~30회의 순전파(forward pass)가 필요하다. BFL은 蒸留(distillation) 연구를 통해 이를 4~8회로 줄이는 데 집중하고 있다. VRAM 문제보다 사용자 대기 시간 문제가 더 크기 때문에 반복적이고 빠른 생성이 필수다.</div>
+  </div>
+</div>
+
+<div class="chart-title fade-in">추론 기법별 적용 계층</div>
+<div class="chart-container fade-in">
+  <canvas id="chart1" height="220"></canvas>
+</div>
+
+<!-- ══ SECTION 2: Model Size ══ -->
+<hr>
+<div class="section-label fade-in">핵심 주제 2</div>
+<h2 class="fade-in">모델 크기: 대형화 vs 소형화</h2>
+
+<p class="fade-in">1조 파라미터의 Kimi K2 같은 초거대 모델과, 온디바이스용 초소형 모델이 동시에 주목받고 있다. 패널은 이 두 방향이 수렴하는 것이 아니라 <em>양방향으로 동시에 극단화</em>될 것이라고 진단했다.</p>
+
+<div class="stats-row fade-in">
+  <div class="stat-card">
+    <div class="stat-number">2.5M+</div>
+    <div class="stat-label">Hugging Face 공개 모델 수</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">13M</div>
+    <div class="stat-label">Hugging Face AI 빌더 수</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">1T</div>
+    <div class="stat-label">Kimi K2 파라미터 수</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">2M+</div>
+    <div class="stat-label">SDXL 월간 다운로드</div>
+  </div>
+</div>
+
+<div class="info-box fade-in">
+  <div class="info-box-title">소형 모델이 필요한 이유</div>
+  <ul>
+    <li>로컬 / 온디바이스 실행 (노트북, 스마트폰)</li>
+    <li>특정 도메인 특화 (법률, 금융, 분류 모델 등)</li>
+    <li>LLM 파이프라인의 가드레일·분류기 역할</li>
+    <li>반복적 창작 작업의 빠른 인터랙션 (영상·이미지)</li>
+    <li>데이터센터 비용 절감 → 최종 사용자 가격 인하</li>
+  </ul>
+</div>
+
+<div class="pull-quote fade-in">
+  <p>"대형 모델은 더 크게, 소형 모델은 더 작게. 두 방향 모두 동시에 진행될 것이다."</p>
+  <cite>— Ophir, LTX</cite>
+</div>
+
+<div class="chart-title fade-in">모델 생태계 다양성 지표 (Hugging Face)</div>
+<div class="chart-container fade-in">
+  <canvas id="chart2" height="220"></canvas>
+</div>
+
+<!-- ══ SECTION 3: MoE ══ -->
+<hr>
+<div class="section-label fade-in">핵심 주제 3</div>
+<h2 class="fade-in">지배적 아키텍처: MoE vs Dense</h2>
+
+<p class="fade-in">Mistral은 Mixtral 8×7B로 오픈소스 Mixture of Experts(MoE) 모델의 포문을 열었다. 패널은 MoE가 고도의 병렬 서비스 환경에서 압도적인 효율을 보인다고 평가하면서도, 기술적 도전과 새로운 아키텍처의 가능성도 함께 논의했다.</p>
+
+<div class="toggle-group fade-in">
+  <button class="toggle-btn active" onclick="switchArch('dense', this)">Dense 모델</button>
+  <button class="toggle-btn" onclick="switchArch('moe', this)">MoE 모델</button>
+  <button class="toggle-btn" onclick="switchArch('diffusion', this)">Diffusion LM</button>
+</div>
+
+<div id="arch-dense" class="arch-content active fade-in">
+  <strong>Dense 모델 (밀집 모델)</strong><br>
+  모든 요청에 전체 파라미터를 활성화한다.<br><br>
+  <span class="arch-pros">장점:</span> 구현이 단순하고 인프라 요구사항이 낮다. 소규모 배포에 유리.<br>
+  <span class="arch-cons">단점:</span> 파라미터 수가 늘수록 연산 비용이 선형적으로 증가한다. 수천 개의 병렬 요청 처리에 비효율적이다.
+</div>
+<div id="arch-moe" class="arch-content fade-in">
+  <strong>Mixture of Experts (전문가 혼합)</strong><br>
+  전체 파라미터 중 일부 "전문가" 레이어만 선택적으로 활성화한다.<br><br>
+  <span class="arch-pros">장점:</span> 전체 파라미터는 크지만 실제 연산량은 적다. 병렬 서빙 처리량이 매우 높다. Patrick은 수천 개의 동시 요청 처리 시 MoE가 빛난다고 강조.<br>
+  <span class="arch-cons">단점:</span> 전체 가중치를 메모리에 올려야 해 VRAM 요구량이 크다. 훈련 안정성과 속도 개선이 여전히 연구 중이다.
+</div>
+<div id="arch-diffusion" class="arch-content fade-in">
+  <strong>Diffusion 기반 LM (연구 중)</strong><br>
+  이미지 생성에서 쓰이는 확산 모델의 원리를 텍스트 생성에 적용한다.<br><br>
+  <span class="arch-pros">잠재력:</span> 자기회귀(autoregressive) 방식의 대안. 병렬 토큰 생성으로 속도 향상 가능성.<br>
+  <span class="arch-cons">현황:</span> Patrick은 이것이 가장 큰 미지수라고 언급. 아직 LM 수준의 품질에 도달하지 못했으며, 커뮤니티의 전환 여부는 불확실하다.
+</div>
+
+<!-- ══ MoE Simulator ══ -->
+<div class="sim-box fade-in">
+  <div class="sim-title">🔢 MoE 효율 시뮬레이터</div>
+  <div class="slider-row">
+    <div class="slider-label">총 파라미터 수 <span id="totalParam">1000</span>억</div>
+    <input type="range" min="100" max="2000" value="1000" step="100" oninput="updateMoE()" id="sliderParam">
+  </div>
+  <div class="slider-row">
+    <div class="slider-label">전문가 활성화 비율 <span id="activePct">12</span>%</div>
+    <input type="range" min="5" max="50" value="12" step="1" oninput="updateMoE()" id="sliderActive">
+  </div>
+  <div class="slider-row">
+    <div class="slider-label">동시 요청 수 <span id="reqNum">1000</span>개</div>
+    <input type="range" min="100" max="10000" value="1000" step="100" oninput="updateMoE()" id="sliderReq">
+  </div>
+  <div class="sim-results">
+    <div class="sim-result-card">
+      <div class="sim-result-val" id="res-active">120억</div>
+      <div class="sim-result-label">실제 활성 파라미터</div>
+    </div>
+    <div class="sim-result-card">
+      <div class="sim-result-val" id="res-save">88%</div>
+      <div class="sim-result-label">Dense 대비 연산 절감</div>
+    </div>
+    <div class="sim-result-card">
+      <div class="sim-result-val" id="res-tput">8.3×</div>
+      <div class="sim-result-label">처리량 배수 추정</div>
+    </div>
+  </div>
+  <button class="reset-btn" onclick="resetMoE()">초기화</button>
+</div>
+
+<!-- ══ SECTION 4: Sovereign AI ══ -->
+<hr>
+<div class="section-label fade-in">핵심 주제 4</div>
+<h2 class="fade-in">소버린 AI와 오픈소스의 역할</h2>
+
+<p class="fade-in">주권 AI(Sovereign AI)란 국가·기업이 AI 기술과 데이터를 스스로 통제할 수 있는 환경을 의미한다. 패널은 오픈소스가 이를 가능하게 하는 유일한 수단이라고 강조했다.</p>
+
+<div class="pull-quote fade-in">
+  <p>"우리가 원하는 세계는 모든 국가, 모든 기업이 자신들의 AI를 구축하고 통제할 수 있는 세계다. 그것은 오픈소스로만 가능하다."</p>
+  <cite>— Jeff Boudier, Hugging Face</cite>
+</div>
+
+<div class="info-box fade-in">
+  <div class="info-box-title">API 방식 vs 오픈소스 배포의 차이</div>
+  <ul>
+    <li><strong>API 방식:</strong> 데이터가 외부 서버로 전송됨 → 보안·규제 문제 발생</li>
+    <li><strong>오픈소스 온프레미스:</strong> 가중치를 내부 인프라에 직접 배포 → 데이터 유출 없음</li>
+    <li><strong>커스터마이징:</strong> 오픈 가중치로 자국 문화, 고객 특성에 맞게 파인튜닝 가능</li>
+    <li><strong>vLLM, SGLang:</strong> 추론 서버 프레임워크로 효율적 서비스 제공 지원</li>
+  </ul>
+</div>
+
+<!-- ══ SECTION 5: Transformers ══ -->
+<hr>
+<div class="section-label fade-in">핵심 주제 5</div>
+<h2 class="fade-in">Transformers 라이브러리의 진화</h2>
+
+<p class="fade-in">Hugging Face의 Transformers 라이브러리는 BERT 시대에 시작해 현재 v5에 이르렀다. 5년에 걸쳐 완성된 이 버전은 상호운용성(interoperability)을 핵심 테마로 한다.</p>
+
+<div class="stats-row fade-in">
+  <div class="stat-card">
+    <div class="stat-number">1B+</div>
+    <div class="stat-label">누적 설치 횟수</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">3M</div>
+    <div class="stat-label">일간 설치 횟수</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">650K</div>
+    <div class="stat-label">GitHub 스타 수</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">v5</div>
+    <div class="stat-label">현재 메이저 버전</div>
+  </div>
+</div>
+
+<div class="info-box fade-in">
+  <div class="info-box-title">Transformers v5의 주요 방향</div>
+  <ul>
+    <li>모델 정의를 더 쉽고 단순하게 → 파인튜닝·RL·추론 내보내기 용이</li>
+    <li>vLLM, SGLang의 백엔드로 통합 (프로덕션 추론 서버 지원)</li>
+    <li>Llama.cpp, MLX 등 로컬 라이브러리와의 연동 강화</li>
+    <li>최적화 기법(NV FP4 등)을 라이브러리 수준에서 직접 제공</li>
+    <li>2.5M 공개 모델 → 로컬 또는 서버에서 빠르게 실행 가능</li>
+  </ul>
+</div>
+
+<!-- ══ SECTION 6: Open Source Business ══ -->
+<hr>
+<div class="section-label fade-in">핵심 주제 6</div>
+<h2 class="fade-in">오픈소스와 비즈니스의 공존</h2>
+
+<p class="fade-in">오픈소스 모델을 공개하면서 동시에 수익을 내는 방법에 대해 각 회사는 다른 전략을 구사하고 있다.</p>
+
+<div class="tech-grid fade-in">
+  <div class="tech-card" onclick="toggleTech(this)">
+    <div class="tech-card-header">
+      <div>Black Forest Labs (BFL)</div>
+      <div class="tech-card-arrow">▾</div>
+    </div>
+    <div class="tech-card-body"><strong>티어링 전략:</strong> API 제공 모델 / 오픈 가중치 모델 / 완전 오픈소스(Apache) 모델로 분리. 오픈소스는 배포(distribution) 전략으로 활용. 커뮤니티에서 LoRA 등 파생 모델이 만들어지면 기업 고객의 관심으로 이어진다.</div>
+  </div>
+  <div class="tech-card" onclick="toggleTech(this)">
+    <div class="tech-card-header">
+      <div>Hugging Face</div>
+      <div class="tech-card-arrow">▾</div>
+    </div>
+    <div class="tech-card-body"><strong>프리미엄 플랫폼:</strong> 공개 모델은 무료, 조직 보안·추가 컴퓨트·스토리지는 구독제. 300,000개 이상의 조직이 사용. 시애틀 기업 Xad 인수로 AI 네이티브 스토리지 구축 (청크 기반 스토리지로 일반 대비 3배 저렴). 훈련 체크포인트·모델 업로드 대역폭을 최적화.</div>
+  </div>
+  <div class="tech-card" onclick="toggleTech(this)">
+    <div class="tech-card-header">
+      <div>Mistral AI</div>
+      <div class="tech-card-arrow">▾</div>
+    </div>
+    <div class="tech-card-body"><strong>솔루션 판매:</strong> AI가 창출하는 진짜 가치는 B2B 복잡한 비즈니스 프로세스에 있다고 판단. 오픈소스 모델을 기반으로 기업용 솔루션을 구축·판매. Mistral AI Studio(기업 커스터마이징 플랫폼) 운영. 현장 파견 엔지니어로 고객사 직접 지원.</div>
+  </div>
+</div>
+
+<div class="pull-quote fade-in">
+  <p>"아이디어에는 독점이 없다. 오픈소스는 전략이며, 동시에 좋은 비즈니스 전략이 될 수 있다."</p>
+  <cite>— Ophir, LTX</cite>
+</div>
+
+<!-- ══ SECTION 7: Predictions ══ -->
+<hr>
+<div class="section-label fade-in">미래 예측</div>
+<h2 class="fade-in">패널리스트의 전망</h2>
+
+<div class="prediction-list fade-in">
+  <div class="prediction-item">
+    <div class="prediction-icon">🎬</div>
+    <div>
+      <div class="prediction-text"><strong>실시간 영상 생성</strong> — 3~4년 전만 해도 제대로 동작하지 않았던 영상 모델이 이제 실시간 생성을 목전에 두고 있다. 시각 지능 분야는 텍스트가 이미지·영상의 부분집합이라는 관점에서 폭발적으로 성장할 것이다.</div>
+      <div class="prediction-speaker">— Tim, Black Forest Labs</div>
+    </div>
+  </div>
+  <div class="prediction-item">
+    <div class="prediction-icon">🤖</div>
+    <div>
+      <div class="prediction-text"><strong>AI가 소프트웨어 개발을 재정의</strong> — 5년 전 "소프트웨어는 머신러닝의 하위 분야"라는 말은 선언적 구호였지만, 지금은 현실이 됐다. AI 퍼스트로 기술 스택 전체가 뒤집히는 패러다임 전환이 진행 중이다.</div>
+      <div class="prediction-speaker">— Jeff Boudier, Hugging Face</div>
+    </div>
+  </div>
+  <div class="prediction-item">
+    <div class="prediction-icon">🔊</div>
+    <div>
+      <div class="prediction-text"><strong>실시간 스트리밍 음성 AI</strong> — 실시간 음성 인식·생성의 오픈소스화, 폰/노트북 온디바이스 구동. 요청-응답 방식에서 스트리밍 입출력 방식으로 인터페이스 패러다임이 바뀐다.</div>
+      <div class="prediction-speaker">— Patrick, Mistral AI</div>
+    </div>
+  </div>
+  <div class="prediction-item">
+    <div class="prediction-icon">🕹️</div>
+    <div>
+      <div class="prediction-text"><strong>인간-AI 제어의 경계 탐색</strong> — AI에게 어디까지 제어권을 넘기고 어디서 인간이 개입할지 결정하는 것이 가장 중요한 과제. 특히 영상처럼 공간적·시각적 매체에서는 세밀한 제어 인터페이스 설계가 핵심이다.</div>
+      <div class="prediction-speaker">— Ophir, LTX</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Inference Library Chart ══ -->
+<div class="chart-title fade-in">오픈소스 추론 생태계 핵심 구성요소</div>
+<div class="chart-container fade-in">
+  <canvas id="chart3" height="240"></canvas>
+</div>
+
+<!-- ══ QUIZ SECTION ══ -->
+<div class="quiz-section fade-in">
+  <div class="quiz-header">📝 이해도 테스트</div>
+  <div class="quiz-sub">10문항 · 객관식 / 단답형 / OX 혼합</div>
+  <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgress" style="width:0%"></div></div>
+
+  <div id="quizArea"></div>
+  <div class="quiz-score-box" id="scoreBox">
+    <div class="quiz-score-num" id="scoreNum">0/10</div>
+    <div class="quiz-score-msg" id="scoreMsg">결과입니다</div>
+    <button class="quiz-retry" onclick="startQuiz()">다시 풀기</button>
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<div class="footer fade-in">
+  <span>GTC 2026 · S81902 분석 리포트</span>
+  <span>2026.03.22</span>
+</div>
+
+<!-- ══ SCRIPTS ══ -->
+<script>
+/* ── Fade + Chart Intersection Observer ── */
+const fadeObs = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+      fadeObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.fade-in').forEach(el => fadeObs.observe(el));
+
+const chartConfigs = {};
+
+chartConfigs['chart1'] = () => {
+  new Chart(document.getElementById('chart1'), {
+    type: 'radar',
+    data: {
+      labels: ['양자화', '투기적 디코딩', 'KV 캐싱', '잠재 공간 압축', '확산 횟수 축소'],
+      datasets: [
+        {
+          label: 'LLM에 적합',
+          data: [95, 90, 85, 30, 10],
+          borderColor: '#e11d48',
+          backgroundColor: 'rgba(225,29,72,0.12)',
+          borderWidth: 2,
+          pointBackgroundColor: '#e11d48'
+        },
+        {
+          label: '확산 모델에 적합',
+          data: [85, 30, 50, 95, 90],
+          borderColor: '#2563eb',
+          backgroundColor: 'rgba(37,99,235,0.12)',
+          borderWidth: 2,
+          pointBackgroundColor: '#2563eb'
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { labels: { font: { family: 'DM Sans', size: 12 }, color: '#1a1a1a' } } },
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { font: { family: 'DM Sans', size: 10 }, color: '#777', stepSize: 25 },
+          grid: { color: '#e5e5e5' },
+          pointLabels: { font: { family: 'DM Sans', size: 11 }, color: '#1a1a1a' }
+        }
+      }
+    }
+  });
+};
+
+chartConfigs['chart2'] = () => {
+  new Chart(document.getElementById('chart2'), {
+    type: 'bar',
+    data: {
+      labels: ['공개 모델', 'AI 빌더(만)', '참여 조직(만)', '일간 설치(만)'],
+      datasets: [{
+        label: '규모',
+        data: [250, 1300, 30, 300],
+        backgroundColor: ['#e11d48', '#1a1a1a', '#6b7280', '#2563eb'],
+        borderRadius: 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const units = ['만 개', '명', '개', '건'];
+              return ` ${ctx.raw.toLocaleString()} ${units[ctx.dataIndex]}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { family: 'DM Sans', size: 11 }, color: '#1a1a1a' } },
+        y: { grid: { color: '#e5e5e5' }, ticks: { font: { family: 'DM Sans', size: 11 }, color: '#777' } }
+      }
+    }
+  });
+};
+
+chartConfigs['chart3'] = () => {
+  new Chart(document.getElementById('chart3'), {
+    type: 'doughnut',
+    data: {
+      labels: ['모델 가중치 (HF Hub)', '추론 서버 (vLLM/SGLang)', '학습 프레임워크 (TRL/PEFT)', '로컬 런타임 (Llama.cpp/MLX)', '기반 라이브러리 (Transformers)'],
+      datasets: [{
+        data: [30, 25, 18, 12, 15],
+        backgroundColor: ['#e11d48', '#1a1a1a', '#6b7280', '#2563eb', '#f43f5e'],
+        borderWidth: 0,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { family: 'DM Sans', size: 11 }, color: '#1a1a1a', padding: 14, boxWidth: 14 }
+        }
+      }
+    }
+  });
+};
+
+const chartObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const canvas = e.target.querySelector('canvas');
+      if (canvas && chartConfigs[canvas.id]) {
+        chartConfigs[canvas.id]();
+        e.target.classList.add('chart-ready');
+        chartObs.unobserve(e.target);
+      }
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.chart-container').forEach(el => chartObs.observe(el));
+
+/* ── Tech card toggle ── */
+function toggleTech(el) {
+  el.classList.toggle('open');
+}
+
+/* ── Architecture toggle ── */
+function switchArch(type, btn) {
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.arch-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('arch-' + type).classList.add('active');
+}
+
+/* ── MoE Simulator ── */
+function updateMoE() {
+  const total = parseInt(document.getElementById('sliderParam').value);
+  const pct = parseInt(document.getElementById('sliderActive').value);
+  const req = parseInt(document.getElementById('sliderReq').value);
+
+  document.getElementById('totalParam').textContent = total;
+  document.getElementById('activePct').textContent = pct;
+  document.getElementById('reqNum').textContent = req.toLocaleString();
+
+  const active = Math.round(total * pct / 100);
+  const save = 100 - pct;
+  const tput = (100 / pct * Math.log10(req / 100 + 1) * 0.8 + 1).toFixed(1);
+
+  document.getElementById('res-active').textContent = active + '억';
+  document.getElementById('res-save').textContent = save + '%';
+  document.getElementById('res-tput').textContent = tput + '×';
+}
+
+function resetMoE() {
+  document.getElementById('sliderParam').value = 1000;
+  document.getElementById('sliderActive').value = 12;
+  document.getElementById('sliderReq').value = 1000;
+  updateMoE();
+}
+updateMoE();
+
+/* ══ QUIZ ENGINE ══ */
+const questions = [
+  // Q1 — 객관식 (쉬움)
+  {
+    type: 'mc',
+    difficulty: '🟢 쉬움',
+    q: 'AI 추론(Inference)의 정의로 가장 올바른 것은?',
+    opts: ['새로운 모델을 학습시키는 과정', '이미 학습된 모델이 새로운 데이터를 처리하는 과정', '데이터셋을 수집하고 전처리하는 과정', '모델 가중치를 인터넷에 공개하는 과정'],
+    answer: 1,
+    explain: '추론(Inference)은 학습이 완료된 모델을 실제 데이터에 적용해 예측이나 생성을 수행하는 단계입니다.'
+  },
+  // Q2 — 객관식 (쉬움)
+  {
+    type: 'mc',
+    difficulty: '🟢 쉬움',
+    q: '양자화(Quantization)가 달성하는 주요 효과는?',
+    opts: ['모델의 파라미터 수를 줄인다', '모델 가중치의 정밀도를 낮춰 메모리와 연산량을 줄인다', '여러 모델을 하나로 합친다', '토큰 예측을 병렬로 처리한다'],
+    answer: 1,
+    explain: '양자화는 FP32 → FP16 → FP8 → FP4처럼 숫자 표현 비트를 줄여 메모리 사용량과 연산 비용을 낮춥니다.'
+  },
+  // Q3 — 객관식 (쉬움)
+  {
+    type: 'mc',
+    difficulty: '🟢 쉬움',
+    q: 'Hugging Face에 현재 공개된 오픈 모델의 수는?',
+    opts: ['약 25만 개', '약 250만 개', '약 2,500만 개', '약 6,500만 개'],
+    answer: 1,
+    explain: 'Jeff Boudier는 Hugging Face에 250만 개 이상의 공개 모델이 있다고 밝혔습니다.'
+  },
+  // Q4 — 객관식 (보통)
+  {
+    type: 'mc',
+    difficulty: '🟡 보통',
+    q: 'Mixture of Experts(MoE) 아키텍처의 핵심 특징은?',
+    opts: ['모든 요청에 전체 파라미터를 활성화한다', '요청마다 일부 "전문가" 레이어만 선택적으로 활성화한다', '확산(diffusion) 방식으로 토큰을 생성한다', '단일 레이어만 사용해 속도를 높인다'],
+    answer: 1,
+    explain: 'MoE는 전체 파라미터 중 요청별로 일부 전문가만 활성화해, 큰 모델 크기에도 실제 연산량은 적게 유지합니다.'
+  },
+  // Q5 — 객관식 (보통)
+  {
+    type: 'mc',
+    difficulty: '🟡 보통',
+    q: '투기적 디코딩(Speculative Decoding)에 대한 설명으로 옳은 것은?',
+    opts: ['GPU 메모리를 절반으로 줄이는 기법이다', '소형 드래프트 모델이 여러 토큰을 미리 생성하고 대형 모델이 검증하는 방식이다', '모델 레이어를 병렬로 처리하는 시스템 기법이다', '잠재 공간에서 압축률을 높이는 알고리즘이다'],
+    answer: 1,
+    explain: '투기적 디코딩은 작은 모델이 여러 토큰 후보를 미리 제안하고, 큰 모델이 한꺼번에 검증해 토큰 생성 속도를 높입니다.'
+  },
+  // Q6 — 단답형 (보통)
+  {
+    type: 'short',
+    difficulty: '🟡 보통',
+    q: 'Mistral AI가 오픈소스로 처음 공개한 MoE 모델의 이름을 쓰세요. (예: 모델명 형식으로)',
+    keywords: ['mixtral', 'mixstral', '8x7', '7b'],
+    explain: 'Mistral은 Mixtral 8×7B 모델을 처음 공개해 오픈소스 MoE 시대를 열었습니다.'
+  },
+  // Q7 — OX (보통)
+  {
+    type: 'ox',
+    difficulty: '🟡 보통',
+    q: '"소버린 AI(Sovereign AI)는 오픈소스 없이도 API 방식만으로 충분히 구현할 수 있다."',
+    answer: false,
+    explain: '패널 전원은 소버린 AI를 위해서는 가중치를 자국/자사 인프라에 직접 배포할 수 있는 오픈소스 모델이 필수라고 강조했습니다.'
+  },
+  // Q8 — 객관식 (보통)
+  {
+    type: 'mc',
+    difficulty: '🟡 보통',
+    q: 'Hugging Face가 AI 네이티브 스토리지 구축을 위해 인수한 회사는?',
+    opts: ['DeepMind', 'Xad', 'Cerebras', 'Cohere'],
+    answer: 1,
+    explain: 'Hugging Face는 시애틀 기반의 Xad를 인수해 청크 기반 스토리지 아키텍처를 도입, 일반 스토리지 대비 3배 저렴한 비용을 달성했습니다.'
+  },
+  // Q9 — OX (어려움)
+  {
+    type: 'ox',
+    difficulty: '🔴 어려움',
+    q: '"확산(Diffusion) 기반 언어 모델은 이미 LLM의 자기회귀 방식을 대체하고 있으며, Patrick은 이로의 전환이 확실하다고 밝혔다."',
+    answer: false,
+    explain: 'Patrick은 확산 LM으로의 전환 가능성을 "가장 큰 미지수"로 언급하며, 커뮤니티가 전환할지 여부가 불확실하다고 했습니다. 현재는 자기회귀 방식이 de facto 표준입니다.'
+  },
+  // Q10 — 객관식 (어려움)
+  {
+    type: 'mc',
+    difficulty: '🔴 어려움',
+    q: 'Transformers v5의 핵심 테마이자, 다양한 추론·학습 환경에서 모델을 쉽게 내보내고 사용할 수 있도록 하는 개념은?',
+    opts: ['파라미터 공유 (Parameter Sharing)', '상호운용성 (Interoperability)', '양자화 인식 훈련 (QAT)', '지식 증류 (Knowledge Distillation)'],
+    answer: 1,
+    explain: 'Transformers v5는 상호운용성(Interoperability)을 핵심으로 모델 정의·파인튜닝·RL·추론 서버 내보내기를 통합했습니다.'
+  }
+];
+
+let cur = 0, score = 0, answered = [];
+
+function startQuiz() {
+  cur = 0; score = 0; answered = new Array(questions.length).fill(null);
+  document.getElementById('scoreBox').classList.remove('show');
+  document.getElementById('quizArea').style.display = '';
+  renderQ();
+}
+
+function renderQ() {
+  const q = questions[cur];
+  const progress = ((cur) / questions.length * 100).toFixed(0);
+  document.getElementById('quizProgress').style.width = progress + '%';
+
+  let html = `<div class="quiz-q-num">${q.difficulty} · 문제 ${cur + 1} / ${questions.length}</div>`;
+  html += `<div class="quiz-q">${q.q}</div>`;
+
+  if (q.type === 'mc') {
+    html += `<div class="quiz-options">`;
+    q.opts.forEach((opt, i) => {
+      let cls = '';
+      if (answered[cur] !== null) {
+        if (i === q.answer) cls = ' correct';
+        else if (i === answered[cur] && answered[cur] !== q.answer) cls = ' wrong';
+      }
+      html += `<button class="quiz-opt${cls}" onclick="answerMC(${i})" ${answered[cur] !== null ? 'disabled' : ''}>${opt}</button>`;
+    });
+    html += `</div>`;
+  } else if (q.type === 'short') {
+    html += `<div class="quiz-input-wrap">
+      <input type="text" class="quiz-input" id="shortInput" placeholder="답을 입력하세요" ${answered[cur] !== null ? 'disabled' : ''} value="${answered[cur] !== null ? (document.getElementById('shortInput') ? document.getElementById('shortInput').value : '') : ''}">
+    </div>
+    <button class="quiz-submit" onclick="answerShort()" ${answered[cur] !== null ? 'disabled style="opacity:0.4;cursor:default"' : ''}>제출</button>`;
+  } else if (q.type === 'ox') {
+    let oCls = '', xCls = '';
+    if (answered[cur] !== null) {
+      if (q.answer === true) { oCls = ' correct'; xCls = answered[cur] === false ? ' wrong' : ''; }
+      else { xCls = ' correct'; oCls = answered[cur] === true ? ' wrong' : ''; }
+    }
+    html += `<div class="ox-group">
+      <button class="ox-btn${oCls}" onclick="answerOX(true)" ${answered[cur] !== null ? 'disabled' : ''}>O</button>
+      <button class="ox-btn${xCls}" onclick="answerOX(false)" ${answered[cur] !== null ? 'disabled' : ''}>X</button>
+    </div>`;
+  }
+
+  if (answered[cur] !== null) {
+    const correct = checkCorrect(cur);
+    html += `<div class="quiz-feedback show ${correct ? 'ok' : 'no'}">
+      ${correct ? '✅ 정답!' : '❌ 오답'} — ${q.explain}
+    </div>`;
+  }
+
+  html += `<div class="quiz-nav">
+    <button class="quiz-nav-btn" onclick="navQ(-1)" ${cur === 0 ? 'disabled' : ''}>← 이전</button>
+    <span class="quiz-counter">${cur + 1} / ${questions.length}</span>
+    <button class="quiz-nav-btn" onclick="navQ(1)">${cur === questions.length - 1 ? '결과 보기' : '다음 →'}</button>
+  </div>`;
+
+  document.getElementById('quizArea').innerHTML = html;
+}
+
+function checkCorrect(idx) {
+  const q = questions[idx];
+  if (q.type === 'mc') return answered[idx] === q.answer;
+  if (q.type === 'ox') return answered[idx] === q.answer;
+  if (q.type === 'short') {
+    const val = answered[idx] ? answered[idx].toLowerCase() : '';
+    return q.keywords.some(k => val.includes(k));
+  }
+}
+
+function answerMC(i) {
+  if (answered[cur] !== null) return;
+  answered[cur] = i;
+  if (checkCorrect(cur)) score++;
+  renderQ();
+}
+
+function answerShort() {
+  if (answered[cur] !== null) return;
+  const val = document.getElementById('shortInput').value.trim();
+  if (!val) return;
+  answered[cur] = val;
+  if (checkCorrect(cur)) score++;
+  renderQ();
+}
+
+function answerOX(val) {
+  if (answered[cur] !== null) return;
+  answered[cur] = val;
+  if (checkCorrect(cur)) score++;
+  renderQ();
+}
+
+function navQ(dir) {
+  const next = cur + dir;
+  if (next < 0) return;
+  if (next >= questions.length) {
+    showScore(); return;
+  }
+  cur = next;
+  renderQ();
+}
+
+function showScore() {
+  document.getElementById('quizArea').style.display = 'none';
+  document.getElementById('quizProgress').style.width = '100%';
+  const box = document.getElementById('scoreBox');
+  box.classList.add('show');
+  document.getElementById('scoreNum').textContent = score + '/10';
+  const msgs = ['다시 한 번 읽어보세요! 📖', '기초는 잡혔어요. 조금 더!', '절반 이상! 잘하고 있어요.', '훌륭해요! 거의 다 맞혔네요.', '완벽합니다! AI 추론 전문가 🏆'];
+  const idx = Math.min(Math.floor(score / 2.5), 4);
+  document.getElementById('scoreMsg').textContent = msgs[idx];
+}
+
+startQuiz();
+</script>
+</body>
+</html>
