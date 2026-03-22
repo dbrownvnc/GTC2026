@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2025 Gordon Bell Prize — 디지털 트윈으로 쓰나미를 실시간 예측하다</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #ffffff;
+  --bg2: #fafafa;
+  --text: #1a1a1a;
+  --text2: #777777;
+  --accent: #e11d48;
+  --accent2: #f43f5e;
+  --border: #e5e5e5;
+  --table-bg: #fafafa;
+  --table-header: #e11d48;
+  --chart1: #e11d48;
+  --chart2: #1a1a1a;
+  --chart3: #6b7280;
+  --chart4: #2563eb;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Source Serif 4', Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.75;
+  font-size: 16px;
+}
+
+/* HERO */
+.hero {
+  background: var(--text);
+  color: #fff;
+  padding: 64px 24px 48px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  border: 2px solid rgba(225,29,72,0.25);
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; left: -40px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  border: 1px solid rgba(225,29,72,0.15);
+}
+.hero-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--accent2);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 7vw, 48px);
+  font-weight: 900;
+  line-height: 1.15;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+.hero h1 em {
+  color: var(--accent2);
+  font-style: normal;
+}
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+  position: relative;
+  z-index: 1;
+}
+.hero-tag {
+  background: rgba(225,29,72,0.15);
+  border: 1px solid rgba(225,29,72,0.35);
+  color: #f9a8b8;
+  padding: 4px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  border-radius: 2px;
+}
+
+/* CONTAINER */
+.container { max-width: 720px; margin: 0 auto; padding: 0 20px; }
+
+/* SECTION */
+.section { padding: 48px 0 32px; border-bottom: 1px solid var(--border); }
+.section:last-child { border-bottom: none; }
+
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(22px, 5vw, 30px);
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 20px;
+}
+h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 28px 0 10px;
+  color: var(--text);
+}
+
+p { margin-bottom: 16px; color: var(--text); }
+p + p { margin-top: 0; }
+
+strong { color: var(--text); font-weight: 600; }
+em { color: var(--accent); font-style: normal; font-weight: 600; }
+
+/* PULL QUOTE */
+.pull-quote {
+  border-left: 4px solid var(--accent);
+  margin: 32px 0;
+  padding: 16px 20px;
+  background: var(--bg2);
+}
+.pull-quote p {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  line-height: 1.5;
+  font-style: italic;
+  margin: 0;
+  color: var(--text);
+}
+.pull-quote cite {
+  display: block;
+  margin-top: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text2);
+  font-style: normal;
+}
+
+/* STAT BOX */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 24px 0;
+}
+.stat-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 20px 16px;
+  border-top: 3px solid var(--accent);
+}
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text2);
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+/* TABLE */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 14px;
+}
+thead th {
+  background: var(--table-header);
+  color: #fff;
+  padding: 10px 12px;
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--table-bg);
+  vertical-align: top;
+}
+tbody tr:nth-child(even) td { background: #f4f4f4; }
+.highlight-row td { background: #fff5f7 !important; font-weight: 600; color: var(--accent); }
+
+/* CHART */
+.fade-in {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.chart-container {
+  position: relative;
+  max-height: 340px;
+  margin: 24px 0;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 16px;
+  border-radius: 2px;
+}
+.chart-container canvas {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  max-height: 300px;
+}
+.chart-container.chart-ready canvas { opacity: 1; }
+.chart-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 12px;
+}
+
+/* FLOW DIAGRAM */
+.flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 24px 0;
+}
+.flow-step {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.flow-step:last-child { border-bottom: none; }
+.flow-step:hover { background: var(--bg2); }
+.flow-num {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 2px;
+}
+.flow-num.offline { background: var(--chart4); }
+.flow-num.online { background: #16a34a; }
+.flow-content { flex: 1; }
+.flow-content strong {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 4px;
+}
+.flow-content p { margin: 0; font-size: 14px; }
+.flow-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+  white-space: nowrap;
+  align-self: center;
+}
+
+/* INTERACTIVE: Speedup Calculator */
+.sim-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 24px;
+  margin: 24px 0;
+  border-top: 3px solid var(--accent);
+}
+.sim-box h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.sim-box .sim-desc {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 20px;
+}
+.slider-row {
+  margin-bottom: 16px;
+}
+.slider-row label {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+.slider-row label span {
+  color: var(--accent);
+  font-weight: 600;
+}
+input[type=range] {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.sim-result {
+  margin-top: 20px;
+  background: var(--text);
+  color: #fff;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sim-result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+.sim-result-row span:first-child { color: #aaa; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.sim-result-row span:last-child { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+.sim-result-row.highlight span:last-child { color: var(--accent2); font-size: 18px; }
+.reset-btn {
+  margin-top: 12px;
+  background: none;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 8px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+.reset-btn:hover { background: var(--accent); color: #fff; }
+
+/* INTERACTIVE: Tsunami Timeline */
+.timeline-sim {
+  background: var(--text);
+  color: #fff;
+  padding: 24px;
+  margin: 24px 0;
+  position: relative;
+  overflow: hidden;
+}
+.timeline-sim h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+.timeline-sim p.desc { font-size: 12px; color: #aaa; margin-bottom: 20px; }
+.timeline-track {
+  position: relative;
+  height: 60px;
+  margin-bottom: 16px;
+}
+.timeline-bar {
+  position: absolute;
+  height: 8px;
+  top: 26px;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+.timeline-bar.bg { background: #333; width: 100%; }
+.timeline-bar.elapsed { background: var(--accent2); }
+.timeline-marker {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.timeline-marker .dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 2px solid;
+  background: var(--text);
+}
+.timeline-marker .label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  white-space: nowrap;
+  color: #ccc;
+  margin-top: 22px;
+}
+.timeline-marker .sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  color: #888;
+  margin-top: 2px;
+}
+.timeline-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.tl-btn {
+  background: none;
+  border: 1px solid #555;
+  color: #ccc;
+  padding: 6px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.06em;
+}
+.tl-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+.tl-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tl-status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--accent2);
+  margin-top: 12px;
+  min-height: 18px;
+}
+
+/* QUIZ */
+.quiz-section {
+  margin-top: 48px;
+  border-top: 3px solid var(--text);
+  padding-top: 40px;
+}
+.quiz-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.quiz-header .badge {
+  background: var(--text);
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  text-transform: uppercase;
+}
+.quiz-item {
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+.quiz-item:last-child { border-bottom: none; }
+.quiz-meta {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+.q-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.q-type {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text2);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+}
+.q-diff {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 1px 7px;
+}
+.q-diff.easy { background: #dcfce7; color: #166534; }
+.q-diff.mid { background: #fff3cd; color: #92400e; }
+.q-diff.hard { background: #fee2e2; color: #991b1b; }
+.quiz-q {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.options { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.options li {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  border-radius: 2px;
+  user-select: none;
+}
+.options li:hover { border-color: var(--accent); background: #fff5f7; }
+.options li.correct { background: #dcfce7; border-color: #16a34a; color: #166534; }
+.options li.wrong { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+.answer-box {
+  display: none;
+  background: var(--bg2);
+  border-left: 3px solid var(--accent);
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.65;
+  margin-top: 8px;
+}
+.answer-box.show { display: block; }
+.answer-box strong { color: var(--accent); }
+
+/* SHORT ANSWER */
+.short-ans-wrap { margin: 10px 0; }
+.short-ans-wrap input[type=text] {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  font-family: 'Source Serif 4', serif;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.2s;
+}
+.short-ans-wrap input:focus { border-color: var(--accent); }
+.check-btn {
+  margin-top: 8px;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  padding: 8px 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background 0.2s;
+}
+.check-btn:hover { background: var(--accent2); }
+
+/* OX */
+.ox-wrap { display: flex; gap: 12px; margin: 10px 0; }
+.ox-btn {
+  flex: 1;
+  padding: 14px;
+  border: 1px solid var(--border);
+  background: none;
+  font-size: 24px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.2s;
+  border-radius: 2px;
+}
+.ox-btn:hover { border-color: var(--accent); }
+.ox-btn.correct { background: #dcfce7; border-color: #16a34a; }
+.ox-btn.wrong { background: #fee2e2; border-color: #dc2626; }
+
+/* SCORE */
+.score-box {
+  background: var(--text);
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  margin-top: 24px;
+  display: none;
+}
+.score-box.show { display: block; }
+.score-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--accent2);
+}
+.score-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 4px;
+}
+
+/* FOOTER */
+.footer {
+  background: var(--bg2);
+  padding: 32px 24px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  margin-top: 48px;
+}
+.footer p {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text2);
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .stat-grid { grid-template-columns: 1fr; }
+  .stat-num { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="container">
+    <p class="hero-label">NVIDIA GTC 2026 · ACM Gordon Bell Prize 2025</p>
+    <h1>디지털 트윈으로<br><em>쓰나미를 실시간</em>으로<br>예측하다</h1>
+    <p style="color:#ccc;font-size:14px;margin-top:16px;line-height:1.7;">Omar Ghattas & Stefan Henneking · UT Austin / UC San Diego / Lawrence Livermore NL</p>
+    <div class="hero-meta">
+      <span class="hero-tag">10억 파라미터</span>
+      <span class="hero-tag">0.2초 실시간 추론</span>
+      <span class="hero-tag">베이지안 불확실성 정량화</span>
+      <span class="hero-tag">100억 배 속도 향상</span>
+      <span class="hero-tag">카스케이디아 단층대</span>
+    </div>
+  </div>
+</header>
+
+<!-- INTRO -->
+<div class="container">
+
+  <section class="section">
+    <div class="section-label">개요 · OVERVIEW</div>
+    <h2>역대 가장 빠른 대규모 베이지안 역문제 풀이</h2>
+    <p>이 연구는 2025년 11월 SC25 슈퍼컴퓨팅 컨퍼런스에서 <strong>ACM 고든 벨 상</strong>을 수상했다. HPC(고성능 컴퓨팅) 분야의 최고 권위를 자랑하는 이 상은, 복잡한 과학 문제에 슈퍼컴퓨팅 기술을 혁신적으로 적용한 연구에 수여된다.</p>
+    <p>연구팀은 <strong>10억 개의 파라미터</strong>를 가진 역문제를, 기존 방법으로 약 50년이 걸리던 계산을 <em>0.2초</em> 만에 풀어내는 알고리즘을 개발했다. 이를 카스케이디아 섭입대에 적용해 실시간 쓰나미 조기 경보 디지털 트윈 시스템을 구현했다.</p>
+
+    <div class="stat-grid fade-in">
+      <div class="stat-box">
+        <div class="stat-num">0.2s</div>
+        <div class="stat-label">실시간 역문제 풀이 시간</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">10¹⁰×</div>
+        <div class="stat-label">기존 대비 속도 향상</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">1B</div>
+        <div class="stat-label">총 파라미터 수</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">55.5T</div>
+        <div class="stat-label">최대 자유도(DOF), El Capitan</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BACKGROUND -->
+  <section class="section">
+    <div class="section-label">배경 · BACKGROUND</div>
+    <h2>카스케이디아 단층대 — 임박한 위협</h2>
+    <p><strong>카스케이디아 섭입대</strong>는 미국 캘리포니아 북부에서 캐나다 브리티시컬럼비아까지 약 1,000km에 걸쳐 있는 단층대다. 태평양쪽 후안데푸카 판이 북미 판 아래로 파고들며(<em>섭입</em>) 마찰로 고착된 상태에서 변형에너지가 계속 축적된다.</p>
+
+    <div class="pull-quote fade-in">
+      <p>"10,000년 동안 고지진학적 증거가 43회의 대지진을 기록한다. 마지막은 1700년 1월 26일. 재발 주기는 250~500년 — 우리는 이미 그 한계에 도달했다."</p>
+      <cite>— Omar Ghattas, 발표 내용 요약</cite>
+    </div>
+
+    <p>지진이 발생하면 바닥판이 수직으로 올라오며 수천 킬로미터의 수주(水柱)를 밀어 올린다. 이 중력파가 해안으로 전파되어 <strong>최대 30m 높이의 쓰나미</strong>가 태평양 북서쪽 해안을 강타할 수 있으며, 일본·아시아 방향으로도 크기는 작지만 측정 가능한 파도가 전달된다.</p>
+
+    <h3>경보의 황금 창: 15분</h3>
+    <p>최초 파도가 해안에 도달하는 시간은 약 <strong>15분</strong>. 주민들이 고지대로 대피할 수 있도록 충분한 경보를 발령하려면 이보다 훨씬 빨리, 이상적으로는 <em>1분 이내</em>에 쓰나미 예측을 완료해야 한다. 현재 카스케이디아에는 이러한 해저 센서망이 아직 없다.</p>
+
+    <!-- TIMELINE SIMULATOR -->
+    <div class="timeline-sim fade-in">
+      <h4>⏱ 지진 발생 후 타임라인 시뮬레이터</h4>
+      <p class="desc">버튼을 눌러 쓰나미 경보 과정을 확인하세요</p>
+      <div class="timeline-track">
+        <div class="timeline-bar bg"></div>
+        <div class="timeline-bar elapsed" id="tlElapsed" style="width:0%"></div>
+        <!-- markers -->
+        <div class="timeline-marker" style="left:0%">
+          <div class="dot" style="border-color:#e11d48;background:#e11d48"></div>
+          <span class="label">지진</span>
+          <span class="sub">0s</span>
+        </div>
+        <div class="timeline-marker" style="left:1.7%">
+          <div class="dot" style="border-color:#f59e0b"></div>
+          <span class="label" style="color:#f59e0b">이 연구</span>
+          <span class="sub" style="color:#f59e0b">0.2s</span>
+        </div>
+        <div class="timeline-marker" style="left:13%">
+          <div class="dot" style="border-color:#60a5fa"></div>
+          <span class="label" style="color:#60a5fa">쓰나미</span>
+          <span class="sub" style="color:#60a5fa">경보 목표</span>
+          <span class="sub" style="color:#60a5fa">3~4분</span>
+        </div>
+        <div class="timeline-marker" style="left:100%">
+          <div class="dot" style="border-color:#ef4444;background:#ef4444"></div>
+          <span class="label" style="color:#ef4444">침수</span>
+          <span class="sub" style="color:#ef4444">15분</span>
+        </div>
+      </div>
+      <div class="timeline-controls">
+        <button class="tl-btn" onclick="runTimeline(0.2/900,'#f59e0b','디지털 트윈 추론 완료: 0.2초')">▶ 디지털 트윈 (0.2s)</button>
+        <button class="tl-btn" onclick="runTimeline(50*365.25*24*3600/(900),'#ef4444','기존 방법: ~50년 소요 (시뮬레이션)')">▶ 기존 방법 (50년)</button>
+        <button class="tl-btn" onclick="resetTimeline()">↺ 초기화</button>
+      </div>
+      <div class="tl-status" id="tlStatus"></div>
+    </div>
+  </section>
+
+  <!-- METHOD -->
+  <section class="section">
+    <div class="section-label">방법론 · METHODOLOGY</div>
+    <h2>왜 기존 방법으론 불가능한가</h2>
+    <p>해저 음향 압력 센서가 지진파를 감지하면, 연구팀은 <strong>역문제(Inverse Problem)</strong>를 풀어 해저 운동을 추론한다. 파라미터는 공간(2.42M 격자점) × 시간(500 타임스텝) = <em>약 10억 차원</em>이다.</p>
+    <p>전통적인 켤레기울기법으로 이 문제를 풀려면 25만 번의 편미분방정식 풀이가 필요하다. 512개 A100 GPU에서 1회 풀이에 1시간이 걸리므로, 총 <strong>약 50년</strong>이 소요된다.</p>
+    <p>신경망 대리 모델(Surrogate)로 대체하는 방법도 있지만, 파동 방정식은 에너지가 소멸되지 않고 전파되므로 <em>저차원 잠재 표현이 근본적으로 불가능</em>하다(콜모고로프 N-폭 장벽). 즉, 파동 문제에는 AI 모델의 핵심 가정인 '매니폴드 가설'이 성립하지 않는다.</p>
+
+    <h3>세 가지 핵심 통찰</h3>
+    <div class="flow fade-in">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-content">
+          <strong>시불변성 (Time-Shift Invariance)</strong>
+          <p>지진이 오늘 발생하든 내년에 발생하든 동일한 물리 동역학이 작동한다. 파라미터-관측치 사상(p2o map) F는 시간 이동에 불변이므로, 행렬의 첫 번째 열만 구성하면 나머지는 이미 결정된다.</p>
+        </div>
+        <div class="flow-time">N<sub>d</sub>회 풀이</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-content">
+          <strong>블록 토플리츠 구조 (Block-Toeplitz)</strong>
+          <p>시불변성으로부터 F 행렬이 블록 토플리츠 행렬임을 도출한다. 블록 토플리츠 행렬은 FFT로 블록 대각화된다. 이 덕분에 편미분방정식 풀이 없이 FFT와 밀집 선형대수 연산만으로 행렬-벡터 곱 적용이 가능해진다.</p>
+        </div>
+        <div class="flow-time">FFT 기반</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-content">
+          <strong>GPU 친화적 연산 구조</strong>
+          <p>FFT와 밀집 선형대수는 GPU가 최고 성능을 발휘하는 연산이다. NVIDIA cuBLAS, cuFFT, cuDSS, cuSOLVERMp, NCCL 등을 활용해 완전히 GPU 가속화된 파이프라인을 구현했다.</p>
+        </div>
+        <div class="flow-time">~ms</div>
+      </div>
+    </div>
+
+    <div class="chart-container fade-in">
+      <div class="chart-title">계산 시간 비교 — 기존 vs. FFT 기반 접근법 (같은 512 A100 GPU)</div>
+      <canvas id="chart1" height="240"></canvas>
+    </div>
+
+    <h3>베이지안 프레임워크 — 불확실성을 함께 계산하다</h3>
+    <p>역문제는 <strong>비적정 문제(Ill-posed)</strong>다. 센서가 희소하고 잡음이 있어 데이터와 일치하는 해저 운동 패턴이 무수히 많다. 베이지안 접근법은 '어느 파라미터 필드가 올바른가'라는 단일 해 대신, <em>모든 가능성에 대한 확률 분포(사후 분포)</em>를 구한다.</p>
+    <p>가우시안 사전분포와 가우시안 잡음 하에서 사후분포도 가우시안이 되어 평균(MAP 추정치)과 공분산만으로 완전히 기술된다. 평균은 선형 시스템을 풀어 구하고, 공분산(불확실성)은 헤시안 행렬의 역행렬로 계산된다.</p>
+  </section>
+
+  <!-- WORKFLOW -->
+  <section class="section">
+    <div class="section-label">워크플로우 · WORKFLOW</div>
+    <h2>오프라인 준비 → 실시간 추론</h2>
+    <p>전체 시스템은 <strong>지진 전 오프라인 준비</strong>와 <strong>지진 발생 후 실시간 온라인 추론</strong>으로 명확히 분리된다.</p>
+
+    <div class="flow fade-in">
+      <div class="flow-step">
+        <div class="flow-num offline">P1</div>
+        <div class="flow-content">
+          <strong>오프라인 Phase 1 — p2o 사상 사전 계산</strong>
+          <p>600개 센서 위치 각각에 대해 역방향 편미분방정식(수반 파동 방정식)을 1회 풀어 p2o 행렬 F의 첫 열을 구성한다. 21개 쓰나미 예측 위치(QoI)에 대해서도 동일하게 수행한다.</p>
+        </div>
+        <div class="flow-time">~538시간</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num offline">P2</div>
+        <div class="flow-content">
+          <strong>오프라인 Phase 2 — FFT 기반 행렬 구성</strong>
+          <p>사전 분포 공분산과 F를 이용해 데이터 공간 헤시안 K와 사후 공분산의 저랭크 구조를 FFT 기반 알고리즘으로 고속 구성한다. 여기서부터 파동 방정식을 다시 풀지 않아도 된다.</p>
+        </div>
+        <div class="flow-time">~2.5시간</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num offline">P3</div>
+        <div class="flow-content">
+          <strong>오프라인 Phase 3 — QoI 공분산 및 데이터-QoI 사상 구성</strong>
+          <p>8,820개 QoI 차원에 걸쳐 사후 QoI 공분산과 데이터에서 QoI로의 직접 사상 Q를 계산한다. 이 단계까지 모두 지진 발생 전에 완료된다.</p>
+        </div>
+        <div class="flow-time">~50분</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num online">P4</div>
+        <div class="flow-content">
+          <strong>온라인 Phase 4 — 실시간 추론 및 예측</strong>
+          <p>지진 발생 후 센서 데이터 d_obs가 입력되면 단순한 행렬-벡터 연산으로 파라미터 평균(해저 운동)과 QoI 평균(쓰나미 파고)을 즉시 계산한다. 기존 파동 방정식 풀이는 전혀 필요 없다.</p>
+        </div>
+        <div class="flow-time" style="color:#16a34a;font-size:16px;">< 0.2초</div>
+      </div>
+    </div>
+
+    <table class="fade-in">
+      <thead>
+        <tr>
+          <th>단계</th><th>주요 작업</th><th>GPU 수</th><th>소요 시간</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Phase 1</td><td>600개 센서 역방향 PDE 풀이 + 21개 QoI PDE 풀이</td><td>512</td><td>~538시간</td></tr>
+        <tr><td>Phase 2</td><td>G* 구성, K 구성 및 인수분해</td><td>16–512</td><td>~2.5시간</td></tr>
+        <tr><td>Phase 3</td><td>QoI 공분산, 데이터→QoI 사상 Q 계산</td><td>512</td><td>~50분</td></tr>
+        <tr class="highlight-row"><td>Phase 4</td><td>파라미터 추론 + QoI 쓰나미 예측</td><td>512 / 1</td><td><strong>< 0.2초 / < 1ms</strong></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- COMPUTING -->
+  <section class="section">
+    <div class="section-label">HPC 인프라 · SUPERCOMPUTERS</div>
+    <h2>세계 최대 슈퍼컴퓨터에서의 성능 검증</h2>
+    <p>연구팀은 세 개의 대형 슈퍼컴퓨터에서 코드를 검증했다. 스케일링 효율은 GPU 수를 늘릴 때 성능이 얼마나 선형적으로 향상되는지를 측정한다.</p>
+
+    <table class="fade-in">
+      <thead>
+        <tr><th>시스템</th><th>TOP500 순위</th><th>GPU</th><th>피크 성능</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Alps</strong> (스위스)</td><td>#8</td><td>10,752 GH200</td><td>574.8 PFlop/s</td></tr>
+        <tr><td><strong>Perlmutter</strong> (NERSC)</td><td>#30</td><td>6,144 A100</td><td>113.0 PFlop/s</td></tr>
+        <tr><td><strong>El Capitan</strong> (Livermore)</td><td>최상위권</td><td>43,520+</td><td>초엑사플롭급</td></tr>
+      </tbody>
+    </table>
+
+    <div class="chart-container fade-in">
+      <div class="chart-title">강 스케일링 효율 (Strong Scaling Efficiency) — 각 시스템 최대 GPU 기준</div>
+      <canvas id="chart2" height="230"></canvas>
+    </div>
+
+    <h3>커널 최적화: 기초 → 텐서 코어</h3>
+    <p>유한요소법 커널은 일반적으로 메모리 병목 연산이다. 연구팀은 <strong>부분 어셈블리(Partial Assembly)</strong>와 <strong>커널 퓨전(Kernel Fusion)</strong>으로 GH200에서 초기 대비 <em>15배</em>의 처리량 향상을 달성했다.</p>
+    <p>이후 발표된 후속 연구에서는 FP64 텐서 코어(DMMA)를 활용해 GPU 공유 메모리와 레지스터 간의 데이터 트래픽을 줄여 추가로 <strong>약 50% 속도 향상</strong>을 얻었다. 이는 GB200(Blackwell)에서 더욱 두드러진다.</p>
+
+    <!-- SPEEDUP CALCULATOR -->
+    <div class="sim-box fade-in">
+      <h4>🔧 GPU 스케일링 효과 계산기</h4>
+      <p class="sim-desc">GPU 수와 병렬 효율을 조절해 강 스케일링 속도 향상을 체험하세요.</p>
+      <div class="slider-row">
+        <label>기준 GPU 수 <span id="gpuBase">170</span>개</label>
+        <input type="range" id="slGpuBase" min="1" max="500" value="170" oninput="calcSpeedup()">
+      </div>
+      <div class="slider-row">
+        <label>최대 GPU 수 <span id="gpuMax">10880</span>개</label>
+        <input type="range" id="slGpuMax" min="100" max="43520" step="100" value="10880" oninput="calcSpeedup()">
+      </div>
+      <div class="slider-row">
+        <label>병렬 효율 <span id="effVal">91</span>%</label>
+        <input type="range" id="slEff" min="50" max="100" value="91" oninput="calcSpeedup()">
+      </div>
+      <div class="sim-result" id="speedupResult">
+        <div class="sim-result-row highlight">
+          <span>실제 속도 향상</span>
+          <span id="actualSpeedup">—</span>
+        </div>
+        <div class="sim-result-row">
+          <span>이상적 속도 향상 (100%)</span>
+          <span id="idealSpeedup">—</span>
+        </div>
+        <div class="sim-result-row">
+          <span>효율 손실</span>
+          <span id="effLoss">—</span>
+        </div>
+      </div>
+      <button class="reset-btn" onclick="resetSpeedup()">↺ 초기화</button>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="section">
+    <div class="section-label">결과 · RESULTS</div>
+    <h2>0.2초 만에 나온 쓰나미 예측의 정확도</h2>
+    <p>테스트에는 UCSD 앨리스 가브리엘 팀의 동적 파열 시뮬레이션으로 생성한 <strong>규모 8.7의 카스케이디아 전폭 파열 시나리오</strong>를 사용했다. 이 합성 데이터를 '정답(Ground Truth)'으로 삼아 역문제 추론 결과와 비교한다.</p>
+
+    <div class="chart-container fade-in">
+      <div class="chart-title">센서 수에 따른 추론 오차 비교 (상대 오차 %)</div>
+      <canvas id="chart3" height="230"></canvas>
+    </div>
+
+    <p>600개 센서를 사용하면 해저 변위 재구성 오차 <strong>29.6%</strong>, 쓰나미 파고 예측 오차 <strong>18.6%</strong>를 달성한다. 175개의 희소 센서망에서도 각각 36.1%, 22.1%로 실용적인 수준을 유지한다. 회수되지 않는 성분은 희소·잡음 데이터 특성상 고주파 공간 세부 정보다.</p>
+
+    <h3>불확실성의 지도화</h3>
+    <p>베이지안 접근법의 핵심 장점은 단순한 '최선 추정치'뿐 아니라 <em>95% 신뢰 구간</em>을 함께 제공한다는 점이다. 불확실성 지도를 보면 센서 배치 위치와 대륙붕 경계에 따라 구조적 패턴이 나타난다. 더 많은 센서가 있을수록 더 좁은 신뢰 구간이 생성된다.</p>
+
+    <h3>최적 센서 배치 (Bayesian OED)</h3>
+    <p>카스케이디아에 언제 센서를 설치하더라도 예산이 한정적이다. 연구팀은 <strong>베이지안 최적 실험 설계(OED)</strong>를 통해 주어진 예산 내에서 정보를 극대화하는 센서 배치를 탐색한다.</p>
+    <p>두 가지 접근법이 존재한다. <em>표준 OED</em>는 해저 운동 파라미터 추론 정보를 최대화하며, <em>목표 지향 OED(Goal-Oriented OED)</em>는 최종 목적인 쓰나미 파고 예측 정확도를 직접 최적화한다. 그 결과 목표 지향 OED에서 선택된 센서들은 쓰나미 예측 지점 근처에 집중 배치되는 경향을 보인다.</p>
+  </section>
+
+  <!-- JAPAN -->
+  <section class="section">
+    <div class="section-label">확장 · EXTENSION TO JAPAN TRENCH</div>
+    <h2>일본 해구 — 2011년 도호쿠 지진의 교훈</h2>
+    <p>2011년 3월 11일, 규모 9.0의 도호쿠 지진과 쓰나미는 <strong>2만 명 이상의 사망자</strong>와 3,000억 달러 이상의 피해를 남겼다. 후쿠시마 원전 멜트다운도 이 쓰나미로 유발되었다. 일본은 사태 수습 이후 S-net이라는 해저 케이블 센서망(5,800km, 150개 관측소)을 구축했다.</p>
+    <p>연구팀은 동일한 디지털 트윈 프레임워크를 일본 해구에도 적용했다. 일본 해구는 카스케이디아보다 수심이 훨씬 깊어(8km 이상) 역문제가 더 복잡하다. 2011년 도호쿠 지진의 동적 파열 모델을 이용한 합성 데이터에서도 전체적인 해저 상승 패턴이 성공적으로 복원되었다.</p>
+
+    <div class="pull-quote fade-in">
+      <p>"S-net 센서망은 2011년 지진 이후에 설치되었기 때문에, 우리가 실제 데이터를 이용해 검증할 수 있는 양이 제한적이다. 하지만 동적 파열 시뮬레이션 기반 합성 데이터로 시스템을 철저히 테스트했다."</p>
+      <cite>— Stefan Henneking, Q&A 세션</cite>
+    </div>
+
+    <div class="chart-container fade-in">
+      <div class="chart-title">두 지역 디지털 트윈 비교</div>
+      <canvas id="chart4" height="230"></canvas>
+    </div>
+  </section>
+
+  <!-- SIGNIFICANCE -->
+  <section class="section">
+    <div class="section-label">의의 · SIGNIFICANCE</div>
+    <h2>이 연구가 왜 혁신인가</h2>
+
+    <div class="flow fade-in">
+      <div class="flow-step">
+        <div class="flow-num" style="background:#2563eb">①</div>
+        <div class="flow-content">
+          <strong>대리 모델 없는 정확한 물리 모델</strong>
+          <p>신경망이나 저차원 근사 없이 완전한 3D 음향-중력파 방정식을 사용한다. 파동 문제의 본질적 고차원성을 수학적 구조(블록 토플리츠)로 돌파한 것이다.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#16a34a">②</div>
+        <div class="flow-content">
+          <strong>불확실성의 정량화</strong>
+          <p>단일 최선 추정치가 아닌 완전한 확률 분포를 실시간으로 제공한다. 의사결정자는 예측 신뢰도를 함께 고려해 대피 명령의 범위와 시급성을 결정할 수 있다.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#7c3aed">③</div>
+        <div class="flow-content">
+          <strong>범용 디지털 트윈 프레임워크</strong>
+          <p>자율 선형 동역학 시스템에 적용 가능한 일반 알고리즘이다. 화학 반응기 제어, 구조물 모니터링, 우주 기상 예측 등 실시간 의사결정이 필요한 다른 분야로도 확장 가능하다.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num" style="background:#d97706">④</div>
+        <div class="flow-content">
+          <strong>역대 최대 비구조 격자 유한요소 시뮬레이션</strong>
+          <p>El Capitan에서 43,520개 GPU로 55.5조 자유도를 처리한 것은 역사상 가장 큰 비구조 격자 유한요소 계산이다. 코드는 완전한 성능 이식성(performance portability)을 보여줬다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUIZ SECTION -->
+  <div class="quiz-section">
+    <div class="quiz-header">
+      <h2 style="margin:0;font-size:24px;">시험 문제</h2>
+      <span class="badge">10 Questions</span>
+    </div>
+    <p style="color:var(--text2);font-size:14px;margin-bottom:32px;">객관식, 단답형, OX 문항을 클릭해 정답을 확인하세요. 객관식은 보기를 클릭, 단답형은 입력 후 확인 버튼을 누르세요.</p>
+
+    <!-- Q1 -->
+    <div class="quiz-item">
+      <div class="quiz-meta">
+        <span class="q-num">Q1</span>
+        <span class="q-type">객관식</span>
+        <span class="q-diff easy">쉬움</span>
+      </div>
+      <p class="quiz-q">ACM 고든 벨 상(Gordon Bell Prize)에 대한 설명으로 옳은 것은?</p>
+      <ul class="options" id="q1-opts">
+        <li onclick="checkOpt(this,'q1',false)">① 자연어 처리 분야 최고의 상으로, 매년 ACL에서 수여한다.</li>
+        <li onclick="checkOpt(this,'q1',true)">② 고성능 컴퓨팅에서 복잡한 과학 문제에 대한 혁신적 응용을 인정하는 상이다.</li>
+        <li onclick="checkOpt(this,'q1',false)">③ 인공지능 분야 노벨상으로 불리며 딥러닝 연구자에게만 수여된다.</li>
+        <li onclick="checkOpt(this,'q1',false)">④ 반도체 설계 분야 최고 권위상으로 IEEE에서 수여한다.</li>
+      </ul>
+      <div class="answer-box" id="q1-ans">
+        <strong>정답: ②</strong><br>ACM 고든 벨 상은 HPC(고성능 컴퓨팅) 분야에서 과학·공학·대규모 데이터 분석에 대한 혁신적 병렬 컴퓨팅 응용을 인정하는 최고 권위상으로, ACM 슈퍼컴퓨팅 컨퍼런스(SC)에서 매년 수여된다.
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="quiz-item">
+      <div class="quiz-meta">
+        <span class="q-num">Q2</span>
+        <span class="q-type">객관식</span>
+        <span class="q-diff easy">쉬움</span>
+      </div>
+      <p class="quiz-q">카스케이디아 단층대에서 마지막 대지진이 발생한 연도는?</p>
+      <ul class="options" id="q2-opts">
+        <li onclick="checkOpt(this,'q2',false)">① 1906년</li>
+        <li onclick="checkOpt(this,'q2',true)">② 1700년</li>
+        <li onclick="checkOpt(this,'q2',false)">③ 1964년</li>
+        <li onclick="checkOpt(this,'q2',false)">④ 2011년</li>
+      </ul>
+      <div class="answer-box" id="q2-ans">
+        <strong>정답: ②</strong><br>카스케이디아 단층대의 마지막 대규모 지진과 '고아 쓰나미(Orphan Tsunami)'는 1700년 1월 26일 발생했다. 고지진학적 증거에 따르면 10,000년 동안 43회의 대지진이 있었으며 재발 주기는 250~500년이므로, 현재 시점(2026년 기준, 326년 경과)은 이미 재발 가능 구간에 진입했다.
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="quiz-item">
+      <div class="quiz-meta">
+        <span class="q-num">Q3</span>
+        <span class="q-type">OX</span>
+        <span class="q-diff easy">쉬움</span>
+      </div>
+      <p class="quiz-q">이 연구는 기존 쓰나미 예측에 주로 사용되는 '천수 방정식(Shallow Water Equations)' 대신, 완전한 3D 음향-중력파 방정식을 사용한다. (O/X)</p>
+      <div class="ox-wrap">
+        <button class="ox-btn" onclick="checkOX(this,'q3','O')">O</button>
+        <button class="ox-btn" onclick="checkOX(this,'q3','X')">X</button>
+      </div>
+      <div class="answer-box" id="q3-ans">
+        <strong>정답: O</strong><br>천수 방정식은 원거리 전파에는 효율적이지만 지진 직후 발생하는 근거리 음향 압력 과도 현상을 포착하지 못한다. 이 연구는 음파와 중력파를 결합한 완전 3D PDE 모델을 사용해 해저 센서의 음향 압력 데이터를 활용할 수 있게 했다.
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="quiz-item">
+      <div class="quiz-meta">
+        <span class="q-num">Q4</span>
+        <span class="q-type">객관식</span>
+        <span class="q-diff mid">보통</span>
+      </div>
+      <p class="quiz-q">역문제의 파라미터-관측치 사상(p2o map) F가 <strong>블록 토플리츠 행렬</strong>이 되는 근본 이유는?</p>
+      <ul class="options" id="q4-opts">
+        <li onclick="checkOpt(this,'q4',false)">① 해저 지형이 균일하게 평탄하기 때문</li>
+        <li onclick="checkOpt(this,'q4',false)">② 센서 수가 파라미터 차원보다 훨씬 적기 때문</li>
+        <li onclick="checkOpt(this,'q4',true)">③ 물리 시스템이 자율(autonomous) 동역학 시스템이어서 시불변성을 가지기 때문</li>
+        <li onclick="checkOpt(this,'q4',false)">④ GPU가 FFT 연산에 특화되어 있기 때문</li>
+      </ul>
+      <div class="answer-box" id="q4-ans">
+        <strong>정답: ③</strong><br>자율 동역학 시스템이란 물리 법칙이 시간의 절대적 시점에 의존하지 않는 시스템이다. 즉, 지진이 오늘 발생하든 내년에 발생하든 같은 물리가 작동한다. 이 시불변성 덕분에 파라미터-관측치 사상 F의 각 블록 행은 이전 행을 한 칸씩 이동시킨 것과 같아 블록 토플리츠 구조가 생성된다.
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="quiz-item">
+      <div class="quiz-meta">
+        <span class="q-num">Q5</span>
+        <span class="q-type">단답형</span>
+        <span class="q-diff mid">보통</span>
+      </div>
+      <p class="quiz-q">이 연구에서 온라인(실시간) 역문제 추론 시간은 몇 초 이내인가?</p>
+      <div class="short-ans-wrap">
+        <input type="text" id="q5-input" placeholder="숫자만 입력 (예: 0.5)" />
+        <button class="check-btn" onclick="checkShort('q5', ['0.2', '0.2초', '0.2s'])">확인</button>
+      </div>
+      <div class="answer-box" id="q5-ans">
+        <strong>정답: 0.2초 이내</strong><br>Phase 4의 실시간 파라미터 추론은 512개 GPU에서 0.2초 이내에 완료된다. QoI(쓰나미 파고) 예측은 단 1개의 GPU에서 1밀리초 이내에 완료된다. 이는 기존 최신 방법 대비 약 100억 배(10¹⁰)의 속도 향상이다.
+      </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="quiz-item">
+      <div class="quiz-meta">
+        <span class="q-num">Q6</span>
+        <span class="q-type">객관식</span>
+        <span class="q-diff mid">보통</span>
+      </div>
+      <p class="quiz-q">베이지안 프레임워크를 사용하는 주요 이유로 가장 적절한 것은?</p>
+      <ul class="options" id="q6-opts">
+        <li onclick="checkOpt(this,'q6',false)">① 계산이 더 빠르기 때문</li>
+        <li onclick="checkOpt(this,'q6',false)">② GPU에서 더 잘 돌아가기 때문</li>
+        <li onclick="checkOpt(this,'q6',true)">③ 희소·잡음 데이터에서 발생하는 불확실성을 확률 분포로 체계적으로 정량화할 수 있기 때문</li>
+        <li onclick="checkOpt(this,'q6',false)">④ 신경망과 결합하기 쉽기 때문</li>
+      </ul>
+      <div class="answer-box" id="q6-ans">
+        <strong>정답: ③</strong><br>역문제는 비적정(ill-posed) 문제로, 희소하고 잡음이 있는 관측치와 일치하는 파라미터 필드가 무수히 많다. 베이지안 프레임워크는 이 모호함을 사후 확률 분포로 표현해 '어느 것이 맞는가'가 아니라 '각각이 얼마나 가능성 있는가'를 알려준다. 이는 조기 경보 시스템에서 신뢰 구간을 함께 제공하는 데 핵심적이다.
+      </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="quiz-item">
+      <div class="quiz-meta">
+        <span class="q-num">Q7</span>
+        <span class="q-type">OX</span>
+        <span class="q-diff mid">보통</span>
+      </div>
+      <p class="quiz-q">이 연구에서 신경망(Neural Network) 대리 모델이 파동 방정식의 대체 수단으로 사용되었다. (O/X)</p>
+      <div class="ox-wrap">
+        <button class="ox-btn" onclick="checkOX(this,'q7','O')">O</button>
+        <button class="ox-btn" onclick="checkOX(this,'q7','X')">X</button>
+      </div>
+      <div class="answer-box" id="q7-ans">
+        <strong>정답: X</strong><br>연구팀은 신경망 대리 모델을 의도적으로 사용하지 않았다. 파동 방정식은 쌍곡선형이어서 정보가 소멸 없이 전파된다. 이는 저차원 잠재 표현이 근본적으로 불가능함을 의미하며(콜모고로프 N-폭 장벽), AI 모델의 전제인 '매니폴드 가설'이 이 문제에 성립하지 않는다.
+      </div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="quiz-item">
+      <div class="quiz-meta">
+        <span class="q-num">Q8</span>
+        <span class="q-type">단답형</span>
+        <span class="q-diff mid">보통</span>
+      </div>
+      <p class="quiz-q">El Capitan 슈퍼컴퓨터에서 달성한 약 자유도 수(DOF)는 얼마인가? (단위: T = 조)</p>
+      <div class="short-ans-wrap">
+        <input type="text" id="q8-input" placeholder="예: 55.5T 또는 55.5" />
+        <button class="check-btn" onclick="checkShort('q8', ['55.5t','55.5 t','55.5','55.5조','55.5 trillion','55.5t dof'])">확인</button>
+      </div>
+      <div class="answer-box" id="q8-ans">
+        <strong>정답: 55.5T (55.5조)</strong><br>El Capitan에서 43,520개 GPU로 총 55.5조(55.5 Trillion) 자유도를 처리했다. 이는 역대 가장 큰 비구조 격자 유한요소 시뮬레이션으로 기록된다. GPU당 약 1.28B(12.8억)의 자유도가 할당되었다.
+      </div>
+    </div>
+
+    <!-- Q9 -->
+    <div class="quiz-item">
+      <div class="quiz-meta">
+        <span class="q-num">Q9</span>
+        <span class="q-type">객관식</span>
+        <span class="q-diff hard">어려움</span>
+      </div>
+      <p class="quiz-q">오프라인 Phase 1에서 600개 센서에 대해 수행해야 하는 필수 계산 작업은?</p>
+      <ul class="options" id="q9-opts">
+        <li onclick="checkOpt(this,'q9',false)">① 600회의 순방향(forward) 파동 방정식 풀이</li>
+        <li onclick="checkOpt(this,'q9',true)">② 600회의 역방향(adjoint) 파동 방정식 풀이</li>
+        <li onclick="checkOpt(this,'q9',false)">③ 600개 센서 위치 각각에 FFT를 직접 적용</li>
+        <li onclick="checkOpt(this,'q9',false)">④ 600개 신경망 모델 학습</li>
+      </ul>
+      <div class="answer-box" id="q9-ans">
+        <strong>정답: ②</strong><br>p2o 행렬 F의 첫 번째 열을 구성하기 위해 각 센서 위치에 대한 수반(adjoint) 편미분방정식을 한 번씩 풀어야 한다. 수반 방정식은 시간 역방향으로 전파되어 데이터 공간과 파라미터 공간 사이의 민감도를 계산한다. 이 600번의 풀이가 Phase 1의 대부분(약 520시간)을 차지한다.
+      </div>
+    </div>
+
+    <!-- Q10 -->
+    <div class="quiz-item">
+      <div class="quiz-meta">
+        <span class="q-num">Q10</span>
+        <span class="q-type">객관식</span>
+        <span class="q-diff hard">어려움</span>
+      </div>
+      <p class="quiz-q">목표 지향 최적 실험 설계(Goal-Oriented OED)가 표준 OED와 다른 점은?</p>
+      <ul class="options" id="q10-opts">
+        <li onclick="checkOpt(this,'q10',false)">① 센서를 더 균등하게 분산 배치한다.</li>
+        <li onclick="checkOpt(this,'q10',false)">② 그리디 알고리즘 대신 완전 조합 탐색을 사용한다.</li>
+        <li onclick="checkOpt(this,'q10',true)">③ 파라미터 추론 정확도 대신 최종 관심 량(쓰나미 파고)의 예측 정확도를 직접 최대화한다.</li>
+        <li onclick="checkOpt(this,'q10',false)">④ 딥러닝 기반 센서 배치 최적화를 사용한다.</li>
+      </ul>
+      <div class="answer-box" id="q10-ans">
+        <strong>정답: ③</strong><br>표준 OED는 해저 운동 파라미터 전체에 대한 사후 공분산의 로그 행렬식(D-optimal 기준)을 최소화한다. 반면 목표 지향 OED는 최종 관심 량인 21개 쓰나미 예측 지점의 파고 예측 불확실성을 직접 최소화한다. 그 결과 목표 지향 OED에서 선택된 센서들은 쓰나미 도달 예정 지점 가까이에 배치되는 경향이 있어 두 방법은 서로 다른 배치 패턴을 도출한다.
+      </div>
+    </div>
+
+    <div class="score-box" id="scoreBox">
+      <div class="score-num" id="scoreNum">—</div>
+      <div class="score-label">/ 10 정답</div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer class="footer">
+  <div class="container">
+    <p>SC25 Gordon Bell Prize Winner · "Real-time Bayesian inference at extreme scale: A digital twin for tsunami early warning applied to the Cascadia subduction zone" · NVIDIA GTC 2026</p>
+    <p style="margin-top:6px;">Henneking, Venkat, Dobrev, Camier, Kolev, Fernando, Gabriel, Ghattas · UT Austin / UCSD / LLNL</p>
+  </div>
+</footer>
+
+<script>
+/* ======= FADE + CHART OBSERVER ======= */
+const fadeObs = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+      fadeObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.fade-in').forEach(el => fadeObs.observe(el));
+
+const chartConfigs = {};
+
+chartConfigs['chart1'] = () => {
+  new Chart(document.getElementById('chart1'), {
+    type: 'bar',
+    data: {
+      labels: ['기존 방법\n(CG, 512 GPU)', '이 연구\n(FFT 기반, 512 GPU)'],
+      datasets: [{
+        label: '계산 시간',
+        data: [50 * 365 * 24, 0.2 / 3600],
+        backgroundColor: ['#6b7280', '#e11d48'],
+        borderRadius: 2,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          type: 'logarithmic',
+          title: { display: true, text: '계산 시간 (시간, 로그 스케일)', font: { family: 'JetBrains Mono', size: 10 } },
+          ticks: { font: { family: 'JetBrains Mono', size: 10 } }
+        },
+        y: { ticks: { font: { family: 'JetBrains Mono', size: 10 } } }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ctx.dataIndex === 0 ? '~438,000 시간 (약 50년)' : '0.0000556 시간 (0.2초)'
+          }
+        }
+      }
+    }
+  });
+};
+
+chartConfigs['chart2'] = () => {
+  new Chart(document.getElementById('chart2'), {
+    type: 'bar',
+    data: {
+      labels: ['Alps\n(GH200)', 'Perlmutter\n(A100)', 'El Capitan'],
+      datasets: [{
+        label: '달성 병렬 효율 (%)',
+        data: [91, 92, 79],
+        backgroundColor: ['#2563eb', '#e11d48', '#1a1a1a'],
+        borderRadius: 2,
+      }, {
+        label: '이상적 효율 (100%)',
+        data: [100, 100, 100],
+        backgroundColor: 'transparent',
+        borderColor: '#e5e5e5',
+        borderWidth: 1,
+        type: 'bar',
+        borderRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          min: 0, max: 110,
+          title: { display: true, text: '병렬 효율 (%)', font: { family: 'JetBrains Mono', size: 10 } },
+          ticks: { font: { family: 'JetBrains Mono', size: 10 } }
+        },
+        x: { ticks: { font: { family: 'JetBrains Mono', size: 10 } } }
+      },
+      plugins: {
+        legend: { labels: { font: { family: 'JetBrains Mono', size: 10 } } },
+        tooltip: {
+          callbacks: {
+            afterLabel: ctx => ctx.datasetIndex === 0 ? `최대 GPU 기준 강 스케일링` : ''
+          }
+        }
+      }
+    }
+  });
+};
+
+chartConfigs['chart3'] = () => {
+  new Chart(document.getElementById('chart3'), {
+    type: 'bar',
+    data: {
+      labels: ['해저 변위 재구성\n(600 센서)', '해저 변위 재구성\n(175 센서)', '쓰나미 파고 예측\n(600 센서)', '쓰나미 파고 예측\n(175 센서)'],
+      datasets: [{
+        label: '상대 오차 (%)',
+        data: [29.6, 36.1, 18.6, 22.1],
+        backgroundColor: ['#e11d48', '#f43f5e', '#1a1a1a', '#6b7280'],
+        borderRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          min: 0, max: 50,
+          title: { display: true, text: '상대 오차 (%)', font: { family: 'JetBrains Mono', size: 10 } },
+          ticks: { font: { family: 'JetBrains Mono', size: 10 } }
+        },
+        x: { ticks: { font: { family: 'JetBrains Mono', size: 10 }, maxRotation: 0, minRotation: 0 } }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => `오차: ${ctx.raw}%` } }
+      }
+    }
+  });
+};
+
+chartConfigs['chart4'] = () => {
+  new Chart(document.getElementById('chart4'), {
+    type: 'radar',
+    data: {
+      labels: ['지역 길이\n(1000km 기준)', '수심', '센서 네트워크\n성숙도', '합성 데이터\n품질', '실시간 검증\n가능성'],
+      datasets: [{
+        label: '카스케이디아',
+        data: [100, 45, 20, 85, 65],
+        backgroundColor: 'rgba(225,29,72,0.15)',
+        borderColor: '#e11d48',
+        pointBackgroundColor: '#e11d48',
+        borderWidth: 2,
+      }, {
+        label: '일본 해구',
+        data: [65, 90, 90, 75, 40],
+        backgroundColor: 'rgba(37,99,235,0.1)',
+        borderColor: '#2563eb',
+        pointBackgroundColor: '#2563eb',
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { display: false },
+          pointLabels: { font: { family: 'JetBrains Mono', size: 9 } }
+        }
+      },
+      plugins: {
+        legend: { labels: { font: { family: 'JetBrains Mono', size: 10 } } }
+      }
+    }
+  });
+};
+
+const chartObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const canvas = e.target.querySelector('canvas');
+      if (canvas && chartConfigs[canvas.id]) {
+        chartConfigs[canvas.id]();
+        e.target.classList.add('chart-ready');
+        chartObs.unobserve(e.target);
+      }
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.chart-container').forEach(el => chartObs.observe(el));
+
+/* ======= TIMELINE ======= */
+let tlAnim = null;
+function runTimeline(fraction, color, msg) {
+  clearInterval(tlAnim);
+  const bar = document.getElementById('tlElapsed');
+  const status = document.getElementById('tlStatus');
+  bar.style.background = color;
+  let pct = 0;
+  const target = Math.min(fraction * 100, 100);
+  tlAnim = setInterval(() => {
+    pct = Math.min(pct + (target / 60), target);
+    bar.style.width = pct + '%';
+    if (pct >= target) {
+      clearInterval(tlAnim);
+      status.textContent = '✓ ' + msg;
+    }
+  }, 16);
+}
+function resetTimeline() {
+  clearInterval(tlAnim);
+  document.getElementById('tlElapsed').style.width = '0%';
+  document.getElementById('tlStatus').textContent = '';
+}
+
+/* ======= SPEEDUP CALCULATOR ======= */
+function calcSpeedup() {
+  const base = parseInt(document.getElementById('slGpuBase').value);
+  const max = parseInt(document.getElementById('slGpuMax').value);
+  const eff = parseInt(document.getElementById('slEff').value);
+  document.getElementById('gpuBase').textContent = base.toLocaleString();
+  document.getElementById('gpuMax').textContent = max.toLocaleString();
+  document.getElementById('effVal').textContent = eff;
+  const ratio = max / base;
+  const ideal = ratio.toFixed(1);
+  const actual = (ratio * eff / 100).toFixed(1);
+  const loss = (ratio - ratio * eff / 100).toFixed(1);
+  document.getElementById('idealSpeedup').textContent = ideal + '×';
+  document.getElementById('actualSpeedup').textContent = actual + '×';
+  document.getElementById('effLoss').textContent = loss + '× 손실';
+}
+function resetSpeedup() {
+  document.getElementById('slGpuBase').value = 170;
+  document.getElementById('slGpuMax').value = 10880;
+  document.getElementById('slEff').value = 91;
+  calcSpeedup();
+}
+calcSpeedup();
+
+/* ======= QUIZ ======= */
+let answered = {};
+let correctCount = 0;
+const TOTAL_Q = 10;
+
+function checkOpt(el, qid, isCorrect) {
+  if (answered[qid]) return;
+  answered[qid] = true;
+  const opts = document.querySelectorAll(`#${qid}-opts li`);
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  el.classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    opts.forEach(o => { if (o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) o.classList.add('correct'); });
+  }
+  document.getElementById(`${qid}-ans`).classList.add('show');
+  if (isCorrect) correctCount++;
+  updateScore();
+}
+
+function checkOX(el, qid, val) {
+  if (answered[qid]) return;
+  answered[qid] = true;
+  const correctAnswers = { q3: 'O', q7: 'X' };
+  const correct = val === correctAnswers[qid];
+  const btns = el.parentElement.querySelectorAll('.ox-btn');
+  btns.forEach(b => b.style.pointerEvents = 'none');
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) {
+    btns.forEach(b => { if (b.textContent.trim() === correctAnswers[qid]) b.classList.add('correct'); });
+  }
+  document.getElementById(`${qid}-ans`).classList.add('show');
+  if (correct) correctCount++;
+  updateScore();
+}
+
+function checkShort(qid, acceptedList) {
+  if (answered[qid]) return;
+  const input = document.getElementById(`${qid}-input`);
+  const val = input.value.trim().toLowerCase().replace(/\s+/g, '');
+  const correct = acceptedList.some(a => val === a.toLowerCase().replace(/\s+/g,'') || val.startsWith(a.toLowerCase().replace(/\s+/g,'').substring(0,4)));
+  answered[qid] = true;
+  input.style.borderColor = correct ? '#16a34a' : '#dc2626';
+  input.style.background = correct ? '#dcfce7' : '#fee2e2';
+  document.getElementById(`${qid}-ans`).classList.add('show');
+  if (correct) correctCount++;
+  updateScore();
+}
+
+function updateScore() {
+  const total = Object.keys(answered).length;
+  if (total === TOTAL_Q) {
+    const box = document.getElementById('scoreBox');
+    document.getElementById('scoreNum').textContent = correctCount;
+    box.classList.add('show');
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+</script>
+</body>
+</html>
