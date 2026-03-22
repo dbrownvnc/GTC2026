@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시험문제 — Delta 800VDC & 모듈형 데이터센터</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:wght@300;400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff; --bg2: #fafafa; --text: #1a1a1a; --text2: #777777;
+    --accent: #e11d48; --accent2: #f43f5e; --border: #e5e5e5;
+    --correct: #16a34a; --wrong: #dc2626; --neutral: #2563eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--bg); color: var(--text);
+    max-width: 720px; margin: 0 auto; padding: 0 20px 60px;
+    line-height: 1.75; font-size: 16px;
+  }
+  .masthead {
+    border-bottom: 3px solid var(--accent);
+    padding: 32px 0 20px; text-align: center;
+  }
+  .masthead-kicker {
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    letter-spacing: .2em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 10px;
+  }
+  .masthead-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(22px, 6vw, 36px); font-weight: 900; line-height: 1.2;
+  }
+  .masthead-sub { font-size: 13px; color: var(--text2); margin-top: 8px; font-style: italic; }
+
+  .score-board {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-top: 3px solid var(--accent); padding: 20px;
+    text-align: center; margin: 28px 0;
+  }
+  .score-num {
+    font-family: 'Playfair Display', serif; font-size: 52px;
+    font-weight: 900; color: var(--accent); line-height: 1;
+  }
+  .score-label { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text2); margin-top: 4px; }
+  .score-bar-bg {
+    background: var(--border); height: 8px; border-radius: 4px;
+    margin: 14px 0 10px; overflow: hidden;
+  }
+  .score-bar-fill {
+    height: 100%; background: var(--accent);
+    width: 0%; transition: width 1s ease; border-radius: 4px;
+  }
+  .score-msg { font-size: 14px; color: var(--text2); font-style: italic; }
+
+  /* QUESTION CARD */
+  .q-card {
+    border: 1px solid var(--border); margin: 24px 0;
+    border-top: 3px solid var(--border); overflow: hidden;
+    transition: border-top-color .3s;
+  }
+  .q-card.answered-correct { border-top-color: var(--correct); }
+  .q-card.answered-wrong { border-top-color: var(--wrong); }
+
+  .q-header {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 16px 16px 14px; background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+  .q-num {
+    font-family: 'Playfair Display', serif; font-size: 22px;
+    font-weight: 900; color: var(--accent); min-width: 32px;
+    line-height: 1;
+  }
+  .q-meta { flex: 1; }
+  .q-badge {
+    display: inline-block; font-family: 'DM Mono', monospace;
+    font-size: 9px; padding: 2px 7px; letter-spacing: .08em;
+    border: 1px solid var(--border); color: var(--text2); margin-bottom: 5px;
+  }
+  .q-badge.easy { border-color: var(--correct); color: var(--correct); }
+  .q-badge.medium { border-color: var(--neutral); color: var(--neutral); }
+  .q-badge.hard { border-color: var(--accent); color: var(--accent); }
+  .q-text { font-size: 15px; font-weight: 600; line-height: 1.5; }
+
+  /* OPTIONS */
+  .q-options { padding: 14px 16px; }
+  .opt-btn {
+    display: block; width: 100%; text-align: left;
+    background: #fff; border: 1px solid var(--border);
+    padding: 10px 14px; margin-bottom: 8px; cursor: pointer;
+    font-family: 'Source Serif 4', serif; font-size: 14px;
+    transition: all .2s; color: var(--text);
+  }
+  .opt-btn:hover:not(:disabled) { border-color: var(--accent); background: #fff5f7; }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.selected-correct {
+    background: #f0fdf4; border-color: var(--correct);
+    color: var(--correct); font-weight: 600;
+  }
+  .opt-btn.selected-wrong {
+    background: #fef2f2; border-color: var(--wrong); color: var(--wrong);
+  }
+  .opt-btn.show-correct {
+    background: #f0fdf4; border-color: var(--correct); color: var(--correct);
+  }
+
+  /* SHORT ANSWER */
+  .short-answer-wrap { padding: 0 16px 14px; }
+  .short-input {
+    width: 100%; border: 1px solid var(--border); padding: 10px 12px;
+    font-family: 'Source Serif 4', serif; font-size: 14px;
+    outline: none; transition: border-color .2s;
+  }
+  .short-input:focus { border-color: var(--accent); }
+  .short-input.correct { border-color: var(--correct); background: #f0fdf4; }
+  .short-input.wrong { border-color: var(--wrong); background: #fef2f2; }
+  .short-submit {
+    margin-top: 8px; background: none; border: 1px solid var(--accent);
+    color: var(--accent); font-family: 'DM Mono', monospace; font-size: 10px;
+    letter-spacing: .1em; padding: 7px 14px; cursor: pointer; text-transform: uppercase;
+    transition: all .2s;
+  }
+  .short-submit:hover { background: var(--accent); color: #fff; }
+
+  /* OX */
+  .ox-wrap { display: flex; gap: 10px; padding: 0 16px 14px; }
+  .ox-btn {
+    flex: 1; padding: 14px; font-family: 'Playfair Display', serif;
+    font-size: 28px; font-weight: 900; text-align: center;
+    background: #fff; border: 1px solid var(--border); cursor: pointer;
+    transition: all .2s;
+  }
+  .ox-btn:hover:not(:disabled) { border-color: var(--accent); background: #fff5f7; }
+  .ox-btn:disabled { cursor: default; }
+  .ox-btn.selected-correct { background: #f0fdf4; border-color: var(--correct); color: var(--correct); }
+  .ox-btn.selected-wrong { background: #fef2f2; border-color: var(--wrong); color: var(--wrong); }
+  .ox-btn.show-correct { background: #f0fdf4; border-color: var(--correct); color: var(--correct); }
+
+  /* EXPLANATION */
+  .q-explanation {
+    display: none; padding: 14px 16px;
+    background: #fffbf0; border-top: 1px solid #fde68a;
+    font-size: 14px; line-height: 1.7;
+  }
+  .q-explanation.show { display: block; }
+  .exp-label {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: #92400e; margin-bottom: 6px;
+  }
+  .exp-answer {
+    font-family: 'DM Mono', monospace; font-weight: 500;
+    color: var(--correct); font-size: 13px; margin-bottom: 6px;
+  }
+
+  /* NAVIGATION */
+  .nav-bar {
+    display: flex; gap: 10px; margin: 32px 0; flex-wrap: wrap;
+  }
+  .nav-btn {
+    flex: 1; min-width: 120px; padding: 12px; text-align: center;
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: .08em;
+    text-transform: uppercase; cursor: pointer; border: 1px solid var(--border);
+    background: #fff; transition: all .2s; color: var(--text);
+  }
+  .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .nav-btn.primary:hover { background: var(--accent2); }
+
+  .divider { width: 60px; height: 3px; background: var(--accent); margin: 32px 0; }
+  footer {
+    border-top: 1px solid var(--border); padding-top: 16px;
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    color: var(--text2); text-align: center;
+  }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-kicker">시험문제 · Delta 800VDC & 모듈형 데이터센터</div>
+  <h1 class="masthead-title">10문제 평가</h1>
+  <p class="masthead-sub">객관식 · 단답형 · OX — 난이도 쉬움 30% / 보통 50% / 어려움 20%</p>
+</header>
+
+<div class="score-board">
+  <div class="score-num" id="scoreNum">0</div>
+  <div class="score-label">/ 10 점</div>
+  <div class="score-bar-bg"><div class="score-bar-fill" id="scoreBar"></div></div>
+  <div class="score-msg" id="scoreMsg">문제를 풀어보세요!</div>
+</div>
+
+<div class="nav-bar">
+  <button class="nav-btn primary" onclick="submitAll()">📋 전체 채점</button>
+  <button class="nav-btn" onclick="resetAll()">↺ 처음부터</button>
+</div>
+
+<!-- ───────────────────────────── Q1 ─── -->
+<div class="q-card" id="qcard1">
+  <div class="q-header">
+    <div class="q-num">01</div>
+    <div class="q-meta">
+      <span class="q-badge easy">쉬움 · 객관식</span>
+      <div class="q-text">Delta Electronics가 설립된 연도와 설립자는 누구인가요?</div>
+    </div>
+  </div>
+  <div class="q-options" id="qopts1">
+    <button class="opt-btn" onclick="selectOpt(1,'A')">A. 1980년, Ping Cheng</button>
+    <button class="opt-btn" onclick="selectOpt(1,'B')">B. 1971년, Bruce Cheng ✓</button>
+    <button class="opt-btn" onclick="selectOpt(1,'C')">C. 1965년, Bruce Cheng</button>
+    <button class="opt-btn" onclick="selectOpt(1,'D')">D. 1990년, Jason Agee</button>
+  </div>
+  <div class="q-explanation" id="qexp1">
+    <div class="exp-label">해설</div>
+    <div class="exp-answer">정답: B — 1971년, Bruce Cheng</div>
+    <p>Delta Electronics는 1971년 Bruce Cheng에 의해 설립되었습니다. 현재 Ping Cheng이 회장 겸 CEO를 맡고 있습니다. 설립 후 55년간 전력 공급 장치 세계 1위 제조사로 성장했습니다.</p>
+  </div>
+</div>
+
+<!-- ───────────────────────────── Q2 ─── -->
+<div class="q-card" id="qcard2">
+  <div class="q-header">
+    <div class="q-num">02</div>
+    <div class="q-meta">
+      <span class="q-badge easy">쉬움 · OX</span>
+      <div class="q-text">미래 AI 데이터센터 전력이 1GW에 달하면, 이는 약 10만 가구의 전력 소비에 해당한다. (O / X)</div>
+    </div>
+  </div>
+  <div class="ox-wrap" id="qopts2">
+    <button class="ox-btn" onclick="selectOX(2,'O')">O</button>
+    <button class="ox-btn" onclick="selectOX(2,'X')">X</button>
+  </div>
+  <div class="q-explanation" id="qexp2">
+    <div class="exp-label">해설</div>
+    <div class="exp-answer">정답: O (맞음)</div>
+    <p>발표에 따르면, 미래 AI 데이터센터가 1GW 전력을 소비하면 이는 약 100k(10만) 가구의 전력 소비와 맞먹습니다. 비교하면 서버 1대 ≈ 가정 1채, 랙 1개 ≈ 가정 100채입니다.</p>
+  </div>
+</div>
+
+<!-- ───────────────────────────── Q3 ─── -->
+<div class="q-card" id="qcard3">
+  <div class="q-header">
+    <div class="q-num">03</div>
+    <div class="q-meta">
+      <span class="q-badge easy">쉬움 · 객관식</span>
+      <div class="q-text">Delta의 800VDC 인-로우 파워 랙(사이드카)의 총 정격 출력 전력은 얼마인가요?</div>
+    </div>
+  </div>
+  <div class="q-options" id="qopts3">
+    <button class="opt-btn" onclick="selectOpt(3,'A')">A. 110kW</button>
+    <button class="opt-btn" onclick="selectOpt(3,'B')">B. 440kW</button>
+    <button class="opt-btn" onclick="selectOpt(3,'C')">C. 660kW ✓</button>
+    <button class="opt-btn" onclick="selectOpt(3,'D')">D. 1MW</button>
+  </div>
+  <div class="q-explanation" id="qexp3">
+    <div class="exp-label">해설</div>
+    <div class="exp-answer">정답: C — 660kW</div>
+    <p>800VDC 인-로우 파워 랙은 6개의 110kW 전원 선반으로 구성되어 있습니다. 6 × 110kW = 660kW입니다. 추가로 BBU(배터리 백업 유닛) 30개(16kW × 30 = 450kW 정격)도 포함되어 있습니다.</p>
+  </div>
+</div>
+
+<!-- ───────────────────────────── Q4 ─── -->
+<div class="q-card" id="qcard4">
+  <div class="q-header">
+    <div class="q-num">04</div>
+    <div class="q-meta">
+      <span class="q-badge medium">보통 · 단답형</span>
+      <div class="q-text">Vera Rubin NVL72용 18.5kW PSU에 내장된 에너지 버퍼(캐패시터 에너지)의 용량은 얼마입니까? (단위 포함)</div>
+    </div>
+  </div>
+  <div class="short-answer-wrap" id="qopts4">
+    <input class="short-input" type="text" id="qinput4" placeholder="답을 입력하세요 (예: 1200 J)">
+    <button class="short-submit" onclick="checkShort(4, ['1200j','1200 j','1200joule','1200줄','1200 joule'])">제출</button>
+  </div>
+  <div class="q-explanation" id="qexp4">
+    <div class="exp-label">해설</div>
+    <div class="exp-answer">정답: 1,200 J (줄)</div>
+    <p>Vera Rubin NVL72용 18.5kW 3상 AC PSU에는 1,200J의 에너지 버퍼가 탑재되어 있습니다. 이는 GB200용 PSU의 75J 대비 10배 이상 증가한 수치이며, GPU 부하 변동을 흡수해 전력망에 완전히 평탄한 입력 전류를 공급합니다.</p>
+  </div>
+</div>
+
+<!-- ───────────────────────────── Q5 ─── -->
+<div class="q-card" id="qcard5">
+  <div class="q-header">
+    <div class="q-num">05</div>
+    <div class="q-meta">
+      <span class="q-badge medium">보통 · 객관식</span>
+      <div class="q-text">100MW IT 부하 기준, 480VAC(효율 93%)에서 800VDC(효율 95%)로 전환 시 연간 예상 전기비용 절감액은? (전력 단가 $0.08/kWh)</div>
+    </div>
+  </div>
+  <div class="q-options" id="qopts5">
+    <button class="opt-btn" onclick="selectOpt(5,'A')">A. 약 $160만/년 ✓</button>
+    <button class="opt-btn" onclick="selectOpt(5,'B')">B. 약 $1,600만/년</button>
+    <button class="opt-btn" onclick="selectOpt(5,'C')">C. 약 $800만/년</button>
+    <button class="opt-btn" onclick="selectOpt(5,'D')">D. 약 $320만/년</button>
+  </div>
+  <div class="q-explanation" id="qexp5">
+    <div class="exp-label">해설</div>
+    <div class="exp-answer">정답: A — 약 $160만(~$1.6M)/년</div>
+    <p>발표의 계산 예시: 100MW IT, $0.08/kWh 조건에서 2%p 효율 향상으로 연간 약 19,000MWh 전력을 절약하며, 이는 약 $1.6M/년에 해당합니다. 1GW 캠퍼스라면 약 $15.9M/년, 10GW 포트폴리오라면 $160M/년 절감 가능합니다.</p>
+  </div>
+</div>
+
+<!-- ───────────────────────────── Q6 ─── -->
+<div class="q-card" id="qcard6">
+  <div class="q-header">
+    <div class="q-num">06</div>
+    <div class="q-meta">
+      <span class="q-badge medium">보통 · OX</span>
+      <div class="q-text">SST(고체 상태 변압기)는 기존 선로 주파수 변압기(LFT)보다 납기가 더 길고 동 가격 상승의 영향을 더 많이 받는다. (O / X)</div>
+    </div>
+  </div>
+  <div class="ox-wrap" id="qopts6">
+    <button class="ox-btn" onclick="selectOX(6,'O')">O</button>
+    <button class="ox-btn" onclick="selectOX(6,'X')">X</button>
+  </div>
+  <div class="q-explanation" id="qexp6">
+    <div class="exp-label">해설</div>
+    <div class="exp-answer">정답: X (틀림)</div>
+    <p>SST는 정반대입니다. 전원 공급 장치처럼 모듈식 구조이기 때문에 ① 납기가 훨씬 짧고, ② 동(구리) 사용량이 적어 구리 가격 상승 영향을 덜 받습니다. 또한 대량 보급 시 가격 하락이 기대됩니다.</p>
+  </div>
+</div>
+
+<!-- ───────────────────────────── Q7 ─── -->
+<div class="q-card" id="qcard7">
+  <div class="q-header">
+    <div class="q-num">07</div>
+    <div class="q-meta">
+      <span class="q-badge medium">보통 · 객관식</span>
+      <div class="q-text">전통적인 데이터센터가 AI 워크로드에 맞지 않는 이유로 발표에서 언급되지 않은 것은?</div>
+    </div>
+  </div>
+  <div class="q-options" id="qopts7">
+    <button class="opt-btn" onclick="selectOpt(7,'A')">A. 고정된 전기 아키텍처</button>
+    <button class="opt-btn" onclick="selectOpt(7,'B')">B. 냉각 시스템이 컴퓨팅 밀도를 따라가지 못함</button>
+    <button class="opt-btn" onclick="selectOpt(7,'C')">C. GPU 성능이 부족함 ✓</button>
+    <button class="opt-btn" onclick="selectOpt(7,'D')">D. 긴 건설 타임라인</button>
+  </div>
+  <div class="q-explanation" id="qexp7">
+    <div class="exp-label">해설</div>
+    <div class="exp-answer">정답: C — GPU 성능 부족은 언급되지 않음</div>
+    <p>발표에서 전통 데이터센터의 한계로 언급된 것은 긴 건설 타임라인, 고정된 전기 아키텍처, 냉각 시스템 부족, 어려운 브라운필드 업그레이드입니다. GPU 성능은 인프라 문제와 별개입니다.</p>
+  </div>
+</div>
+
+<!-- ───────────────────────────── Q8 ─── -->
+<div class="q-card" id="qcard8">
+  <div class="q-header">
+    <div class="q-num">08</div>
+    <div class="q-meta">
+      <span class="q-badge medium">보통 · 단답형</span>
+      <div class="q-text">800V → 50V 변환을 위한 DC-DC 변환 선반은 1U 공간에 몇 kW를 수용할 수 있나요?</div>
+    </div>
+  </div>
+  <div class="short-answer-wrap" id="qopts8">
+    <input class="short-input" type="text" id="qinput8" placeholder="숫자만 입력 (예: 90)">
+    <button class="short-submit" onclick="checkShort(8, ['90','90kw','90 kw'])">제출</button>
+  </div>
+  <div class="q-explanation" id="qexp8">
+    <div class="exp-label">해설</div>
+    <div class="exp-answer">정답: 90kW</div>
+    <p>800V→54V 절연형 DC-DC 변환 선반은 1U(1유닛) 공간에 90kW를 수용합니다. 6개 레일 × 15kW 구성이며, Busbar Barklip 연결과 Ethernet/Redfish API 기반 컨트롤러가 탑재됩니다. 기존 50V 서버를 800VDC 환경에서 그대로 사용 가능하게 해주는 브리지 솔루션입니다.</p>
+  </div>
+</div>
+
+<!-- ───────────────────────────── Q9 ─── -->
+<div class="q-card" id="qcard9">
+  <div class="q-header">
+    <div class="q-num">09</div>
+    <div class="q-meta">
+      <span class="q-badge hard">어려움 · 객관식</span>
+      <div class="q-text">아래 중 800VDC 아키텍처의 CapEx(자본 지출) 절감 효과를 모두 고른 것은?<br>
+      ㄱ. 전기 인프라 단순화 (변환 단계 감소, 동선 절감)<br>
+      ㄴ. 전력 밀도 향상으로 건물 면적당 컴퓨팅 용량 증가<br>
+      ㄷ. 모듈형 배포로 단계적·점진적 투자 가능<br>
+      ㄹ. GPU 클럭 속도 향상</div>
+    </div>
+  </div>
+  <div class="q-options" id="qopts9">
+    <button class="opt-btn" onclick="selectOpt(9,'A')">A. ㄱ, ㄴ</button>
+    <button class="opt-btn" onclick="selectOpt(9,'B')">B. ㄱ, ㄴ, ㄷ ✓</button>
+    <button class="opt-btn" onclick="selectOpt(9,'C')">C. ㄴ, ㄷ, ㄹ</button>
+    <button class="opt-btn" onclick="selectOpt(9,'D')">D. ㄱ, ㄴ, ㄷ, ㄹ</button>
+  </div>
+  <div class="q-explanation" id="qexp9">
+    <div class="exp-label">해설</div>
+    <div class="exp-answer">정답: B — ㄱ, ㄴ, ㄷ</div>
+    <p>발표에서 800VDC의 CapEx 절감 효과로 ① 전기 인프라 단순화(변환 단계 감소 → 동선·전기실 축소), ② 전력 밀도 증가로 건물 면적 효율 향상, ③ 모듈형 배포로 단계적 투자 가능(유휴 용량 위험 감소)을 언급했습니다. GPU 클럭 속도는 전력 아키텍처와 무관합니다.</p>
+  </div>
+</div>
+
+<!-- ───────────────────────────── Q10 ─── -->
+<div class="q-card" id="qcard10">
+  <div class="q-header">
+    <div class="q-num">10</div>
+    <div class="q-meta">
+      <span class="q-badge hard">어려움 · 객관식</span>
+      <div class="q-text">50V 방식으로 1MW 랙에 전력을 공급하려면 이론상 필요한 전류는 얼마인가? 그리고 이것이 800VDC 전환의 주된 기술적 이유인 이유를 가장 잘 설명한 것은?</div>
+    </div>
+  </div>
+  <div class="q-options" id="qopts10">
+    <button class="opt-btn" onclick="selectOpt(10,'A')">A. 1,000A — 800V보다 전압이 낮아 효율이 떨어지기 때문</button>
+    <button class="opt-btn" onclick="selectOpt(10,'B')">B. 5,000A — 케이블 굵기가 문제이기 때문</button>
+    <button class="opt-btn" onclick="selectOpt(10,'C')">C. 20,000A — 이 정도 전류는 손실과 물리적 배선이 비현실적이기 때문 ✓</button>
+    <button class="opt-btn" onclick="selectOpt(10,'D')">D. 10,000A — 변압기가 감당할 수 없기 때문</button>
+  </div>
+  <div class="q-explanation" id="qexp10">
+    <div class="exp-label">해설</div>
+    <div class="exp-answer">정답: C — 20,000A, 물리적으로 비현실적</div>
+    <p>P = V × I 공식에서 1MW = 50V × I → I = 20,000A입니다. Ralf Pieper는 발표에서 "이 정도 전류는 손실이 너무 크고 물리적으로 불가능하다"고 설명하며, 이것이 800VDC로 전환해야 하는 핵심 기술적 이유라고 강조했습니다. 800V 기준이면 같은 1MW에 1,250A만 필요합니다.</p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="nav-bar">
+  <button class="nav-btn primary" onclick="submitAll()">📋 전체 채점</button>
+  <button class="nav-btn" onclick="resetAll()">↺ 처음부터</button>
+</div>
+
+<footer>
+  <p>시험문제 출처: NVIDIA GTC 2026 — Delta Electronics S82097 발표 내용 기반</p>
+  <p style="margin-top:6px;"><a href="delta_800vdc_analysis.html">← 분석 문서로 돌아가기</a></p>
+</footer>
+
+<script>
+const answers = {
+  1: { type: 'mc', correct: 'B' },
+  2: { type: 'ox', correct: 'O' },
+  3: { type: 'mc', correct: 'C' },
+  4: { type: 'short', keywords: ['1200j','1200 j','1200joule','1200줄','1200 joule','1200'] },
+  5: { type: 'mc', correct: 'A' },
+  6: { type: 'ox', correct: 'X' },
+  7: { type: 'mc', correct: 'C' },
+  8: { type: 'short', keywords: ['90','90kw','90 kw','90킬로와트'] },
+  9: { type: 'mc', correct: 'B' },
+  10: { type: 'mc', correct: 'C' },
+};
+
+const userAnswers = {};
+
+function selectOpt(qNum, opt) {
+  if (userAnswers[qNum] !== undefined) return;
+  userAnswers[qNum] = opt;
+  const correct = answers[qNum].correct;
+  const btns = document.querySelectorAll(`#qopts${qNum} .opt-btn`);
+  btns.forEach(btn => {
+    btn.disabled = true;
+    const letter = btn.textContent.trim()[0];
+    if (letter === opt && opt === correct) btn.classList.add('selected-correct');
+    else if (letter === opt && opt !== correct) btn.classList.add('selected-wrong');
+    else if (letter === correct) btn.classList.add('show-correct');
+  });
+  const card = document.getElementById(`qcard${qNum}`);
+  card.classList.add(opt === correct ? 'answered-correct' : 'answered-wrong');
+  document.getElementById(`qexp${qNum}`).classList.add('show');
+  updateScore();
+}
+
+function selectOX(qNum, choice) {
+  if (userAnswers[qNum] !== undefined) return;
+  userAnswers[qNum] = choice;
+  const correct = answers[qNum].correct;
+  const btns = document.querySelectorAll(`#qopts${qNum} .ox-btn`);
+  btns.forEach(btn => {
+    btn.disabled = true;
+    const val = btn.textContent.trim();
+    if (val === choice && choice === correct) btn.classList.add('selected-correct');
+    else if (val === choice && choice !== correct) btn.classList.add('selected-wrong');
+    else if (val === correct) btn.classList.add('show-correct');
+  });
+  const card = document.getElementById(`qcard${qNum}`);
+  card.classList.add(choice === correct ? 'answered-correct' : 'answered-wrong');
+  document.getElementById(`qexp${qNum}`).classList.add('show');
+  updateScore();
+}
+
+function checkShort(qNum, keywords) {
+  if (userAnswers[qNum] !== undefined) return;
+  const inputEl = document.getElementById(`qinput${qNum}`);
+  const val = inputEl.value.trim().toLowerCase().replace(/\s+/g,'');
+  const isCorrect = keywords.some(k => val === k.replace(/\s+/g,'').toLowerCase());
+  userAnswers[qNum] = isCorrect ? 'correct' : 'wrong';
+  inputEl.disabled = true;
+  inputEl.classList.add(isCorrect ? 'correct' : 'wrong');
+  document.querySelector(`#qopts${qNum} .short-submit`).disabled = true;
+  const card = document.getElementById(`qcard${qNum}`);
+  card.classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
+  document.getElementById(`qexp${qNum}`).classList.add('show');
+  updateScore();
+}
+
+function updateScore() {
+  let score = 0;
+  Object.entries(userAnswers).forEach(([q, ans]) => {
+    const a = answers[q];
+    if (a.type === 'mc' || a.type === 'ox') { if (ans === a.correct) score++; }
+    else if (a.type === 'short') { if (ans === 'correct') score++; }
+  });
+  document.getElementById('scoreNum').textContent = score;
+  const pct = (score / 10) * 100;
+  document.getElementById('scoreBar').style.width = pct + '%';
+  const total = Object.keys(userAnswers).length;
+  if (total === 10) {
+    const msgs = [
+      [10, '🏆 완벽! 전문가 수준입니다.'],
+      [8, '🎉 훌륭합니다! 핵심 개념을 잘 이해했습니다.'],
+      [6, '👍 좋습니다! 틀린 문제의 해설을 다시 확인해보세요.'],
+      [4, '📖 절반 이상 맞았습니다. 분석 문서를 다시 복습해보세요.'],
+      [0, '💪 분석 문서부터 다시 읽고 재도전해보세요!']
+    ];
+    const msg = msgs.find(([min]) => score >= min);
+    document.getElementById('scoreMsg').textContent = msg[1];
+  } else {
+    document.getElementById('scoreMsg').textContent = `${total}/10 문제 완료`;
+  }
+}
+
+function submitAll() {
+  for (let i = 1; i <= 10; i++) {
+    if (userAnswers[i] !== undefined) continue;
+    const a = answers[i];
+    if (a.type === 'mc') {
+      const btns = document.querySelectorAll(`#qopts${i} .opt-btn`);
+      btns.forEach(btn => {
+        btn.disabled = true;
+        if (btn.textContent.trim()[0] === a.correct) btn.classList.add('show-correct');
+      });
+    } else if (a.type === 'ox') {
+      const btns = document.querySelectorAll(`#qopts${i} .ox-btn`);
+      btns.forEach(btn => {
+        btn.disabled = true;
+        if (btn.textContent.trim() === a.correct) btn.classList.add('show-correct');
+      });
+    } else if (a.type === 'short') {
+      const inp = document.getElementById(`qinput${i}`);
+      if (inp) { inp.disabled = true; }
+      const sub = document.querySelector(`#qopts${i} .short-submit`);
+      if (sub) sub.disabled = true;
+    }
+    userAnswers[i] = 'skipped';
+    document.getElementById(`qexp${i}`).classList.add('show');
+    document.getElementById(`qcard${i}`).classList.add('answered-wrong');
+  }
+  updateScore();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetAll() {
+  Object.keys(userAnswers).forEach(k => delete userAnswers[k]);
+  for (let i = 1; i <= 10; i++) {
+    const card = document.getElementById(`qcard${i}`);
+    card.classList.remove('answered-correct','answered-wrong');
+    document.getElementById(`qexp${i}`).classList.remove('show');
+    const btns = card.querySelectorAll('.opt-btn, .ox-btn');
+    btns.forEach(btn => {
+      btn.disabled = false;
+      btn.classList.remove('selected-correct','selected-wrong','show-correct');
+    });
+    const inp = document.getElementById(`qinput${i}`);
+    if (inp) { inp.disabled = false; inp.value = ''; inp.classList.remove('correct','wrong'); }
+    const sub = card.querySelector('.short-submit');
+    if (sub) sub.disabled = false;
+  }
+  document.getElementById('scoreNum').textContent = '0';
+  document.getElementById('scoreBar').style.width = '0%';
+  document.getElementById('scoreMsg').textContent = '문제를 풀어보세요!';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
