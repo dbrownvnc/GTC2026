@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vera C. Rubin Observatory — HPC+AI 가속 워크플로</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg2: #fafafa;
+    --text: #1a1a1a;
+    --text2: #777777;
+    --accent: #e11d48;
+    --accent2: #f43f5e;
+    --chart1: #e11d48;
+    --chart2: #1a1a1a;
+    --chart3: #6b7280;
+    --chart4: #2563eb;
+    --table-bg: #fafafa;
+    --table-header: #e11d48;
+    --border: #e5e5e5;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    font-size: 17px;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* ── HEADER ── */
+  .cover {
+    padding: 56px 0 40px;
+    border-bottom: 3px solid var(--text);
+  }
+  .cover-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+  .cover-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 7vw, 46px);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 20px;
+    letter-spacing: -0.02em;
+  }
+  .cover-title span { color: var(--accent); }
+  .cover-subtitle {
+    font-size: 15px;
+    color: var(--text2);
+    font-style: italic;
+    border-left: 3px solid var(--accent);
+    padding-left: 14px;
+    margin-bottom: 24px;
+  }
+  .cover-meta {
+    display: flex; gap: 20px; flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    letter-spacing: 0.08em;
+  }
+  .cover-meta span { display: flex; align-items: center; gap: 5px; }
+  .cover-meta span::before { content: '◆'; color: var(--accent); font-size: 7px; }
+
+  /* ── SECTIONS ── */
+  section { padding: 40px 0; border-bottom: 1px solid var(--border); }
+  section:last-child { border-bottom: none; }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(20px, 5vw, 28px);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text);
+    margin-bottom: 18px;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 26px 0 10px;
+  }
+  p { margin-bottom: 14px; color: var(--text); }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── PULLQUOTE ── */
+  .pullquote {
+    border-left: 4px solid var(--accent);
+    margin: 28px 0;
+    padding: 16px 20px;
+    background: var(--bg2);
+  }
+  .pullquote p {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-style: italic;
+    color: var(--text);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* ── STATS GRID ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 24px 0;
+  }
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 18px 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--accent);
+  }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(22px, 6vw, 34px);
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    letter-spacing: 0.05em;
+    line-height: 1.4;
+  }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    background: var(--table-bg);
+  }
+  thead tr { background: var(--table-header); color: #fff; }
+  thead th {
+    padding: 10px 12px;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td {
+    padding: 10px 12px;
+    vertical-align: top;
+    color: var(--text);
+  }
+  tbody tr:nth-child(even) { background: #f5f5f5; }
+  .highlight { color: var(--accent); font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── PIPELINE FLOW ── */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+  }
+  .pipe-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 0;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .pipe-step:hover { background: var(--bg2); }
+  .pipe-num {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pipe-content { flex: 1; }
+  .pipe-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .pipe-desc { font-size: 13px; color: var(--text2); margin: 0; }
+  .pipe-connector {
+    width: 1px; height: 18px;
+    background: var(--border);
+    margin-left: 15px;
+  }
+  .pipe-detail {
+    display: none;
+    background: var(--bg2);
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    margin: 6px 0 6px 46px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+  .pipe-step.active .pipe-detail,
+  .pipe-detail.open { display: block; }
+
+  /* ── CHART ── */
+  .chart-container {
+    position: relative;
+    max-height: 340px;
+    margin: 20px 0;
+  }
+  .chart-container canvas {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    max-height: 300px;
+  }
+  .chart-container.chart-ready canvas { opacity: 1; }
+
+  /* ── FADE IN ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── SIMULATOR ── */
+  .simulator {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 22px 18px;
+    margin: 24px 0;
+  }
+  .sim-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sim-title span {
+    font-size: 11px; font-family: 'JetBrains Mono', monospace;
+    color: #fff; background: var(--accent);
+    padding: 2px 8px; letter-spacing: 0.1em;
+  }
+  .slider-row {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .slider-item label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text2);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 5px;
+  }
+  .slider-item label .val { color: var(--accent); font-weight: 600; }
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--accent);
+    cursor: pointer;
+    height: 4px;
+  }
+  .sim-result {
+    background: var(--text);
+    color: #fff;
+    padding: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .sim-result .r-label { font-size: 10px; color: #aaa; letter-spacing: 0.1em; margin-bottom: 2px; }
+  .sim-result .r-val { font-size: 18px; font-weight: 600; color: var(--accent2); }
+  .reset-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 14px;
+    background: none;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { background: var(--accent); color: #fff; }
+
+  /* ── TAG LIST ── */
+  .tag-list {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin: 16px 0;
+  }
+  .tag {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    letter-spacing: 0.05em;
+  }
+  .tag.accent { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* ── PROCESS TIMELINE ── */
+  .timeline {
+    margin: 20px 0;
+    position: relative;
+  }
+  .tl-item {
+    display: flex; gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .tl-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .tl-dot {
+    flex-shrink: 0;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 8px;
+  }
+  .tl-content { flex: 1; }
+  .tl-head {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px; font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .tl-body { font-size: 14px; color: var(--text2); }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 32px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    letter-spacing: 0.1em;
+    text-align: center;
+    border-top: 1px solid var(--border);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* ── COMPARE TOGGLE ── */
+  .compare-wrap { margin: 20px 0; }
+  .toggle-tabs {
+    display: flex;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .toggle-tab {
+    flex: 1;
+    padding: 10px;
+    background: var(--bg2);
+    border: none;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--text2);
+    transition: all 0.2s;
+  }
+  .toggle-tab.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .compare-panel { display: none; padding: 16px; background: var(--bg2); border: 1px solid var(--border); border-top: none; }
+  .compare-panel.active { display: block; }
+
+  @media (max-width: 400px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .sim-result { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ COVER ══════════════ -->
+<header class="cover fade-in">
+  <div class="cover-tag">SC25 기술 세션 S81766 · 전문 분석</div>
+  <h1 class="cover-title">우주를 <span>실시간</span>으로 읽는다</h1>
+  <p class="cover-subtitle">
+    Vera C. Rubin 천문대 & X선 자유전자레이저를 위한 HPC+AI 가속 워크플로 분석
+  </p>
+  <div class="cover-meta">
+    <span>2026년 03월 24일</span>
+    <span>NVIDIA · Princeton Univ.</span>
+    <span>천문학 · 고성능컴퓨팅</span>
+  </div>
+</header>
+
+<!-- ══════════════ 개요 ══════════════ -->
+<section>
+  <div class="section-label">Overview</div>
+  <h2>왜 지금 이 연구인가</h2>
+  <p>
+    현대 과학 시설들은 <strong>데이터 폭발</strong>의 한가운데 있습니다. Vera C. Rubin 천문대는 매 시간 수 테라바이트의 영상을 생산하고, X선 자유전자레이저(XFEL)는 피코미터 해상도의 원자 데이터를 쏟아냅니다. 문제는 데이터를 모으는 것이 아니라 <strong>초 단위로 분석</strong>해 실시간으로 과학적 판단을 내리는 것입니다.
+  </p>
+  <p>
+    이 발표는 NVIDIA 연구팀과 Princeton 대학 협력팀이 어떻게 기존 CPU 워크플로를 GPU 기반으로 재설계하여 수백~수천 배의 속도 향상을 달성했는지를 설명합니다.
+  </p>
+
+  <div class="stats-grid fade-in">
+    <div class="stat-card">
+      <div class="stat-num">3.2 GP</div>
+      <div class="stat-label">LSST 카메라<br>해상도 (기가픽셀)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">2초</div>
+      <div class="stat-label">3.2 GB 이미지<br>전체 판독 시간</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">500회</div>
+      <div class="stat-label">하룻밤 망원경<br>포인팅 횟수</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">3,300야</div>
+      <div class="stat-label">10년 서베이<br>총 관측 밤 수</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 시설 소개 ══════════════ -->
+<section>
+  <div class="section-label">Facility</div>
+  <h2>Vera C. Rubin 천문대</h2>
+
+  <p>
+    칠레 아타카마 사막에 위치한 Rubin 천문대는 <strong>8.4m 반사 망원경</strong>과 세계 최대 디지털 카메라(3.2 기가픽셀)를 갖춘 서베이 천문대입니다. 189개의 4K×4K CCD 칩이 하나의 거대한 카메라를 구성하며, 보름달 면적의 약 10배에 해당하는 하늘을 한 번에 촬영합니다.
+  </p>
+
+  <div class="pullquote fade-in">
+    <p>"우리는 세계에서 가장 길고 큰 우주 영화를 만들고 있습니다. 10년간 3,300번의 밤, 같은 하늘을 반복 촬영합니다."</p>
+  </div>
+
+  <h3>과학적 목표</h3>
+  <div class="compare-wrap">
+    <div class="toggle-tabs">
+      <button class="toggle-tab active" onclick="switchTab(event,'t0')">암흑물질·에너지</button>
+      <button class="toggle-tab" onclick="switchTab(event,'t1')">태양계</button>
+      <button class="toggle-tab" onclick="switchTab(event,'t2')">일시적 현상</button>
+    </div>
+    <div id="t0" class="compare-panel active">
+      <p>암흑물질과 암흑에너지의 분포를 수십억 광년에 걸쳐 추적합니다. 은하 모양 통계(약한 중력렌즈 효과)를 이용해 보이지 않는 물질의 지도를 그립니다.</p>
+    </div>
+    <div id="t1" class="compare-panel">
+      <p>운영 약 2년 내 직경 140m 이상의 태양계 천체를 거의 완전히 목록화할 예정입니다. 단 2주 관측만으로 이미 알려진 소행성의 <strong>6%</strong>를 새로 발견했습니다.</p>
+    </div>
+    <div id="t2" class="compare-panel">
+      <p>초신성, 변광성 등 시간에 따라 변하는 천체를 실시간으로 검출합니다. 각 이벤트는 <strong>수십 초 내</strong> 전 세계 천문학자에게 경보가 발송됩니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 핵심 도전 ══════════════ -->
+<section>
+  <div class="section-label">Challenge</div>
+  <h2>데이터는 많고, 시간은 없다</h2>
+
+  <p>
+    천문대가 생산하는 원본 데이터는 시간당 수 TB이며, 후처리 과정에서 더욱 늘어납니다. 핵심 도전은 세 가지입니다.
+  </p>
+
+  <div class="timeline">
+    <div class="tl-item fade-in">
+      <div class="tl-dot"></div>
+      <div class="tl-content">
+        <div class="tl-head">① 실시간 경보 (Prompt Processing)</div>
+        <div class="tl-body">초신성·소행성 등 순간적 현상은 감지 즉시 전 세계에 경보를 보내야 합니다. 다른 망원경의 후속 관측 창이 닫히기 전에 알려야 하기 때문입니다. 기존 CPU 시스템은 CCD 1개(189분의 1)를 처리하는 데 <span class="highlight">10분→4분</span> 수준이었으나, 목표는 <span class="highlight">수십 초</span>입니다.</div>
+      </div>
+    </div>
+    <div class="tl-item fade-in">
+      <div class="tl-dot"></div>
+      <div class="tl-content">
+        <div class="tl-head">② 차분 이미징 (Difference Imaging)</div>
+        <div class="tl-body">새 이미지에서 기준 이미지(수백 장 합성)를 빼면 변화한 천체만 남습니다. 그러나 대기 흔들림(점퍼짐 함수, PSF)이 매 촬영마다 달라지고, 픽셀 격자도 미세하게 어긋납니다. 이를 수학적으로 교정한 뒤 빼는 것이 핵심 계산입니다.</div>
+      </div>
+    </div>
+    <div class="tl-item fade-in">
+      <div class="tl-dot"></div>
+      <div class="tl-content">
+        <div class="tl-head">③ I/O 병목</div>
+        <div class="tl-body">계산 시간의 약 50%가 데이터 읽기(I/O)입니다. HDF5 형식은 80배 최적화를 달성했고, FITS(천문 표준 형식) GPU 직접 로딩 API를 개발 중입니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 처리 파이프라인 ══════════════ -->
+<section>
+  <div class="section-label">Pipeline</div>
+  <h2>처리 단계 — 클릭하여 자세히 보기</h2>
+  <p style="font-size:13px;color:var(--text2);margin-bottom:16px;">각 단계를 클릭하면 상세 설명이 펼쳐집니다.</p>
+
+  <div class="pipeline" id="pipeline">
+    <div class="pipe-step" onclick="togglePipe(this)">
+      <div class="pipe-num">1</div>
+      <div class="pipe-content">
+        <div class="pipe-title">왜핑 (Warping)</div>
+        <div class="pipe-desc">이미지 정렬 및 기저 함수 구성</div>
+        <div class="pipe-detail">
+          새 이미지와 기준 이미지의 픽셀 격자가 다릅니다. 렌즈 수차, CCD 간 간격, 대기 굴절 등으로 동일 천체가 다른 픽셀에 맺힙니다. 기저 함수(Basis Function)를 통해 이미지를 수학적으로 표현하고, 서브픽셀 정밀도로 보간하여 격자를 정렬합니다. 이 기저 함수 라이브러리는 이 프로젝트 이전에는 존재하지 않았습니다.
+        </div>
+      </div>
+    </div>
+    <div class="pipe-connector"></div>
+
+    <div class="pipe-step" onclick="togglePipe(this)">
+      <div class="pipe-num">2</div>
+      <div class="pipe-content">
+        <div class="pipe-title">Alard-Lupton 합성곱 보정</div>
+        <div class="pipe-desc">PSF(점퍼짐 함수) 매칭 및 차분</div>
+        <div class="pipe-detail">
+          대기는 별빛을 퍼지게 만드는 합성곱 커널(점퍼짐 함수, PSF)입니다. 새 이미지와 기준 이미지의 PSF가 다르면 단순 뺄셈이 불가능합니다. Alard-Lupton 알고리즘은 가우시안 함수로 PSF를 피팅하고, 두 이미지의 PSF를 일치시킨 뒤 차분합니다. 결과물인 '다이폴(Dipole)'은 천체가 이동한 거리와 방향을 나타냅니다.
+        </div>
+      </div>
+    </div>
+    <div class="pipe-connector"></div>
+
+    <div class="pipe-step" onclick="togglePipe(this)">
+      <div class="pipe-num">3</div>
+      <div class="pipe-content">
+        <div class="pipe-title">천체 분류 및 카탈로그화</div>
+        <div class="pipe-desc">매 밤 수만 개 새 천체 자동 분류</div>
+        <div class="pipe-detail">
+          차분 이미지에서 검출된 신호를 천체 종류별로 분류합니다. 매 관측 야간 수만 개의 새로운 태양계 천체가 발견됩니다. 그래프 신경망(GNN)이 이 분류를 보조하며, HPC 수치 계산 결과가 AI 모델 학습의 정답 데이터(Ground Truth)로 사용됩니다.
+        </div>
+      </div>
+    </div>
+    <div class="pipe-connector"></div>
+
+    <div class="pipe-step" onclick="togglePipe(this)">
+      <div class="pipe-num">4</div>
+      <div class="pipe-content">
+        <div class="pipe-title">경보 발송 (Alert Broker)</div>
+        <div class="pipe-desc">Kafka 큐 → 전 세계 커뮤니티 브로커</div>
+        <div class="pipe-detail">
+          분류된 이벤트를 이미지 절편(Cutout)과 함께 Kafka 메시지 큐에 넣습니다. 초신성 브로커, 태양계 브로커 등 전 세계 커뮤니티 브로커들이 자신의 관심 채널을 구독하여 필요한 경보만 수신합니다. 하룻밤에 약 10만 건의 경보가 발송될 예정입니다.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 속도 향상 시각화 ══════════════ -->
+<section>
+  <div class="section-label">Performance</div>
+  <h2>CPU vs GPU — 처리 시간 비교</h2>
+  <p>알고리즘 자체를 GPU 아키텍처에 맞게 재설계한 결과입니다. 단순 코드 변환이 아닌 물리·수학을 재해석한 최적화입니다.</p>
+
+  <div class="chart-container fade-in">
+    <canvas id="speedChart" height="240"></canvas>
+  </div>
+
+  <div class="table-wrap fade-in">
+    <table>
+      <thead>
+        <tr>
+          <th>작업</th>
+          <th>이전 (CPU)</th>
+          <th>이후 (GPU)</th>
+          <th>속도 향상</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>CCD 1개 프롬프트 처리</td>
+          <td>10분</td>
+          <td class="highlight">~10초 이하</td>
+          <td class="highlight">~60×</td>
+        </tr>
+        <tr>
+          <td>전체 카메라 워크플로 (NumPy→KuPy)</td>
+          <td>7+ 시간</td>
+          <td class="highlight">~3분</td>
+          <td class="highlight">~140×</td>
+        </tr>
+        <tr>
+          <td>다이폴 피팅 (멀티쓰레드 CPU vs 1 GPU)</td>
+          <td>5시간</td>
+          <td class="highlight">64초</td>
+          <td class="highlight">~281×</td>
+        </tr>
+        <tr>
+          <td>다이폴 피팅 (멀티 GPU)</td>
+          <td>5시간</td>
+          <td class="highlight">1초</td>
+          <td class="highlight">~18,000×</td>
+        </tr>
+        <tr>
+          <td>KuPy Numeric 전체 워크플로</td>
+          <td>수시간</td>
+          <td class="highlight">31초</td>
+          <td class="highlight">~3,000×</td>
+        </tr>
+        <tr>
+          <td>XFEL X선 데이터 분석</td>
+          <td>15시간</td>
+          <td class="highlight">0.5초</td>
+          <td class="highlight">>1,000×</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════ 시뮬레이터 ══════════════ -->
+<section>
+  <div class="section-label">Simulator</div>
+  <h2>GPU 스케일업 시뮬레이터</h2>
+  <p>GPU 수와 알고리즘 효율을 조절하여 처리 시간 변화를 시뮬레이션합니다.</p>
+
+  <div class="simulator fade-in">
+    <div class="sim-title">처리 시간 예측기 <span>INTERACTIVE</span></div>
+    <div class="slider-row">
+      <div class="slider-item">
+        <label>
+          GPU 수 (A100 기준)
+          <span class="val" id="gpuVal">1개</span>
+        </label>
+        <input type="range" id="gpuCount" min="1" max="64" value="1" step="1" oninput="updateSim()">
+      </div>
+      <div class="slider-item">
+        <label>
+          알고리즘 최적화 수준
+          <span class="val" id="algoVal">300×</span>
+        </label>
+        <input type="range" id="algoOpt" min="50" max="3000" value="300" step="50" oninput="updateSim()">
+      </div>
+      <div class="slider-item">
+        <label>
+          CCD 처리 수
+          <span class="val" id="ccdVal">189개 (전체)</span>
+        </label>
+        <input type="range" id="ccdCount" min="1" max="189" value="189" step="1" oninput="updateSim()">
+      </div>
+    </div>
+    <div class="sim-result">
+      <div>
+        <div class="r-label">예상 처리 시간</div>
+        <div class="r-val" id="simTime">—</div>
+      </div>
+      <div>
+        <div class="r-label">CPU 대비 속도</div>
+        <div class="r-val" id="simSpeedup">—</div>
+      </div>
+      <div>
+        <div class="r-label">10분 기준 실시간 처리 가능 여부</div>
+        <div class="r-val" id="simFeasible">—</div>
+      </div>
+      <div>
+        <div class="r-label">처리 대역폭 (CCD/초)</div>
+        <div class="r-val" id="simBandwidth">—</div>
+      </div>
+    </div>
+    <button class="reset-btn" onclick="resetSim()">↺ 초기화</button>
+  </div>
+</section>
+
+<!-- ══════════════ 기술 스택 ══════════════ -->
+<section>
+  <div class="section-label">Technology</div>
+  <h2>핵심 기술 스택</h2>
+
+  <h3>소프트웨어 파이프라인 진화</h3>
+  <p>Rubin 천문대의 데이터 파이프라인은 25년에 걸쳐 발전했습니다.</p>
+
+  <div class="chart-container fade-in">
+    <canvas id="stackChart" height="220"></canvas>
+  </div>
+
+  <h3>신규 개발 라이브러리</h3>
+  <div class="tag-list">
+    <span class="tag accent">CUDA Python</span>
+    <span class="tag">KuPy</span>
+    <span class="tag">KuPy Numeric</span>
+    <span class="tag">기저 함수 라이브러리</span>
+    <span class="tag">다이폴 피팅 API</span>
+    <span class="tag">FITS GPU 로딩 API (개발중)</span>
+    <span class="tag">HDF5 최적화 (80× 향상)</span>
+  </div>
+
+  <div class="pullquote fade-in">
+    <p>"단순 코드 이식이 아닙니다. 물리를 이해하고, 수식을 재해석하고, GPU 아키텍처에 맞게 알고리즘 자체를 다시 설계했습니다."</p>
+  </div>
+</section>
+
+<!-- ══════════════ AI 훈련 루프 ══════════════ -->
+<section>
+  <div class="section-label">AI Integration</div>
+  <h2>HPC ↔ AI 양방향 루프</h2>
+  <p>
+    이 프로젝트의 핵심 철학은 <strong>HPC가 AI를 검증하고, AI가 HPC를 보조한다</strong>는 것입니다. AI 모델이 올바른 물리를 수행하는지 확인하려면 고정밀 수치 계산이 정답(Ground Truth)을 제공해야 합니다.
+  </p>
+
+  <div style="margin:24px 0;background:var(--bg2);border:1px solid var(--border);padding:20px;">
+    <div style="display:flex;flex-direction:column;gap:0;align-items:center;">
+      <div style="background:var(--accent);color:#fff;padding:10px 20px;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:center;width:100%;max-width:320px;">HPC 고정밀 수치 계산</div>
+      <div style="display:flex;justify-content:center;gap:40px;padding:8px 0;font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;">
+        <span>↓ Ground Truth</span><span>↑ 피드백</span>
+      </div>
+      <div style="background:var(--chart4);color:#fff;padding:10px 20px;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:center;width:100%;max-width:320px;">AI / 신경망 모델 훈련</div>
+      <div style="display:flex;justify-content:center;gap:40px;padding:8px 0;font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;">
+        <span>↓ 추론 결과</span><span>↑ 새 데이터</span>
+      </div>
+      <div style="background:var(--chart3);color:#fff;padding:10px 20px;font-family:'JetBrains Mono',monospace;font-size:12px;text-align:center;width:100%;max-width:320px;">Rubin 천문대 실측 데이터</div>
+    </div>
+  </div>
+
+  <p>
+    그래프 신경망(GNN)은 새 이미지와 기준 이미지의 패턴을 인식해 정렬하고, 비균일 왜곡을 교정합니다. 이 과정에서 <strong>오차 계산(Error Propagation)</strong>이 함께 수행되어 AI가 놓친 물리를 수치 계산으로 보완합니다.
+  </p>
+</section>
+
+<!-- ══════════════ XFEL ══════════════ -->
+<section>
+  <div class="section-label">XFEL</div>
+  <h2>X선 자유전자레이저(XFEL) 적용</h2>
+  <p>
+    동일한 가속 워크플로는 XFEL 데이터 분석에도 적용됩니다. 피코미터(10⁻¹² m) 해상도의 X선 이미지에서 신호를 검출하고, 다차원 신호 분해를 통해 원자 운동의 3D 지도를 재구성합니다.
+  </p>
+  <div class="stats-grid fade-in">
+    <div class="stat-card">
+      <div class="stat-num">15h</div>
+      <div class="stat-label">기존 CPU 처리 시간</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">0.5초</div>
+      <div class="stat-label">GPU 가속 후<br>처리 시간</div>
+    </div>
+  </div>
+  <p style="margin-top:14px;">
+    이는 <strong>100,000배 이상</strong>의 속도 향상으로, 실험 중 실시간 피드백(라이브 스티어링)을 가능하게 합니다.
+  </p>
+</section>
+
+<!-- ══════════════ 의의 및 전망 ══════════════ -->
+<section>
+  <div class="section-label">Significance</div>
+  <h2>핵심 의의 및 향후 방향</h2>
+
+  <div class="timeline">
+    <div class="tl-item fade-in">
+      <div class="tl-dot"></div>
+      <div class="tl-content">
+        <div class="tl-head">오차 계산의 민주화</div>
+        <div class="tl-body">GPU 가속으로 절약된 시간을 오차 계산에 사용합니다. 기존엔 속도 때문에 생략되던 불확도 정량화가 이제 워크플로에 포함됩니다. "소행성이 지구와 충돌하는 날짜"를 예측할 때 오차 범위는 생사와 직결됩니다.</div>
+      </div>
+    </div>
+    <div class="tl-item fade-in">
+      <div class="tl-dot"></div>
+      <div class="tl-content">
+        <div class="tl-head">오픈 커뮤니티 중심 개발</div>
+        <div class="tl-body">Harvard, UPenn, Johns Hopkins, U-Washington, Penn State, CMU, Simons Foundation 등 수십 개 기관의 피드백으로 라이브러리를 개선합니다. 기술 블로그는 2026년 4월 15일 공개 예정입니다.</div>
+      </div>
+    </div>
+    <div class="tl-item fade-in">
+      <div class="tl-dot"></div>
+      <div class="tl-content">
+        <div class="tl-head">실험 실시간 조향 (Live Steering)</div>
+        <div class="tl-body">분석 결과를 실험 장비에 즉시 피드백하여 관측 전략을 실시간으로 변경합니다. Rubin 망원경의 거울 변형 액추에이터에 신경망 기반 대기 보정을 실시간 적용하는 것이 다음 목표입니다.</div>
+      </div>
+    </div>
+    <div class="tl-item fade-in">
+      <div class="tl-dot"></div>
+      <div class="tl-content">
+        <div class="tl-head">DGX Spark 단일 노드 실행 가능</div>
+        <div class="tl-body">전체 워크플로를 DGX Spark 한 대에서 수 시간 만에 실행할 수 있게 벤치마킹됐습니다. 연구 접근성이 크게 높아집니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>SC25 기술 세션 S81766 분석 · Rubin Observatory × NVIDIA 협력 연구</p>
+  <p style="margin-top:6px;"><a href="https://skyviewer.app" target="_blank">skyviewer.app</a> — Rubin 첫 관측 이미지 공개 뷰어</p>
+</footer>
+
+<script>
+// ── TAB TOGGLE ──
+function switchTab(e, id) {
+  document.querySelectorAll('.toggle-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.compare-panel').forEach(p => p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+// ── PIPELINE TOGGLE ──
+function togglePipe(el) {
+  const detail = el.querySelector('.pipe-detail');
+  if (!detail) return;
+  const isOpen = detail.classList.contains('open');
+  document.querySelectorAll('.pipe-detail').forEach(d => d.classList.remove('open'));
+  if (!isOpen) detail.classList.add('open');
+}
+
+// ── SIMULATOR ──
+const CPU_BASE = 10 * 60; // 10 minutes per CCD in seconds
+function updateSim() {
+  const gpus = parseInt(document.getElementById('gpuCount').value);
+  const algo = parseInt(document.getElementById('algoOpt').value);
+  const ccds = parseInt(document.getElementById('ccdCount').value);
+
+  document.getElementById('gpuVal').textContent = gpus + '개';
+  document.getElementById('algoVal').textContent = algo + '×';
+  document.getElementById('ccdCount').nextElementSibling && void 0;
+
+  const ccdLabel = ccds === 189 ? '189개 (전체)' : ccds + '개';
+  document.getElementById('ccdVal').textContent = ccdLabel;
+
+  // Time per CCD after GPU + algo speedup, then parallelize by GPU count
+  const timePerCCD = (CPU_BASE / algo);
+  const totalTime = (timePerCCD * ccds) / gpus;
+  const speedup = CPU_BASE * ccds / totalTime;
+
+  let timeStr;
+  if (totalTime < 1) timeStr = (totalTime * 1000).toFixed(0) + 'ms';
+  else if (totalTime < 60) timeStr = totalTime.toFixed(1) + '초';
+  else if (totalTime < 3600) timeStr = (totalTime / 60).toFixed(1) + '분';
+  else timeStr = (totalTime / 3600).toFixed(1) + '시간';
+
+  document.getElementById('simTime').textContent = timeStr;
+  document.getElementById('simSpeedup').textContent = speedup > 1000
+    ? (speedup / 1000).toFixed(1) + 'k×' : speedup.toFixed(0) + '×';
+
+  const feasible = totalTime <= 60;
+  document.getElementById('simFeasible').textContent = feasible ? '✓ 가능' : '✗ 초과';
+  document.getElementById('simFeasible').style.color = feasible ? '#22c55e' : '#f43f5e';
+
+  const bw = ccds / Math.max(totalTime, 0.001);
+  document.getElementById('simBandwidth').textContent = bw > 1
+    ? bw.toFixed(1) + '/s' : (bw * 60).toFixed(1) + '/min';
+}
+function resetSim() {
+  document.getElementById('gpuCount').value = 1;
+  document.getElementById('algoOpt').value = 300;
+  document.getElementById('ccdCount').value = 189;
+  updateSim();
+}
+updateSim();
+
+// ── CHART CONFIGS ──
+const chartConfigs = {};
+
+chartConfigs['speedChart'] = () => {
+  new Chart(document.getElementById('speedChart'), {
+    type: 'bar',
+    data: {
+      labels: ['CCD 1개\nCPU→GPU', '전체 카메라\nNumPy→KuPy', '다이폴 피팅\n1 GPU', '다이폴 피팅\n멀티 GPU', 'KuPy Numeric\n전체 워크플로', 'XFEL\n분석'],
+      datasets: [
+        {
+          label: '이전 (시간)',
+          data: [10/60, 7, 5, 5, 5, 15],
+          backgroundColor: '#1a1a1a',
+        },
+        {
+          label: '이후 (시간)',
+          data: [10/60/60, 3/60, 64/3600, 1/3600, 31/3600, 0.5/3600],
+          backgroundColor: '#e11d48',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { labels: { font: { family: 'JetBrains Mono', size: 11 }, color: '#1a1a1a' } },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const v = ctx.raw;
+              if (v < 1/60) return ctx.dataset.label + ': ' + (v * 3600).toFixed(1) + '초';
+              if (v < 1) return ctx.dataset.label + ': ' + (v * 60).toFixed(1) + '분';
+              return ctx.dataset.label + ': ' + v.toFixed(1) + '시간';
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          type: 'logarithmic',
+          title: { display: true, text: '처리 시간 (시간, 로그 스케일)', font: { size: 10, family: 'JetBrains Mono' } },
+          ticks: { font: { family: 'JetBrains Mono', size: 10 } }
+        },
+        x: { ticks: { font: { family: 'JetBrains Mono', size: 10 } } }
+      }
+    }
+  });
+};
+
+chartConfigs['stackChart'] = () => {
+  new Chart(document.getElementById('stackChart'), {
+    type: 'bar',
+    data: {
+      labels: ['2000년대 초', '2015년경', '2025년 현재'],
+      datasets: [
+        { label: 'C++', data: [90, 70, 40], backgroundColor: '#1a1a1a' },
+        { label: 'Python', data: [10, 25, 45], backgroundColor: '#e11d48' },
+        { label: 'Rust', data: [0, 5, 10], backgroundColor: '#6b7280' },
+        { label: 'CUDA/GPU', data: [0, 0, 5], backgroundColor: '#2563eb' },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { labels: { font: { family: 'JetBrains Mono', size: 11 }, color: '#1a1a1a' } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.raw + '%' } }
+      },
+      scales: {
+        x: { stacked: true, ticks: { font: { family: 'JetBrains Mono', size: 11 } } },
+        y: {
+          stacked: true,
+          max: 100,
+          ticks: { font: { family: 'JetBrains Mono', size: 10 }, callback: v => v + '%' }
+        }
+      }
+    }
+  });
+};
+
+// ── INTERSECTION OBSERVERS ──
+const fadeObs = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+      fadeObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.fade-in').forEach(el => fadeObs.observe(el));
+
+const chartObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const canvas = e.target.querySelector('canvas');
+      if (canvas && chartConfigs[canvas.id]) {
+        chartConfigs[canvas.id]();
+        e.target.classList.add('chart-ready');
+        chartObs.unobserve(e.target);
+      }
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.chart-container').forEach(el => chartObs.observe(el));
+</script>
+</body>
+</html>

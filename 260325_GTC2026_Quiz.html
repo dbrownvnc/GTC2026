@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시험문제 — Rubin Observatory HPC+AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:wght@300;400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff; --bg2: #fafafa; --text: #1a1a1a; --text2: #777777;
+    --accent: #e11d48; --border: #e5e5e5;
+    --easy: #16a34a; --mid: #d97706; --hard: #dc2626;
+    --correct: #dcfce7; --wrong: #fee2e2; --correct-border: #16a34a; --wrong-border: #dc2626;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    font-size: 16px;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+
+  .cover {
+    padding: 48px 0 32px;
+    border-bottom: 3px solid var(--text);
+    margin-bottom: 32px;
+  }
+  .cover-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 14px;
+  }
+  .cover-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 6vw, 38px); font-weight: 900;
+    color: var(--text); margin-bottom: 12px; line-height: 1.15;
+  }
+  .cover-title span { color: var(--accent); }
+  .cover-sub {
+    font-size: 14px; color: var(--text2); font-style: italic;
+    margin-bottom: 18px;
+  }
+  .score-board {
+    display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .score-item {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 10px 16px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  }
+  .score-item .s-num {
+    font-size: 22px; font-family: 'Playfair Display', serif;
+    font-weight: 900; color: var(--accent);
+  }
+  .score-item .s-label { color: var(--text2); font-size: 10px; letter-spacing: 0.08em; }
+
+  .divider-section {
+    display: flex; align-items: center; gap: 10px;
+    margin: 32px 0 24px;
+  }
+  .divider-section span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text2); white-space: nowrap;
+  }
+  .divider-section::before, .divider-section::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .q-card {
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+    background: var(--bg);
+    transition: border-color 0.3s;
+  }
+  .q-card.answered-correct { border-color: var(--correct-border); }
+  .q-card.answered-wrong { border-color: var(--wrong-border); }
+
+  .q-header {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 16px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .q-num {
+    flex-shrink: 0; width: 28px; height: 28px;
+    border-radius: 50%; background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+  }
+  .q-meta { flex: 1; }
+  .q-badges { display: flex; gap: 6px; margin-bottom: 6px; }
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.08em;
+    padding: 2px 7px; border: 1px solid;
+  }
+  .badge.easy { color: var(--easy); border-color: var(--easy); }
+  .badge.mid { color: var(--mid); border-color: var(--mid); }
+  .badge.hard { color: var(--hard); border-color: var(--hard); }
+  .badge.type { color: var(--text2); border-color: var(--border); }
+  .q-text { font-size: 15px; font-weight: 600; line-height: 1.5; }
+
+  .q-body { padding: 16px; }
+
+  /* MCQ */
+  .options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .option-btn {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Source Serif 4', serif;
+    font-size: 14px;
+    color: var(--text);
+    transition: all 0.2s;
+    width: 100%;
+  }
+  .option-btn:hover { border-color: var(--accent); }
+  .option-btn .opt-label {
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 600; color: var(--accent);
+    min-width: 20px;
+  }
+  .option-btn.correct-ans { background: var(--correct); border-color: var(--correct-border); }
+  .option-btn.wrong-ans { background: var(--wrong); border-color: var(--wrong-border); }
+  .option-btn:disabled { cursor: not-allowed; }
+
+  /* Short answer */
+  .short-wrap { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .short-wrap input {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    font-family: 'Source Serif 4', serif; font-size: 14px;
+    width: 100%; background: var(--bg2); color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .short-wrap input:focus { border-color: var(--accent); }
+  .short-wrap input.correct-ans { background: var(--correct); border-color: var(--correct-border); }
+  .short-wrap input.wrong-ans { background: var(--wrong); border-color: var(--wrong-border); }
+
+  /* OX */
+  .ox-wrap { display: flex; gap: 12px; margin-bottom: 14px; }
+  .ox-btn {
+    flex: 1; padding: 14px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    cursor: pointer;
+    font-family: 'Playfair Display', serif;
+    font-size: 24px; font-weight: 900;
+    transition: all 0.2s;
+    color: var(--text2);
+  }
+  .ox-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .ox-btn.correct-ans { background: var(--correct); border-color: var(--correct-border); color: var(--correct-border); }
+  .ox-btn.wrong-ans { background: var(--wrong); border-color: var(--wrong-border); color: var(--wrong-border); }
+  .ox-btn:disabled { cursor: not-allowed; }
+
+  .check-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    background: var(--accent); color: #fff;
+    border: none; cursor: pointer;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.1em;
+    transition: opacity 0.2s;
+    margin-right: 8px;
+  }
+  .check-btn:hover { opacity: 0.85; }
+  .check-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .feedback {
+    display: none;
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-left: 3px solid var(--accent);
+    background: var(--bg2);
+    font-size: 14px; line-height: 1.6;
+  }
+  .feedback.show { display: block; }
+  .feedback .fb-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .feedback.fb-correct { border-left-color: var(--correct-border); }
+  .feedback.fb-correct .fb-label { color: var(--correct-border); }
+  .feedback.fb-wrong { border-left-color: var(--wrong-border); }
+  .feedback.fb-wrong .fb-label { color: var(--wrong-border); }
+
+  /* ANSWER SECTION */
+  .answer-section {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 3px solid var(--text);
+  }
+  .answer-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(20px, 5vw, 28px); font-weight: 900;
+    color: var(--text); margin-bottom: 6px;
+  }
+  .answer-section > p {
+    color: var(--text2); font-size: 14px; margin-bottom: 24px;
+    font-style: italic;
+  }
+  .ans-card {
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+    padding: 16px;
+    background: var(--bg2);
+  }
+  .ans-q-label {
+    display: flex; gap: 10px; align-items: center;
+    margin-bottom: 10px;
+  }
+  .ans-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--text); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .ans-q-text { font-size: 14px; font-weight: 600; color: var(--text2); flex: 1; }
+  .ans-answer {
+    background: var(--accent); color: #fff;
+    padding: 8px 12px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    margin-bottom: 10px; font-weight: 600;
+  }
+  .ans-explanation { font-size: 14px; color: var(--text); line-height: 1.65; }
+
+  .progress-bar {
+    height: 4px; background: var(--border); margin-bottom: 20px;
+  }
+  .progress-fill {
+    height: 100%; background: var(--accent);
+    width: 0%; transition: width 0.5s ease;
+  }
+
+  @media (max-width: 400px) {
+    .score-board { gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <div class="cover-tag">시험문제 · Rubin Observatory HPC+AI 분석</div>
+  <h1 class="cover-title">10문항 <span>검증 시험</span></h1>
+  <p class="cover-sub">객관식 · 단답형 · OX 혼합 | 쉬움 30% · 보통 50% · 어려움 20%</p>
+  <div class="score-board">
+    <div class="score-item">
+      <div class="s-num" id="scoreDisplay">0</div>
+      <div class="s-label">/ 10 정답</div>
+    </div>
+    <div class="score-item">
+      <div class="s-num" id="attemptDisplay">0</div>
+      <div class="s-label">시도 문항</div>
+    </div>
+    <div class="score-item">
+      <div class="s-num" id="pctDisplay">0%</div>
+      <div class="s-label">정답률</div>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+</header>
+
+<!-- ═══════════════════════════ Q1 ═══════════════════════════ -->
+<div class="divider-section"><span>쉬움</span></div>
+
+<div class="q-card" id="qcard-1">
+  <div class="q-header">
+    <div class="q-num">1</div>
+    <div class="q-meta">
+      <div class="q-badges">
+        <span class="badge easy">쉬움</span>
+        <span class="badge type">객관식</span>
+      </div>
+      <div class="q-text">Vera C. Rubin 천문대의 LSST 카메라 해상도는?</div>
+    </div>
+  </div>
+  <div class="q-body">
+    <div class="options">
+      <button class="option-btn" onclick="checkMCQ(1,'A','D')"><span class="opt-label">A</span>189 메가픽셀</button>
+      <button class="option-btn" onclick="checkMCQ(1,'B','D')"><span class="opt-label">B</span>1.0 기가픽셀</button>
+      <button class="option-btn" onclick="checkMCQ(1,'C','D')"><span class="opt-label">C</span>2.4 기가픽셀</button>
+      <button class="option-btn" onclick="checkMCQ(1,'D','D')"><span class="opt-label">D</span>3.2 기가픽셀</button>
+    </div>
+    <div class="feedback" id="fb-1"></div>
+  </div>
+</div>
+
+<!-- Q2 -->
+<div class="q-card" id="qcard-2">
+  <div class="q-header">
+    <div class="q-num">2</div>
+    <div class="q-meta">
+      <div class="q-badges">
+        <span class="badge easy">쉬움</span>
+        <span class="badge type">OX</span>
+      </div>
+      <div class="q-text">Rubin 천문대의 데이터 파이프라인 소프트웨어는 처음부터 Python 우선으로 개발되었다.</div>
+    </div>
+  </div>
+  <div class="q-body">
+    <div class="ox-wrap">
+      <button class="ox-btn" onclick="checkOX(2,'O','X')">O</button>
+      <button class="ox-btn" onclick="checkOX(2,'X','X')">X</button>
+    </div>
+    <div class="feedback" id="fb-2"></div>
+  </div>
+</div>
+
+<!-- Q3 -->
+<div class="q-card" id="qcard-3">
+  <div class="q-header">
+    <div class="q-num">3</div>
+    <div class="q-meta">
+      <div class="q-badges">
+        <span class="badge easy">쉬움</span>
+        <span class="badge type">객관식</span>
+      </div>
+      <div class="q-text">LSST 카메라가 3.2 기가픽셀 전체를 판독하는 데 걸리는 시간은?</div>
+    </div>
+  </div>
+  <div class="q-body">
+    <div class="options">
+      <button class="option-btn" onclick="checkMCQ(3,'A','B')"><span class="opt-label">A</span>30초</button>
+      <button class="option-btn" onclick="checkMCQ(3,'B','B')"><span class="opt-label">B</span>2초</button>
+      <button class="option-btn" onclick="checkMCQ(3,'C','B')"><span class="opt-label">C</span>10초</button>
+      <button class="option-btn" onclick="checkMCQ(3,'D','B')"><span class="opt-label">D</span>1분</button>
+    </div>
+    <div class="feedback" id="fb-3"></div>
+  </div>
+</div>
+
+<!-- ═══ 보통 ═══ -->
+<div class="divider-section"><span>보통</span></div>
+
+<!-- Q4 -->
+<div class="q-card" id="qcard-4">
+  <div class="q-header">
+    <div class="q-num">4</div>
+    <div class="q-meta">
+      <div class="q-badges">
+        <span class="badge mid">보통</span>
+        <span class="badge type">단답형</span>
+      </div>
+      <div class="q-text">차분 이미징에서 'PSF'란 무엇을 의미하는지 우리말로 쓰세요.</div>
+    </div>
+  </div>
+  <div class="q-body">
+    <div class="short-wrap">
+      <input type="text" id="short-4" placeholder="답을 입력하세요..." maxlength="40">
+    </div>
+    <button class="check-btn" onclick="checkShort(4,['점퍼짐 함수','점 퍼짐 함수','점퍼짐함수','psf','point spread function'])">확인</button>
+    <div class="feedback" id="fb-4"></div>
+  </div>
+</div>
+
+<!-- Q5 -->
+<div class="q-card" id="qcard-5">
+  <div class="q-header">
+    <div class="q-num">5</div>
+    <div class="q-meta">
+      <div class="q-badges">
+        <span class="badge mid">보통</span>
+        <span class="badge type">객관식</span>
+      </div>
+      <div class="q-text">이 프로젝트에서 CPU 대비 GPU 속도 향상이 가장 큰 경우는?</div>
+    </div>
+  </div>
+  <div class="q-body">
+    <div class="options">
+      <button class="option-btn" onclick="checkMCQ(5,'A','C')"><span class="opt-label">A</span>CCD 1개 프롬프트 처리 (~60×)</button>
+      <button class="option-btn" onclick="checkMCQ(5,'B','C')"><span class="opt-label">B</span>전체 카메라 NumPy→KuPy (~140×)</button>
+      <button class="option-btn" onclick="checkMCQ(5,'C','C')"><span class="opt-label">C</span>다이폴 피팅 (멀티 GPU, 5시간→1초)</button>
+      <button class="option-btn" onclick="checkMCQ(5,'D','C')"><span class="opt-label">D</span>XFEL X선 분석 (~1,000×)</button>
+    </div>
+    <div class="feedback" id="fb-5"></div>
+  </div>
+</div>
+
+<!-- Q6 -->
+<div class="q-card" id="qcard-6">
+  <div class="q-header">
+    <div class="q-num">6</div>
+    <div class="q-meta">
+      <div class="q-badges">
+        <span class="badge mid">보통</span>
+        <span class="badge type">OX</span>
+      </div>
+      <div class="q-text">이 프로젝트의 새 GPU 라이브러리는 기존 코드를 그대로 GPU에 옮기는 방식으로 속도를 높였다.</div>
+    </div>
+  </div>
+  <div class="q-body">
+    <div class="ox-wrap">
+      <button class="ox-btn" onclick="checkOX(6,'O','X')">O</button>
+      <button class="ox-btn" onclick="checkOX(6,'X','X')">X</button>
+    </div>
+    <div class="feedback" id="fb-6"></div>
+  </div>
+</div>
+
+<!-- Q7 -->
+<div class="q-card" id="qcard-7">
+  <div class="q-header">
+    <div class="q-num">7</div>
+    <div class="q-meta">
+      <div class="q-badges">
+        <span class="badge mid">보통</span>
+        <span class="badge type">객관식</span>
+      </div>
+      <div class="q-text">프로파일링 결과, GPU 워크플로에서 처리 시간의 약 50%를 차지하는 병목은?</div>
+    </div>
+  </div>
+  <div class="q-body">
+    <div class="options">
+      <button class="option-btn" onclick="checkMCQ(7,'A','C')"><span class="opt-label">A</span>PSF 피팅 계산</button>
+      <button class="option-btn" onclick="checkMCQ(7,'B','C')"><span class="opt-label">B</span>신경망 추론</button>
+      <button class="option-btn" onclick="checkMCQ(7,'C','C')"><span class="opt-label">C</span>데이터 입출력(I/O)</button>
+      <button class="option-btn" onclick="checkMCQ(7,'D','C')"><span class="opt-label">D</span>이미지 왜핑(Warping)</button>
+    </div>
+    <div class="feedback" id="fb-7"></div>
+  </div>
+</div>
+
+<!-- Q8 -->
+<div class="q-card" id="qcard-8">
+  <div class="q-header">
+    <div class="q-num">8</div>
+    <div class="q-meta">
+      <div class="q-badges">
+        <span class="badge mid">보통</span>
+        <span class="badge type">단답형</span>
+      </div>
+      <div class="q-text">Rubin 천문대가 경보를 전 세계에 전송할 때 사용하는 메시지 큐 시스템의 이름은?</div>
+    </div>
+  </div>
+  <div class="q-body">
+    <div class="short-wrap">
+      <input type="text" id="short-8" placeholder="답을 입력하세요..." maxlength="30">
+    </div>
+    <button class="check-btn" onclick="checkShort(8,['kafka','카프카'])">확인</button>
+    <div class="feedback" id="fb-8"></div>
+  </div>
+</div>
+
+<!-- ═══ 어려움 ═══ -->
+<div class="divider-section"><span>어려움</span></div>
+
+<!-- Q9 -->
+<div class="q-card" id="qcard-9">
+  <div class="q-header">
+    <div class="q-num">9</div>
+    <div class="q-meta">
+      <div class="q-badges">
+        <span class="badge hard">어려움</span>
+        <span class="badge type">객관식</span>
+      </div>
+      <div class="q-text">이 프로젝트에서 HPC 수치 계산 결과를 AI 모델 학습에 활용하는 주요 이유로 가장 적절한 것은?</div>
+    </div>
+  </div>
+  <div class="q-body">
+    <div class="options">
+      <button class="option-btn" onclick="checkMCQ(9,'A','B')"><span class="opt-label">A</span>AI가 CPU보다 빠르게 수치를 계산하기 때문에</button>
+      <button class="option-btn" onclick="checkMCQ(9,'B','B')"><span class="opt-label">B</span>AI가 올바른 물리를 수행하는지 검증할 정답(Ground Truth)이 필요하기 때문에</button>
+      <button class="option-btn" onclick="checkMCQ(9,'C','B')"><span class="opt-label">C</span>AI 모델이 HPC 시스템을 대체하기 위해서</button>
+      <button class="option-btn" onclick="checkMCQ(9,'D','B')"><span class="opt-label">D</span>HPC 결과는 AI 없이는 해석이 불가능하기 때문에</button>
+    </div>
+    <div class="feedback" id="fb-9"></div>
+  </div>
+</div>
+
+<!-- Q10 -->
+<div class="q-card" id="qcard-10">
+  <div class="q-header">
+    <div class="q-num">10</div>
+    <div class="q-meta">
+      <div class="q-badges">
+        <span class="badge hard">어려움</span>
+        <span class="badge type">단답형</span>
+      </div>
+      <div class="q-text">차분 이미징에서 '다이폴(Dipole)'이 나타내는 정보를 구체적으로 설명하세요.</div>
+    </div>
+  </div>
+  <div class="q-body">
+    <div class="short-wrap">
+      <input type="text" id="short-10" placeholder="답을 입력하세요..." maxlength="80">
+    </div>
+    <button class="check-btn" onclick="checkShort(10,['이동','움직임','변화','moved','movement','거리','방향','이동량'])">확인</button>
+    <div class="feedback" id="fb-10"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ ANSWER SHEET ═══════════════════ -->
+<div class="answer-section">
+  <h2>정답 및 해설</h2>
+  <p>모든 문항의 정답과 상세 해설입니다.</p>
+
+  <div class="ans-card">
+    <div class="ans-q-label">
+      <div class="ans-num">1</div>
+      <div class="ans-q-text">LSST 카메라 해상도</div>
+    </div>
+    <div class="ans-answer">정답: D — 3.2 기가픽셀</div>
+    <div class="ans-explanation">189개의 4K×4K CCD 칩을 합산하면 약 3.2 기가픽셀(32억 화소)이 됩니다. 이는 세계 최대의 단일 디지털 카메라입니다. 숫자 189는 구성 칩 수이고, 해상도 자체가 아닙니다.</div>
+  </div>
+
+  <div class="ans-card">
+    <div class="ans-q-label">
+      <div class="ans-num">2</div>
+      <div class="ans-q-text">파이프라인 개발 방식</div>
+    </div>
+    <div class="ans-answer">정답: X (거짓)</div>
+    <div class="ans-explanation">파이프라인은 약 25년 전 C++98로 시작되었으며, Python 2.3 바인딩이 일부 추가된 형태였습니다. 이후 점차 Python 우선 구조로 마이그레이션하여 현재는 Python 3.14 + C++20 + 일부 Rust 바인딩 구조가 되었습니다.</div>
+  </div>
+
+  <div class="ans-card">
+    <div class="ans-q-label">
+      <div class="ans-num">3</div>
+      <div class="ans-q-text">전체 판독 시간</div>
+    </div>
+    <div class="ans-answer">정답: B — 2초</div>
+    <div class="ans-explanation">3.2 기가픽셀 전체를 단 2초 만에 읽어냅니다. 이 빠른 판독 속도가 가능해야 500회/야간의 관측 일정을 소화할 수 있습니다.</div>
+  </div>
+
+  <div class="ans-card">
+    <div class="ans-q-label">
+      <div class="ans-num">4</div>
+      <div class="ans-q-text">PSF의 의미</div>
+    </div>
+    <div class="ans-answer">정답: 점퍼짐 함수 (Point Spread Function)</div>
+    <div class="ans-explanation">PSF(Point Spread Function)는 대기 난류와 광학계에 의해 점광원이 이미지에서 퍼지는 방식을 수학적으로 표현한 합성곱 커널입니다. 대기는 매번 다른 PSF를 만들기 때문에, 차분 이미징 전 두 이미지의 PSF를 일치시키는 작업이 필수적입니다.</div>
+  </div>
+
+  <div class="ans-card">
+    <div class="ans-q-label">
+      <div class="ans-num">5</div>
+      <div class="ans-q-text">최대 속도 향상 사례</div>
+    </div>
+    <div class="ans-answer">정답: C — 다이폴 피팅 (멀티 GPU, 5시간→1초)</div>
+    <div class="ans-explanation">멀티 GPU 환경에서 다이폴 피팅은 5시간에서 1초로 단축됩니다. 이는 18,000배에 달하는 속도 향상으로, 선택지 중 가장 큰 배율입니다. XFEL은 15시간→0.5초(약 108,000배)가 더 크지만, 이 선택지는 포함되지 않았습니다.</div>
+  </div>
+
+  <div class="ans-card">
+    <div class="ans-q-label">
+      <div class="ans-num">6</div>
+      <div class="ans-q-text">GPU 가속 방식</div>
+    </div>
+    <div class="ans-answer">정답: X (거짓)</div>
+    <div class="ans-explanation">단순 코드 이식(포팅)이 아니라 알고리즘 자체를 GPU 아키텍처에 맞게 재설계했습니다. 물리를 이해하고, 수학으로 변환하고, GPU 병렬 처리에 최적화된 방식으로 다시 구현한 것이 핵심입니다. 기저 함수 라이브러리도 이 과정에서 새로 개발되었습니다.</div>
+  </div>
+
+  <div class="ans-card">
+    <div class="ans-q-label">
+      <div class="ans-num">7</div>
+      <div class="ans-q-text">주요 병목</div>
+    </div>
+    <div class="ans-answer">정답: C — 데이터 입출력(I/O)</div>
+    <div class="ans-explanation">프로파일링 결과 I/O가 처리 시간의 약 50%를 차지합니다. 이를 해결하기 위해 HDF5 형식은 80배 최적화되었고, FITS 형식의 GPU 직접 로딩 API를 개발 중입니다. 또한 관측 일정이 사전에 알려져 있어 기준 이미지(Template)를 미리 GPU에 올려두는 방식으로 일부 완화합니다.</div>
+  </div>
+
+  <div class="ans-card">
+    <div class="ans-q-label">
+      <div class="ans-num">8</div>
+      <div class="ans-q-text">경보 전송 시스템</div>
+    </div>
+    <div class="ans-answer">정답: Kafka (카프카)</div>
+    <div class="ans-explanation">검출된 이벤트는 이미지 절편(Cutout)과 함께 Kafka 메시지 큐에 패키징됩니다. 전 세계 커뮤니티 브로커들이 관심 채널을 구독하여 초신성 브로커, 태양계 브로커 등이 각자 필요한 경보를 수신합니다.</div>
+  </div>
+
+  <div class="ans-card">
+    <div class="ans-q-label">
+      <div class="ans-num">9</div>
+      <div class="ans-q-text">HPC-AI 연계 이유</div>
+    </div>
+    <div class="ans-answer">정답: B — AI가 올바른 물리를 수행하는지 검증할 Ground Truth 필요</div>
+    <div class="ans-explanation">AI가 빠르게 분류·추론하더라도 그 결과가 물리적으로 정확한지 알 수 없습니다. HPC의 고정밀 수치 계산은 AI 모델에게 "정답"을 제공하고, AI는 이를 바탕으로 학습합니다. 새 데이터가 쌓일수록 파라미터와 오차 계산이 정밀해지는 반복적 개선 루프입니다.</div>
+  </div>
+
+  <div class="ans-card">
+    <div class="ans-q-label">
+      <div class="ans-num">10</div>
+      <div class="ans-q-text">다이폴(Dipole)의 의미</div>
+    </div>
+    <div class="ans-answer">정답: 천체가 이동한 양과 방향 (크기·형태 변화 포함)</div>
+    <div class="ans-explanation">다이폴은 새 이미지에서 기준 이미지를 뺀 결과물로, 양(positive)과 음(negative) 신호의 쌍으로 나타납니다. 이 쌍의 위치·크기·형태를 분석하면 해당 천체가 얼마나, 어떤 방향으로 이동했는지 알 수 있습니다. 소행성 궤도 예측처럼 정밀도가 생사를 가르는 응용에서 특히 중요합니다.</div>
+  </div>
+</div>
+
+<script>
+let score = 0;
+let attempted = 0;
+const answered = new Set();
+
+function updateScore() {
+  document.getElementById('scoreDisplay').textContent = score;
+  document.getElementById('attemptDisplay').textContent = attempted;
+  const pct = attempted > 0 ? Math.round(score / attempted * 100) : 0;
+  document.getElementById('pctDisplay').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = (attempted / 10 * 100) + '%';
+}
+
+function showFeedback(qNum, isCorrect, html) {
+  const fb = document.getElementById('fb-' + qNum);
+  fb.innerHTML = `<div class="fb-label">${isCorrect ? '✓ 정답' : '✗ 오답'}</div>${html}`;
+  fb.className = 'feedback show ' + (isCorrect ? 'fb-correct' : 'fb-wrong');
+  document.getElementById('qcard-' + qNum).classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
+}
+
+function checkMCQ(qNum, chosen, correct) {
+  if (answered.has(qNum)) return;
+  answered.add(qNum);
+  attempted++;
+  const isCorrect = chosen === correct;
+  if (isCorrect) score++;
+
+  // Style buttons
+  const card = document.getElementById('qcard-' + qNum);
+  card.querySelectorAll('.option-btn').forEach((btn, i) => {
+    const opt = ['A','B','C','D'][i];
+    btn.disabled = true;
+    if (opt === correct) btn.classList.add('correct-ans');
+    else if (opt === chosen && !isCorrect) btn.classList.add('wrong-ans');
+  });
+
+  const feedbacks = {
+    1: { C: '정답은 <strong>3.2 기가픽셀</strong>입니다. 189개의 4K×4K CCD 칩으로 구성됩니다.', text: '정답은 <strong>3.2 기가픽셀</strong>입니다.' },
+    3: { C: '정답은 <strong>2초</strong>입니다. 매우 빠른 판독이 연속 관측을 가능하게 합니다.', text: '정답은 <strong>2초</strong>입니다.' },
+    5: { C: '다이폴 피팅 멀티 GPU: 5시간 → 1초, 약 18,000배 향상입니다.', text: '다이폴 피팅(멀티 GPU)이 5시간→1초로 가장 높은 배율입니다.' },
+    7: { C: '데이터 I/O가 약 50% 병목입니다. HDF5 80배 최적화, FITS GPU 로딩 API 개발 중입니다.', text: '데이터 I/O가 약 50%를 차지하는 주요 병목입니다.' },
+    9: { C: 'AI 모델의 물리적 정확성을 검증하기 위한 Ground Truth가 필요합니다.', text: 'HPC 결과가 AI 학습의 정답(Ground Truth) 역할을 합니다.' },
+  };
+
+  const fb = feedbacks[qNum];
+  const msg = isCorrect
+    ? '훌륭합니다! ' + (fb ? fb.text : '')
+    : '정답은 <strong>' + correct + '</strong>번입니다. 정답 해설란을 참고하세요.';
+  showFeedback(qNum, isCorrect, msg);
+  updateScore();
+}
+
+function checkOX(qNum, chosen, correct) {
+  if (answered.has(qNum)) return;
+  answered.add(qNum);
+  attempted++;
+  const isCorrect = chosen === correct;
+  if (isCorrect) score++;
+
+  const card = document.getElementById('qcard-' + qNum);
+  card.querySelectorAll('.ox-btn').forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent.trim() === correct) btn.classList.add('correct-ans');
+    else if (btn.textContent.trim() === chosen && !isCorrect) btn.classList.add('wrong-ans');
+  });
+
+  const msgs = {
+    2: '파이프라인은 C++98로 시작했습니다. 현재는 Python 우선 구조로 25년에 걸쳐 마이그레이션되었습니다.',
+    6: '단순 포팅이 아니라 GPU 아키텍처에 맞게 알고리즘 자체를 재설계했습니다.',
+  };
+  const msg = isCorrect ? '정확합니다! ' + (msgs[qNum] || '') : '틀렸습니다. 정답은 <strong>' + correct + '</strong>입니다. ' + (msgs[qNum] || '');
+  showFeedback(qNum, isCorrect, msg);
+  updateScore();
+}
+
+function checkShort(qNum, keywords) {
+  if (answered.has(qNum)) return;
+  const input = document.getElementById('short-' + qNum);
+  const val = input.value.trim().toLowerCase();
+  if (!val) { input.focus(); return; }
+
+  answered.add(qNum);
+  attempted++;
+  const isCorrect = keywords.some(kw => val.includes(kw.toLowerCase()));
+  if (isCorrect) score++;
+
+  input.disabled = true;
+  input.classList.add(isCorrect ? 'correct-ans' : 'wrong-ans');
+
+  const explanations = {
+    4: '점퍼짐 함수(PSF)는 대기 난류와 광학계 때문에 점광원이 이미지에서 번져 보이는 현상을 수학적으로 나타낸 합성곱 커널입니다.',
+    8: 'Kafka는 대규모 실시간 메시지 스트리밍 시스템으로, 경보를 전 세계 브로커에 빠르게 전달하는 데 사용됩니다.',
+    10: '다이폴은 새 이미지 - 기준 이미지 차분 결과로, 천체의 이동 거리, 방향, 크기·형태 변화 정보를 담고 있습니다.',
+  };
+  const msg = isCorrect
+    ? '정답입니다! ' + (explanations[qNum] || '')
+    : '아쉽습니다. 정답 해설란을 참고하세요. ' + (explanations[qNum] || '');
+  showFeedback(qNum, isCorrect, msg);
+  // disable button
+  const btns = document.querySelectorAll('#qcard-' + qNum + ' .check-btn');
+  btns.forEach(b => b.disabled = true);
+  updateScore();
+}
+</script>
+</body>
+</html>
