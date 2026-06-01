@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NVIDIA GTC Taipei 2026 — 분석 리포트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#ffffff; --bg2:#fafafa; --text:#1a1a1a; --text2:#777777;
+    --accent:#e11d48; --accent2:#f43f5e; --border:#e5e5e5;
+    --c1:#e11d48; --c2:#1a1a1a; --c3:#6b7280; --c4:#2563eb;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:'Noto Sans KR',sans-serif; line-height:1.75;
+    font-weight:300; -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .wrap{max-width:720px; margin:0 auto; padding:0 22px}
+
+  /* HERO */
+  .hero{
+    background:var(--text); color:#fff; padding:64px 22px 56px;
+    position:relative; overflow:hidden;
+  }
+  .hero::before{
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(circle at 80% 10%, rgba(225,29,72,.35), transparent 55%);
+  }
+  .hero-inner{max-width:720px; margin:0 auto; position:relative; z-index:1}
+  .kicker{
+    font-size:12px; letter-spacing:3px; text-transform:uppercase;
+    color:var(--accent2); font-weight:500; margin-bottom:18px;
+  }
+  .hero h1{
+    font-family:'Playfair Display',serif; font-weight:900;
+    font-size:clamp(34px,9vw,54px); line-height:1.08; letter-spacing:-.5px;
+  }
+  .hero h1 em{color:var(--accent2); font-style:italic}
+  .hero .sub{
+    margin-top:22px; font-size:15px; color:#cfcfcf; font-weight:300;
+    max-width:560px;
+  }
+  .meta-row{
+    margin-top:30px; display:flex; flex-wrap:wrap; gap:10px;
+  }
+  .tag{
+    font-size:11px; letter-spacing:1px; padding:6px 13px; border-radius:30px;
+    border:1px solid rgba(255,255,255,.25); color:#eee;
+  }
+
+  /* SECTIONS */
+  section{padding:50px 0}
+  .sec-num{
+    font-family:'Playfair Display',serif; font-style:italic;
+    color:var(--accent); font-size:15px; margin-bottom:6px; font-weight:600;
+  }
+  h2{
+    font-family:'Playfair Display',serif; font-weight:700;
+    font-size:clamp(25px,6vw,34px); line-height:1.18; letter-spacing:-.3px;
+    margin-bottom:22px;
+  }
+  h3{
+    font-weight:700; font-size:18px; margin:30px 0 12px;
+    color:var(--text); border-left:3px solid var(--accent); padding-left:12px;
+  }
+  p{margin-bottom:16px; font-size:15.5px; color:#2a2a2a}
+  .lead{font-size:17px; color:var(--text2); font-weight:300; margin-bottom:24px}
+  strong{font-weight:700; color:var(--text)}
+  .hl{background:linear-gradient(transparent 60%, rgba(225,29,72,.18) 60%); font-weight:500}
+
+  .divider{height:1px; background:var(--border); margin:0}
+
+  /* PULL QUOTE */
+  .quote{
+    border-top:2px solid var(--accent); border-bottom:2px solid var(--accent);
+    padding:26px 0; margin:34px 0;
+  }
+  .quote p{
+    font-family:'Playfair Display',serif; font-style:italic;
+    font-size:21px; line-height:1.45; color:var(--text); margin:0;
+  }
+  .quote .by{
+    font-family:'Noto Sans KR'; font-style:normal; font-size:13px;
+    color:var(--text2); margin-top:12px; letter-spacing:1px;
+  }
+
+  /* STAT GRID */
+  .stats{display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--border); margin:26px 0; border:1px solid var(--border)}
+  .stat{background:var(--bg); padding:22px 16px; text-align:center}
+  .stat .n{font-family:'Playfair Display',serif; font-weight:900; font-size:30px; color:var(--accent); line-height:1}
+  .stat .l{font-size:12px; color:var(--text2); margin-top:8px}
+
+  /* CARD */
+  .card{
+    background:var(--bg2); border:1px solid var(--border); border-radius:14px;
+    padding:22px; margin:20px 0;
+  }
+  .card h4{font-weight:700; font-size:16px; margin-bottom:6px; color:var(--accent)}
+  .card p{font-size:14.5px; margin-bottom:0; color:#3a3a3a}
+
+  /* TABLE */
+  .tbl-wrap{overflow-x:auto; margin:22px 0; border-radius:10px; border:1px solid var(--border)}
+  table{width:100%; border-collapse:collapse; font-size:14px; min-width:340px}
+  th{background:var(--accent); color:#fff; padding:12px 14px; text-align:left; font-weight:500; font-size:13px}
+  td{padding:11px 14px; border-bottom:1px solid var(--border); background:var(--bg2)}
+  tr:last-child td{border-bottom:none}
+  td:first-child{font-weight:500; color:var(--text)}
+
+  /* CHART */
+  .fade-in{opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease}
+  .fade-in.visible{opacity:1; transform:translateY(0)}
+  .chart-container{position:relative; max-height:340px; margin:24px 0}
+  .chart-container canvas{opacity:0; transition:opacity .4s ease; max-height:300px}
+  .chart-container.chart-ready canvas{opacity:1}
+  .chart-cap{font-size:12px; color:var(--text2); text-align:center; margin-top:8px}
+
+  /* SIMULATOR */
+  .sim{background:var(--text); color:#fff; border-radius:16px; padding:26px 22px; margin:30px 0}
+  .sim h4{font-family:'Playfair Display',serif; color:var(--accent2); font-size:19px; margin-bottom:6px}
+  .sim .desc{font-size:13px; color:#bbb; margin-bottom:20px}
+  .sim label{display:block; font-size:13px; color:#ddd; margin:18px 0 7px; display:flex; justify-content:space-between}
+  .sim label span{color:var(--accent2); font-weight:700}
+  .sim input[type=range]{width:100%; -webkit-appearance:none; height:5px; border-radius:5px; background:#444; outline:none; cursor:pointer}
+  .sim input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:var(--accent); cursor:pointer; box-shadow:0 0 0 4px rgba(225,29,72,.25)}
+  .sim input[type=range]::-moz-range-thumb{width:20px; height:20px; border-radius:50%; background:var(--accent); border:none; cursor:pointer}
+  .sim-out{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:24px}
+  .sim-box{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:10px; padding:16px; text-align:center}
+  .sim-box .v{font-family:'Playfair Display',serif; font-weight:900; font-size:26px; color:#fff; line-height:1}
+  .sim-box .k{font-size:11px; color:#aaa; margin-top:7px}
+  .sim-box.accent .v{color:var(--accent2)}
+  .sim-reset{margin-top:18px; background:var(--accent); color:#fff; border:none; padding:11px 20px; border-radius:8px; font-family:'Noto Sans KR'; font-size:13px; font-weight:500; cursor:pointer; width:100%}
+  .sim-reset:active{transform:scale(.98)}
+  .sim-note{font-size:11px; color:#888; margin-top:14px; line-height:1.5}
+
+  /* AGENT DIAGRAM */
+  .agent-diagram{margin:26px 0}
+  .agent-layer{
+    background:var(--bg2); border:1px solid var(--border); border-left:4px solid var(--c3);
+    border-radius:10px; padding:16px 18px; margin-bottom:10px; cursor:pointer;
+    transition:all .25s ease;
+  }
+  .agent-layer:hover{border-left-color:var(--accent); transform:translateX(4px)}
+  .agent-layer.active{border-left-color:var(--accent); background:#fff; box-shadow:0 4px 18px rgba(225,29,72,.12)}
+  .agent-layer .t{font-weight:700; font-size:15px; display:flex; align-items:center; gap:8px}
+  .agent-layer .t .badge{font-size:10px; background:var(--accent); color:#fff; padding:2px 8px; border-radius:20px; font-weight:500}
+  .agent-layer .d{font-size:13px; color:var(--text2); margin-top:8px; max-height:0; overflow:hidden; transition:max-height .3s ease, margin .3s ease}
+  .agent-layer.active .d{max-height:120px; margin-top:10px}
+
+  .term{border-bottom:1px dashed var(--accent); cursor:help}
+
+  /* FOOTER */
+  footer{background:var(--bg2); border-top:1px solid var(--border); padding:40px 22px; text-align:center; margin-top:30px}
+  footer p{font-size:13px; color:var(--text2); margin:0}
+  footer .big{font-family:'Playfair Display',serif; font-style:italic; font-size:18px; color:var(--text); margin-bottom:10px}
+
+  .note-box{background:#fff5f7; border:1px solid #fbcfe0; border-radius:10px; padding:16px 18px; margin:20px 0; font-size:13.5px; color:#7a1230}
+  .note-box b{color:var(--accent)}
+  ul.clean{list-style:none; margin:14px 0}
+  ul.clean li{padding:9px 0 9px 26px; position:relative; font-size:14.5px; border-bottom:1px solid var(--border)}
+  ul.clean li:last-child{border-bottom:none}
+  ul.clean li::before{content:"›"; position:absolute; left:6px; color:var(--accent); font-weight:700; font-size:17px}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="kicker">NVIDIA GTC Taipei · 2026.06.01</div>
+    <h1>토큰이 곧 <em>돈</em>이 되는 시대,<br>엔비디아의 다음 한 수</h1>
+    <p class="sub">젠슨 황 CEO가 대만 GTC 무대에서 선언한 것은 단순한 신제품 발표가 아니었다. "에이전트형 AI(Agentic AI)"가 실제 일을 하기 시작했고, 그 결과 컴퓨팅 자체가 매출이 되는 구조로 산업이 재편되고 있다는 이야기였다.</p>
+    <div class="meta-row">
+      <span class="tag">Vera Rubin</span>
+      <span class="tag">Vera CPU</span>
+      <span class="tag">RTX Spark</span>
+      <span class="tag">NemoTron 3</span>
+      <span class="tag">Cosmos 3</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- 1 -->
+<section>
+  <div class="sec-num">I. 큰 그림</div>
+  <h2>"쓸모 있는 AI가 도착했다"</h2>
+  <p class="lead">2년 전 같은 무대에서 젠슨 황은 "다음 물결은 에이전트형 AI"라고 예고했다. 이번엔 그것이 현실이 됐다고 선언했다.</p>
+  <p>에이전트형 AI란 사람이 일일이 명령하지 않아도 <strong>스스로 관찰하고, 추론하고, 계획을 세워, 도구를 써서 일을 끝내는 AI</strong>를 말한다. 그가 가장 먼저 꺼낸 증거는 소프트웨어 개발 현장의 데이터였다.</p>
+  <p>전 세계 약 3,000만~4,000만 명의 직업 개발자가 코드를 작성한다. 이들이 깃허브(GitHub)에 코드를 올리는 양(커밋 수)이 폭발적으로 늘었다는 것이다.</p>
+
+  <div class="chart-container fade-in">
+    <canvas id="commitChart" height="240"></canvas>
+  </div>
+  <div class="chart-cap">▲ 깃허브 연간 커밋 수 추이 (단위: 백만 건). 2026년은 첫 몇 달 추세를 연율 환산한 추정.</div>
+
+  <p><span class="hl">2023년 3억 건, 2024년 4억 건, 2025년 5억 건이던 커밋이 2026년 들어 첫 몇 달 만에 거의 3배로 뛰었다.</span> 젠슨 황은 이를 "AI가 일자리를 줄인다는 건 완전한 헛소리"라는 근거로 삼았다. 개발자 한 명이 만들어내는 산출이 폭발적으로 커지면, 기업은 오히려 더 많은 개발자를 고용하게 된다는 논리다.</p>
+
+  <div class="quote">
+    <p>"한 명의 엔지니어를 고용해 9조 달러어치 생산을 만들 수 있다면, 왜 더 많이 고용하지 않겠는가?"</p>
+    <div class="by">— 젠슨 황, 개발자 생산성에 대해</div>
+  </div>
+
+  <div class="note-box">
+    <b>경제적 함의</b> &nbsp;개발자 인건비 약 3조 달러가 그 몇 배의 경제적 산출로 증폭된다는 주장이다. 핵심은 "AI 도입이 비용 절감(인력 대체)이 아니라 산출 확대(수요 창출)로 이어진다"는 프레임이다. 다만 이 산출 수치는 발표자 측 추정으로, 실제 거시 통계 반영 여부는 지켜봐야 한다.</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 2 -->
+<section>
+  <div class="sec-num">II. 새로운 컴퓨팅 모델</div>
+  <h2>'에이전트'는 어떻게 작동하는가</h2>
+  <p class="lead">젠슨 황은 에이전트를 일종의 운영체제(OS)에 비유했다. 네 가지 부품이 모여 하나의 새로운 애플리케이션을 이룬다.</p>
+  <p>예전에는 우리가 앱을 켜고, 클릭하고, 타이핑했다. 이제는 <strong>"내가 원하는 것(의도)"을 AI에게 설명하면, AI가 코드를 만들거나 도구를 써서 결과물을 내놓는다.</strong> 무대에서는 클로드 코드(Claude Code)와 코덱스(Codex)로 GIF·CAD 파일을 즉석 생성하는 시연이 이어졌다.</p>
+
+  <p style="font-size:13px;color:var(--text2)">아래 각 층을 눌러 구성 요소를 확인하세요. 👆</p>
+  <div class="agent-diagram">
+    <div class="agent-layer" data-layer>
+      <div class="t">① 모델 <span class="badge">LLM · 두뇌</span></div>
+      <div class="d">거대언어모델(LLM)이 '생각'을 담당한다. 추론·계획·도구 사용 판단을 한다. 똑똑할수록·빠를수록·저렴할수록 좋다.</div>
+    </div>
+    <div class="agent-layer" data-layer>
+      <div class="t">② 하네스(Harness) <span class="badge">오케스트레이션</span></div>
+      <div class="d">전체를 지휘하는 '운영체제' 같은 층. 정보 라우팅, 단기기억(작업기억)·장기기억 관리, 도구 호출 흐름을 조율한다. OpenClaw, Hermes 등이 여기 해당.</div>
+    </div>
+    <div class="agent-layer" data-layer>
+      <div class="t">③ 도구 + 스킬 <span class="badge">Tools</span></div>
+      <div class="d">스프레드시트, 웹브라우저, 데이터베이스, 컴파일러 등 외부 도구. 엔비디아는 자사의 1,000여 개 CUDA-X 라이브러리에 '스킬(사용설명서)'을 붙여 AI가 직접 배워 쓰도록 했다.</div>
+    </div>
+    <div class="agent-layer" data-layer>
+      <div class="t">④ 런타임 <span class="badge">Runtime</span></div>
+      <div class="d">모든 것을 묶어 실제로 돌리는 실행 환경. 클라우드·온프레미스·PC·로봇 어디서 도는지에 따라 달라진다. 엔비디아의 OpenShell이 보안 런타임 역할.</div>
+    </div>
+  </div>
+
+  <p>중요한 점은 이 구조가 <strong class="hl">근본적으로 '분산·이질적(disaggregated & distributed)'</strong>이라는 것이다. 생각할 때(LLM), 도구를 쓸 때(CPU), 보안을 처리할 때(DPU) 각각 다른 칩이 켜진다. 이 복잡성이 바로 엔비디아가 새 하드웨어를 통째로 다시 설계한 이유다.</p>
+
+  <div class="note-box">
+    <b>용어</b> &nbsp;<b>KV 캐싱</b>은 AI가 대화·작업 중 직전 맥락을 빠르게 기억하는 '작업기억' 기술. 무엇을 기억하고·압축하고·다시 꺼낼지 관리하는 메모리 시스템이 차세대 저장장치 산업을 통째로 바꿀 것이라고 봤다.</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 3 -->
+<section>
+  <div class="sec-num">III. 핵심 제품</div>
+  <h2>Vera Rubin, 풀 가동 돌입</h2>
+  <p class="lead">"베라 루빈은 한 개의 칩이 아니다." 엔비디아 역사상 가장 야심 찬 프로젝트로, 4만 명 엔지니어 전체가 투입됐다.</p>
+  <p>기존 그레이스 블랙웰이 'AI 추론'을 위해 만들어졌다면, <strong>베라 루빈은 '에이전트를 돌리기 위해' 만들어진 다중 랙(multi-rack) 시스템</strong>이다. GPU(루빈) + CPU(베라) + NVLink 72 + 저장장치 + 보안칩(Bluefield)이 하나로 통합됐다.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="n">7</div><div class="l">신규 칩 종류</div></div>
+    <div class="stat"><div class="n">3nm</div><div class="l">TSMC 공정 · HBM4</div></div>
+    <div class="stat"><div class="n">1.3M</div><div class="l">랙당 부품 수</div></div>
+    <div class="stat"><div class="n">150</div><div class="l">대만 공급망 파트너</div></div>
+  </div>
+
+  <h3>조립 시간이 2시간 → 5분</h3>
+  <p>가장 인상적인 수치다. 그레이스 블랙웰 랙 한 대 조립에 2시간이 걸렸지만, 베라 루빈은 케이블·호스·팬을 없애고 중앙 PCB로 양면을 연결해 <span class="hl">5분 만에 조립</span>한다. 공급망 규모는 그레이스 블랙웰의 2배다.</p>
+
+  <div class="chart-container fade-in">
+    <canvas id="assemblyChart" height="220"></canvas>
+  </div>
+  <div class="chart-cap">▲ 랙 1대 조립 시간 (분). 케이블 제거 + PCB 통합 설계의 효과.</div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>구성 요소</th><th>핵심 사양</th></tr></thead>
+      <tbody>
+        <tr><td>Vera Rubin (GPU)</td><td>NVLink 72 · 최고 처리량 토큰 생성</td></tr>
+        <tr><td>Vera CPU 랙</td><td>256 CPU · 전량 액체냉각</td></tr>
+        <tr><td>GroK3 LPX</td><td>256 LPU · 40PB/s SRAM · 최저 지연</td></tr>
+        <tr><td>Spectrum-X Photonics</td><td>세계 최초 200Gbit 광통합 이더넷 스위치</td></tr>
+        <tr><td>HBM4 메모리</td><td>마이크론 · SK하이닉스 · 삼성</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note-box"><b>한국 투자자 관전 포인트</b> &nbsp;HBM4 공급사로 <b>SK하이닉스·삼성전자</b>가 명시됐다. 베라 루빈 공급망이 그레이스 블랙웰의 2배 규모라는 점은 메모리 수요 확대를 시사한다.</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 4 -->
+<section>
+  <div class="sec-num">IV. 경제 논리</div>
+  <h2>"컴퓨팅이 곧 매출이다"</h2>
+  <p class="lead">이번 키노트를 관통하는 단 하나의 경제 명제. 1기가와트(GW) 규모 AI 팩토리 한 곳의 건설비가 천문학적으로 뛰고 있다.</p>
+
+  <div class="chart-container fade-in">
+    <canvas id="gwCostChart" height="230"></canvas>
+  </div>
+  <div class="chart-cap">▲ 1GW AI 팩토리 건설 비용 추이 (단위: 십억 달러). 곧 1,000억 달러 시대.</div>
+
+  <p>건설비가 1,000억 달러에 육박하고, "첫 번째에 제대로 작동해야 한다"는 압박이 커지면서, 핵심 지표는 단순한 칩 성능이 아니라 <strong class="hl">와트당 처리량(Performance per Watt)</strong>이 됐다. 1GW 발전 용량은 고정이므로, 같은 전력으로 더 많은 토큰을 뽑아내는 쪽이 곧 더 많은 매출을 낸다.</p>
+
+  <h3>젠슨 황의 4대 성공 변수</h3>
+  <ul class="clean">
+    <li><strong>첫 토큰까지의 시간</strong> — 인프라가 빨리 켜지고 빨리 수익을 낼수록 좋다.</li>
+    <li><strong>와트당 토큰</strong> — 같은 전력으로 더 많이 생산 = 매출 증가.</li>
+    <li><strong>신뢰성</strong> — 수백만 개 케이블이 조화롭게 작동해야. 장애 간 평균시간이 관건.</li>
+    <li><strong>자산 수명</strong> — 아키텍처가 유연하고 생태계가 풍부할수록 오래 쓴다 = 총소유비용(TCO) 하락.</li>
+  </ul>
+
+  <h3>🕹️ 와트당 매출 시뮬레이터</h3>
+  <p>젠슨 황의 "더 많이 살수록, 더 많이 번다(The more you buy, the more you make)" 논리를 직접 조작해 보세요. 전력은 고정이고, 효율(와트당 토큰)과 토큰 단가가 매출을 결정합니다.</p>
+
+  <div class="sim">
+    <h4>AI 팩토리 토큰 경제</h4>
+    <div class="desc">1GW 고정 전력에서 효율과 단가를 바꿔보세요</div>
+
+    <label>발전 용량 <span id="vGw">1.0 GW</span></label>
+    <input type="range" id="sGw" min="0.5" max="2" step="0.1" value="1">
+
+    <label>와트당 처리 효율 (토큰/와트, 상대지수) <span id="vEff">100</span></label>
+    <input type="range" id="sEff" min="40" max="200" step="5" value="100">
+
+    <label>토큰 1백만 개당 단가 <span id="vPrice">$1.0</span></label>
+    <input type="range" id="sPrice" min="0.2" max="3" step="0.1" value="1">
+
+    <div class="sim-out">
+      <div class="sim-box">
+        <div class="v" id="oTokens">—</div>
+        <div class="k">연간 토큰 생산 (조 단위, 상대)</div>
+      </div>
+      <div class="sim-box accent">
+        <div class="v" id="oRev">—</div>
+        <div class="k">연간 매출 잠재력 (상대지수)</div>
+      </div>
+    </div>
+    <button class="sim-reset" id="simReset">초기값으로 리셋</button>
+    <p class="sim-note">※ 절대 금액이 아닌 상대 비교용 모델입니다. 효율을 2배로 올리면 같은 전력으로 매출이 2배가 되는 "와트당 매출" 원리를 보여줍니다. (키노트 발언에 기반한 개념 시뮬레이션)</p>
+  </div>
+
+  <div class="quote">
+    <p>"잘못된 아키텍처를 칩이 싸다는 이유로 고르는 건 말이 안 된다. 매출은 와트당 성능에서 나온다."</p>
+    <div class="by">— 젠슨 황</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 5 -->
+<section>
+  <div class="sec-num">V. 새 칩 부류</div>
+  <h2>Vera — 사람이 아닌 '에이전트'를 위한 CPU</h2>
+  <p class="lead">"지금까지의 모든 CPU는 사람을 위해 만들어졌다. 베라는 에이전트를 위한 CPU다."</p>
+  <p>사람은 초(second) 단위로 산다. 클라우드 CPU는 코어를 잘게 나눠 시간당 임대됐다. 하지만 <strong>에이전트는 나노초(nanosecond) 단위로 살고, 매우 성급하다.</strong> 도구를 쓰거나 DB에 접근할 때 응답이 늦으면 다음 단계로 못 넘어간다. 그래서 엔비디아는 처음부터 새 아키텍처(Olympus 코어)를 설계했다.</p>
+
+  <h3>베라의 4대 특징</h3>
+  <div class="card"><h4>① 클럭당 명령어(IPC) 세계 최고</h4><p>단일 스레드 성능 최우선. 한 클럭에 10개 명령어를 처리해 지연을 최소화.</p></div>
+  <div class="card"><h4>② 코어당 대역폭</h4><p>LPDDR5X로 1.2TB/s. 최고성능 외부 CPU의 2~3배 대역폭.</p></div>
+  <div class="card"><h4>③ 칩 안팎 전체 대역폭</h4><p>88개 Olympus 코어를 칩렛 분할 없이 단일 메시로 연결, 코어 간 통신 50% 빠름. x86 대비 메모리 지연 40% 감소.</p></div>
+  <div class="card"><h4>④ 에너지 효율</h4><p>토큰 생산(=돈)에서 전력을 뺏지 않도록, 최대한 많은 CPU를 팩토리에 욱여넣기 위함.</p></div>
+
+  <p>실제 워크로드 성능이 인상적이다. GPU에서나 보던 'X배' 향상을 CPU 실측에서 보여줬다.</p>
+
+  <div class="chart-container fade-in">
+    <canvas id="veraChart" height="230"></canvas>
+  </div>
+  <div class="chart-cap">▲ Vera CPU의 x86 대비 실측 성능 배수. 막대를 호버하면 수치가 보입니다.</div>
+
+  <ul class="clean">
+    <li><strong>SQL 처리 3배</strong> — IBM이 만든, 지구상 모든 DB가 쓰는 언어를 3배 빠르게.</li>
+    <li><strong>실시간 스트림 처리 6배</strong> — 뉴욕증권거래소(NYSE)에 실제 적용 중인 텔레메트리 처리.</li>
+    <li><strong>에이전트 샌드박스 1.8배</strong> — 코드·도구·데이터 파이프라인 실행.</li>
+  </ul>
+  <div class="note-box"><b>왜 중요한가</b> &nbsp;엔비디아는 이미 그레이스 블랙웰로 세계 최대 CPU 제조사 중 하나가 됐다. 모든 데이터센터·클라우드가 그레이스를 이미 인증·최적화했기 때문에, 베라는 "역사상 가장 빠르게 성공할 제품"이 될 것이라고 자신했다.</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 6 -->
+<section>
+  <div class="sec-num">VI. 소프트웨어 & 모델</div>
+  <h2>엔터프라이즈 AI 툴킷과 NemoTron 3</h2>
+  <p class="lead">"모든 기업이 에이전트 회사가 될 것이다." 모든 기업이 묻는 질문 — "어떻게 에이전트를 안전하게 돌리나?"</p>
+  <p>엔비디아의 답은 앞서 설명한 4요소(모델·하네스·도구·런타임)를 묶은 <strong>NVIDIA 엔터프라이즈 AI 툴킷</strong>이다. 보안 런타임 <strong>OpenShell</strong>은 오픈소스로 공개돼 레드햇·캐노니컬·마이크로소프트가 채택 중이다.</p>
+
+  <h3>NemoTron 3 Ultra — 오픈 모델</h3>
+  <p>엔비디아의 차세대 오픈 모델. 모델뿐 아니라 <strong class="hl">학습 데이터와 학습 스크립트까지 전부 공개</strong>하는 것이 특징이다. 세계 최초로 <span class="term" title="State Space Model: 긴 맥락을 효율적으로 처리하는 신경망 구조">SSM(상태공간모델)</span>과 <span class="term" title="Mixture of Experts: 입력마다 필요한 전문가 일부만 켜는 구조">MoE(전문가 혼합)</span>를 결합한 하이브리드 아키텍처를 채택했다.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="n">5×</div><div class="l">더 빠름</div></div>
+    <div class="stat"><div class="n">-30%</div><div class="l">운영 비용 절감</div></div>
+  </div>
+  <p style="font-size:14px;color:var(--text2)">세계 최고 오픈 모델 대비 5배 빠르고 30% 저렴하다고 주장. 이미 NemoTron 4도 개발 중이다.</p>
+
+  <h3>케이던스(Cadence) 협업 — 칩 설계 슈퍼에이전트</h3>
+  <p>엔비디아 자신의 가장 중요한 일, 칩 설계에 에이전트를 투입했다. 코덱스가 지휘하고 케이던스 ChipStack이 RTL 검증 루프를 돌린다. <span class="hl">몇 주 걸리던 검증이 몇 시간으로 — 40배 이상 빨라졌다.</span> 엔비디아는 "수십만 개의 케이던스 슈퍼에이전트를 고용하겠다"고 했다.</p>
+</section>
+
+<div class="divider"></div>
+
+<!-- 7 -->
+<section>
+  <div class="sec-num">VII. 개인용 컴퓨터의 재발명</div>
+  <h2>RTX Spark — 40년 만의 PC 혁명</h2>
+  <p class="lead">"마이크로소프트와 엔비디아가 40년 만에 PC를 다시 발명한다."</p>
+  <p>핵심은 <strong>N1X 칩</strong>이다. 미디어텍과 공동 설계했으며, 블랙웰 RTX GPU(6,144 CUDA 코어, 1페타플롭)와 20코어 그레이스 CPU를 NVLink로 융합했다. 128GB 통합 메모리, TSMC 3nm, 700억 트랜지스터.</p>
+
+  <div class="card"><h4>왜 'PC의 재발명'인가</h4><p>예전 PC는 앱을 켜고 클릭·타이핑하는 도구였다. 새 PC는 LLM이 '현대판 DirectX' 역할을 하고, 앱 자리에 '에이전트 런타임'이 들어선다. 클라우드든 로컬이든 에이전트가 24시간 돌아간다.</p></div>
+
+  <p>데스크톱·노트북·워크스테이션 3종 라인업이 공개됐다. 최상위 <strong>DGX 스테이션 포 윈도우</strong>는 768GB 메모리·20페타플롭·8TB/s 대역폭으로, 책상 위에서 1조 파라미터 모델을 돌릴 수 있다.</p>
+  <p>어도비는 포토샵·프리미어 코어를 재설계해 RTX Spark에서 2배 빠르게 구동하며, MCP 서버로 에이전트와 직접 연동된다. 집 설계 시연에서는 로컬 에이전트가 Rhino·Blender를 직접 조작하고 <strong>클로드 소네트(Claude Sonnet)</strong>를 클라우드에서 호출했다.</p>
+
+  <div class="quote">
+    <p>"언젠가 모든 집에 AI 슈퍼컴퓨터가 있을 것이다. 홈시어터처럼. 그건 PC보다 R2-D2나 C-3PO에 가까울 것이다."</p>
+    <div class="by">— 젠슨 황, PC의 미래에 대해</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 8 -->
+<section>
+  <div class="sec-num">VIII. 물리 AI</div>
+  <h2>Cosmos 3, Alpamayo 2, Isaac GR00T</h2>
+  <p class="lead">언어 모델의 데이터는 '우리 관점(3인칭)'이지만, 로봇 AI는 '로봇 관점(1인칭)' 데이터가 필요하다. 데이터가 가장 어려운 문제다.</p>
+  <p>엔비디아의 해법은 사다리식 부트스트랩이다: <strong>원격조작(사람 시연) → 시뮬레이션(Omniverse) → 어떤 관점에서도 물리세계를 이해하는 월드 파운데이션 모델.</strong></p>
+
+  <div class="card"><h4>Cosmos 3 — 물리 AI용 오픈 옴니모델</h4><p>'트랜스포머 혼합' 아키텍처. 자기회귀 트랜스포머가 추론·계획하고, 디퓨전 트랜스포머가 다음 장면을 생성. VLM·월드모델·시뮬레이터·월드액션모델로 변신 가능. 모델·데이터·학습법 모두 공개.</p></div>
+
+  <div class="card"><h4>Alpamayo 2 — 자율주행 오픈 모델</h4><p>NVIDIA Hyperion 채택 브랜드가 세계 자동차의 약 80%, 모빌리티 서비스의 약 97%가 연결. Halos OS 위에서 구동. 스스로 상황을 말로 추론하는 '리즈닝 자율주행차'.</p></div>
+
+  <div class="card"><h4>Isaac GR00T — 휴머노이드 레퍼런스 로봇</h4><p>각 손 25 자유도, 로봇 전체 31 자유도, 키 6피트·150파운드(Sharpa 제작). Thor 칩 구동. 대학·연구실이 몇 달 걸리던 셋업을 몇 시간으로 단축하도록 설계.</p></div>
+
+  <p>핵심은 <strong class="hl">모든 시스템이 동일한 패턴</strong>을 따른다는 것이다 — 클라우드 에이전트든, PC든, 자율주행차든, 휴머노이드든 "모델 + 하네스 + 도구 + 런타임" 구조는 똑같다.</p>
+</section>
+
+<div class="divider"></div>
+
+<!-- 9 -->
+<section>
+  <div class="sec-num">IX. 정리</div>
+  <h2>세 줄 요약</h2>
+  <ul class="clean">
+    <li><strong>Vera Rubin 풀 가동.</strong> 그레이스 블랙웰이 AI 추론용이었다면, 베라 루빈은 에이전트를 돌리는 분산형 처리 시스템. 공급망 2배, 조립 시간 2시간→5분.</li>
+    <li><strong>Vera CPU = 에이전트용 CPU.</strong> 사람이 아닌 성급한 에이전트를 위한 저지연·고대역폭 칩. SQL 3배, NYSE 스트림 6배. 회사 역사상 가장 빠른 성공 예고.</li>
+    <li><strong>엔터프라이즈 AI 툴킷 + PC 재발명.</strong> 모든 기업이 에이전트를 만들 수 있게. RTX Spark로 클라우드·온프레미스·PC·로봇 어디서나 같은 에이전트 패턴.</li>
+  </ul>
+
+  <div class="note-box" style="margin-top:24px">
+    <b>투자 관점 한 줄</b> &nbsp;핵심 서사는 "토큰이 수익 단위가 되면서 컴퓨팅 수요가 구조적으로 늘어난다"는 것. 한국 투자자에게는 <b>HBM4(SK하이닉스·삼성)</b>, 대만 공급망, 그리고 본문에 언급된 <b>네이버 클라우드·한국은행·현대</b> 등 지역 AI 클라우드 흐름이 관전 포인트. 단, 발표 수치는 제조사 주장이므로 독립 검증이 필요합니다.</div>
+</section>
+
+</div>
+
+<footer>
+  <p class="big">"컴퓨터 산업은 지난 6개월 만에 모든 것이 바뀌었다."</p>
+  <p>NVIDIA GTC Taipei 2026 키노트 분석 · 본 문서는 공개 자막 기반 요약·해설이며 투자 자문이 아닙니다.</p>
+</footer>
+
+<script>
+  // ===== Fade-in observer =====
+  const fadeObs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        fadeObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.fade-in').forEach(el => fadeObs.observe(el));
+
+  // ===== Chart configs =====
+  const C = { accent:'#e11d48', dark:'#1a1a1a', gray:'#6b7280', blue:'#2563eb' };
+  Chart.defaults.font.family = "'Noto Sans KR', sans-serif";
+  Chart.defaults.color = '#777';
+
+  const chartConfigs = {};
+
+  chartConfigs['commitChart'] = () => {
+    new Chart(document.getElementById('commitChart'), {
+      type:'bar',
+      data:{
+        labels:['2023','2024','2025','2026*'],
+        datasets:[{
+          label:'깃허브 커밋 (백만)',
+          data:[300,400,500,1450],
+          backgroundColor:['#6b7280','#6b7280','#1a1a1a','#e11d48'],
+          borderRadius:6, maxBarThickness:64
+        }]
+      },
+      options:{responsive:true, maintainAspectRatio:false, animation:{duration:1200},
+        plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>c.parsed.y+'M 커밋'}}},
+        scales:{y:{beginAtZero:true, grid:{color:'#eee'}}, x:{grid:{display:false}}}}
+    });
+  };
+
+  chartConfigs['assemblyChart'] = () => {
+    new Chart(document.getElementById('assemblyChart'), {
+      type:'bar',
+      data:{
+        labels:['Grace Blackwell','Vera Rubin'],
+        datasets:[{label:'조립 시간 (분)', data:[120,5],
+          backgroundColor:['#6b7280','#e11d48'], borderRadius:6, maxBarThickness:80}]
+      },
+      options:{indexAxis:'y', responsive:true, maintainAspectRatio:false, animation:{duration:1200},
+        plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>c.parsed.x+'분'}}},
+        scales:{x:{beginAtZero:true, grid:{color:'#eee'}}, y:{grid:{display:false}}}}
+    });
+  };
+
+  chartConfigs['gwCostChart'] = () => {
+    new Chart(document.getElementById('gwCostChart'), {
+      type:'line',
+      data:{
+        labels:['초기','현재','곧'],
+        datasets:[{
+          label:'1GW당 건설비 (십억$)',
+          data:[25,55,90],
+          borderColor:'#e11d48', backgroundColor:'rgba(225,29,72,.1)',
+          fill:true, tension:.35, pointRadius:6, pointBackgroundColor:'#e11d48',
+          borderWidth:3
+        }]
+      },
+      options:{responsive:true, maintainAspectRatio:false, animation:{duration:1300},
+        plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>'약 $'+c.parsed.y+'B'}}},
+        scales:{y:{beginAtZero:true, grid:{color:'#eee'}, ticks:{callback:v=>'$'+v+'B'}}, x:{grid:{display:false}}}}
+    });
+  };
+
+  chartConfigs['veraChart'] = () => {
+    new Chart(document.getElementById('veraChart'), {
+      type:'bar',
+      data:{
+        labels:['SQL 처리','NYSE 스트림','에이전트 샌드박스'],
+        datasets:[{label:'x86 대비 배수', data:[3,6,1.8],
+          backgroundColor:['#1a1a1a','#e11d48','#2563eb'], borderRadius:6, maxBarThickness:60}]
+      },
+      options:{responsive:true, maintainAspectRatio:false, animation:{duration:1200},
+        plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>c.parsed.y+'배 빠름'}}},
+        scales:{y:{beginAtZero:true, grid:{color:'#eee'}, ticks:{callback:v=>v+'×'}}, x:{grid:{display:false}}}}
+    });
+  };
+
+  const chartObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const canvas = e.target.querySelector('canvas');
+        if (canvas && chartConfigs[canvas.id]) {
+          chartConfigs[canvas.id]();
+          e.target.classList.add('chart-ready');
+          chartObs.unobserve(e.target);
+        }
+      }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.chart-container').forEach(el => chartObs.observe(el));
+
+  // ===== Agent diagram toggle =====
+  document.querySelectorAll('[data-layer]').forEach(layer => {
+    layer.addEventListener('click', () => {
+      const wasActive = layer.classList.contains('active');
+      document.querySelectorAll('[data-layer]').forEach(l => l.classList.remove('active'));
+      if (!wasActive) layer.classList.add('active');
+    });
+  });
+
+  // ===== Simulator =====
+  const sGw=document.getElementById('sGw'), sEff=document.getElementById('sEff'), sPrice=document.getElementById('sPrice');
+  const vGw=document.getElementById('vGw'), vEff=document.getElementById('vEff'), vPrice=document.getElementById('vPrice');
+  const oTokens=document.getElementById('oTokens'), oRev=document.getElementById('oRev');
+
+  function calcSim(){
+    const gw=parseFloat(sGw.value), eff=parseFloat(sEff.value), price=parseFloat(sPrice.value);
+    vGw.textContent=gw.toFixed(1)+' GW';
+    vEff.textContent=eff;
+    vPrice.textContent='$'+price.toFixed(1);
+    // tokens index = gw * eff (relative). base gw1, eff100 => 100
+    const tokens = gw * eff;
+    const rev = tokens * price;
+    oTokens.textContent=(tokens/100).toFixed(2)+'×';
+    oRev.textContent=(rev/100).toFixed(2)+'×';
+  }
+  [sGw,sEff,sPrice].forEach(s=>s.addEventListener('input',calcSim));
+  document.getElementById('simReset').addEventListener('click',()=>{
+    sGw.value=1; sEff.value=100; sPrice.value=1; calcSim();
+  });
+  calcSim();
+</script>
+</body>
+</html>

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NVIDIA GTC Taipei 2026 — 인터랙티브 시험문제</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff; --bg2:#fafafa; --text:#1a1a1a; --text2:#777777;
+    --accent:#e11d48; --accent2:#f43f5e; --border:#e5e5e5;
+    --green:#16a34a; --green-bg:#dcfce7; --red:#dc2626; --red-bg:#fee2e2;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg2); color:var(--text); font-family:'Noto Sans KR',sans-serif; font-weight:300; -webkit-font-smoothing:antialiased; padding-bottom:60px}
+  .wrap{max-width:680px; margin:0 auto; padding:0 16px}
+
+  /* HERO */
+  header{background:var(--text); color:#fff; padding:44px 16px 38px; position:relative; overflow:hidden}
+  header::before{content:""; position:absolute; inset:0; background:radial-gradient(circle at 85% 0%, rgba(225,29,72,.4), transparent 55%)}
+  .head-inner{max-width:680px; margin:0 auto; position:relative; z-index:1}
+  .kicker{font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--accent2); font-weight:500; margin-bottom:12px}
+  header h1{font-family:'Playfair Display',serif; font-weight:900; font-size:clamp(26px,7vw,38px); line-height:1.1}
+  header p{margin-top:14px; font-size:14px; color:#cfcfcf}
+
+  /* STICKY SCOREBOARD */
+  .scoreboard{position:sticky; top:0; z-index:100; background:#fff; border-bottom:1px solid var(--border); box-shadow:0 2px 14px rgba(0,0,0,.06); padding:12px 16px}
+  .sb-inner{max-width:680px; margin:0 auto}
+  .sb-stats{display:flex; justify-content:space-between; align-items:center; font-size:13px; margin-bottom:8px}
+  .sb-stats .item{text-align:center; flex:1}
+  .sb-stats .item .num{font-family:'Playfair Display',serif; font-weight:900; font-size:20px; color:var(--text); display:block}
+  .sb-stats .item .lbl{font-size:10px; color:var(--text2); letter-spacing:.5px}
+  .sb-stats .item.rate .num{color:var(--accent)}
+  .progress{height:7px; background:#eee; border-radius:10px; overflow:hidden}
+  .progress-bar{height:100%; width:0%; border-radius:10px; background:var(--red); transition:width .5s ease, background .4s ease}
+
+  /* QUESTION CARD */
+  .quiz{padding:28px 0}
+  .q-card{background:#fff; border:1px solid var(--border); border-radius:16px; padding:22px 20px; margin-bottom:22px; box-shadow:0 2px 10px rgba(0,0,0,.03)}
+  .q-top{display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap}
+  .q-no{font-family:'Playfair Display',serif; font-weight:900; font-size:22px; color:var(--accent)}
+  .q-type{font-size:11px; background:var(--text); color:#fff; padding:3px 10px; border-radius:20px; letter-spacing:.5px}
+  .q-diff{font-size:11px; padding:3px 10px; border-radius:20px; font-weight:500}
+  .q-diff.easy{background:#dcfce7; color:#166534}
+  .q-diff.mid{background:#fef9c3; color:#854d0e}
+  .q-diff.hard{background:#fee2e2; color:#991b1b}
+  .q-text{font-size:16.5px; font-weight:500; line-height:1.55; margin-bottom:18px; color:var(--text)}
+
+  .options{display:flex; flex-direction:column; gap:10px}
+  .opt{border:1.5px solid var(--border); background:#fff; border-radius:11px; padding:13px 16px; font-size:14.5px; font-family:'Noto Sans KR'; font-weight:400; text-align:left; cursor:pointer; transition:all .18s ease; color:var(--text); display:flex; align-items:center; gap:10px; line-height:1.45}
+  .opt:hover:not(:disabled){border-color:var(--accent); background:#fff5f7}
+  .opt .marker{flex-shrink:0; width:24px; height:24px; border-radius:50%; border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--text2)}
+  .opt:disabled{cursor:default}
+  .opt.correct{background:var(--green-bg); border-color:var(--green); color:#14532d; font-weight:500}
+  .opt.correct .marker{background:var(--green); border-color:var(--green); color:#fff}
+  .opt.wrong{background:var(--red-bg); border-color:var(--red); color:#7f1d1d}
+  .opt.wrong .marker{background:var(--red); border-color:var(--red); color:#fff}
+  .badge-res{margin-left:auto; font-size:12px; font-weight:700; padding:2px 9px; border-radius:20px}
+  .badge-res.ok{background:var(--green); color:#fff}
+  .badge-res.no{background:var(--red); color:#fff}
+
+  /* SHORT ANSWER */
+  .sa-row{display:flex; gap:8px}
+  .sa-row input{flex:1; border:1.5px solid var(--border); border-radius:10px; padding:12px 14px; font-size:15px; font-family:'Noto Sans KR'; outline:none}
+  .sa-row input:focus{border-color:var(--accent)}
+  .sa-row input:disabled{background:var(--bg2)}
+  .sa-submit{background:var(--accent); color:#fff; border:none; border-radius:10px; padding:0 20px; font-size:14px; font-weight:500; font-family:'Noto Sans KR'; cursor:pointer}
+  .sa-submit:disabled{background:#ccc; cursor:default}
+  .sa-feedback{margin-top:10px; font-size:13px; font-weight:500}
+  .sa-feedback.ok{color:var(--green)}
+  .sa-feedback.no{color:var(--red)}
+
+  /* OX */
+  .ox-row{display:flex; gap:12px}
+  .ox-btn{flex:1; border:1.5px solid var(--border); background:#fff; border-radius:12px; padding:18px; font-size:24px; font-weight:700; font-family:'Playfair Display',serif; cursor:pointer; transition:all .18s ease; color:var(--text)}
+  .ox-btn:hover:not(:disabled){border-color:var(--accent); background:#fff5f7}
+  .ox-btn:disabled{cursor:default}
+  .ox-btn.correct{background:var(--green-bg); border-color:var(--green); color:var(--green)}
+  .ox-btn.wrong{background:var(--red-bg); border-color:var(--red); color:var(--red)}
+
+  /* EXPLANATION */
+  .explain{max-height:0; overflow:hidden; transition:max-height .4s ease, margin .4s ease, padding .4s ease; background:var(--bg2); border-radius:11px; border-left:3px solid var(--accent); padding:0 16px}
+  .explain.show{max-height:400px; margin-top:16px; padding:14px 16px}
+  .explain .et{font-size:12px; font-weight:700; color:var(--accent); letter-spacing:1px; margin-bottom:6px}
+  .explain .ec{font-size:13.5px; color:#3a3a3a; line-height:1.6}
+
+  /* RESULT MODAL */
+  .modal-bg{position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:200; padding:20px; backdrop-filter:blur(3px)}
+  .modal-bg.show{display:flex}
+  .modal{background:#fff; border-radius:20px; max-width:380px; width:100%; padding:34px 26px; text-align:center; animation:pop .4s ease}
+  @keyframes pop{from{transform:scale(.85); opacity:0} to{transform:scale(1); opacity:1}}
+  .modal .grade{font-family:'Playfair Display',serif; font-weight:900; font-size:72px; line-height:1; color:var(--accent)}
+  .modal .score{font-size:18px; font-weight:700; margin:14px 0 6px}
+  .modal .msg{font-size:14px; color:var(--text2); line-height:1.6; margin-bottom:24px}
+  .modal .retry{background:var(--accent); color:#fff; border:none; padding:13px 28px; border-radius:10px; font-size:14px; font-weight:500; font-family:'Noto Sans KR'; cursor:pointer; width:100%}
+  .modal .retry:active{transform:scale(.98)}
+
+  footer{text-align:center; padding:30px 16px; font-size:12px; color:var(--text2)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-inner">
+    <div class="kicker">NVIDIA GTC Taipei 2026 · Quiz</div>
+    <h1>키노트 이해도 테스트</h1>
+    <p>총 10문제 · 객관식 + 단답형 + OX · 자동 채점 & 즉시 해설</p>
+  </div>
+</header>
+
+<div class="scoreboard">
+  <div class="sb-inner">
+    <div class="sb-stats">
+      <div class="item"><span class="num" id="sbSolved">0</span><span class="lbl">푼 문제 / 10</span></div>
+      <div class="item"><span class="num" id="sbCorrect">0</span><span class="lbl">맞힌 문제</span></div>
+      <div class="item rate"><span class="num" id="sbRate">0%</span><span class="lbl">정답률</span></div>
+    </div>
+    <div class="progress"><div class="progress-bar" id="sbBar"></div></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="quiz" id="quiz"></div>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="grade" id="mGrade">A</div>
+    <div class="score" id="mScore">10 / 10</div>
+    <div class="msg" id="mMsg"></div>
+    <button class="retry" id="mRetry">🔄 다시 풀기</button>
+  </div>
+</div>
+
+<footer>NVIDIA GTC Taipei 2026 키노트 자막 기반 · 학습용 퀴즈</footer>
+
+<script>
+const QUIZ_DATA = [
+  {
+    id:1, type:'mc', difficulty:'easy',
+    question:'젠슨 황이 "쓸모 있는 AI가 도착했다"는 첫 번째 증거로 제시한 것은?',
+    options:['스마트폰 판매량 급증','깃허브(GitHub) 커밋 수의 폭발적 증가','데이터센터 전력 소비량','반도체 가격 하락'],
+    answer:1,
+    explanation:'젠슨 황은 깃허브 커밋(소프트웨어 코드 업로드)이 2023년 3억 → 2024년 4억 → 2025년 5억 건이었다가 2026년 첫 몇 달 만에 거의 3배로 뛴 것을 에이전트형 AI가 실제 일을 하기 시작한 증거로 들었습니다.'
+  },
+  {
+    id:2, type:'ox', difficulty:'easy',
+    question:'젠슨 황은 AI가 소프트웨어 엔지니어 일자리를 줄이고 있다고 말했다.',
+    answer:'X',
+    explanation:'정반대입니다. 그는 "AI가 일자리를 줄인다는 건 완전한 헛소리"라며, 산출이 폭발적으로 커지기 때문에 오히려 더 많은 엔지니어를 고용하게 된다고 주장했습니다.'
+  },
+  {
+    id:3, type:'mc', difficulty:'mid',
+    question:'키노트에서 설명한 "에이전트"를 구성하는 4가지 요소가 올바르게 묶인 것은?',
+    options:['CPU, GPU, RAM, 저장장치','모델, 하네스(harness), 도구·스킬, 런타임','입력, 출력, 처리, 메모리','클라우드, 엣지, 온프레미스, 모바일'],
+    answer:1,
+    explanation:'에이전트는 ① 생각을 담당하는 모델(LLM), ② 전체를 지휘하는 하네스(운영체제 역할), ③ 도구와 스킬, ④ 모든 것을 묶어 실행하는 런타임으로 구성됩니다. 젠슨 황은 이를 운영체제에 비유했습니다.'
+  },
+  {
+    id:4, type:'mc', difficulty:'mid',
+    question:'그레이스 블랙웰과 비교해 베라 루빈(Vera Rubin) 랙의 조립 시간은 어떻게 바뀌었나?',
+    options:['2시간 → 30분','5분 → 2시간','2시간 → 5분','변화 없음'],
+    answer:2,
+    explanation:'케이블·호스·팬을 없애고 중앙 PCB로 양면을 연결하는 설계 덕분에, 그레이스 블랙웰 랙 조립에 2시간 걸리던 것이 베라 루빈에서는 5분으로 단축됐습니다.'
+  },
+  {
+    id:5, type:'sa', difficulty:'mid',
+    question:'베라 루빈에 쓰이는 HBM4 메모리 공급사로 키노트에 언급된 한국 기업 두 곳 중 하나를 적으세요. (예: SK하이닉스 또는 삼성)',
+    answer:['sk하이닉스','sk 하이닉스','하이닉스','삼성','삼성전자','sk hynix','hynix','samsung'],
+    explanation:'베라 루빈의 HBM4 메모리 공급사로 마이크론(Micron), SK하이닉스(SK Hynix), 삼성(Samsung)이 명시됐습니다. 이 중 SK하이닉스와 삼성이 한국 기업입니다.'
+  },
+  {
+    id:6, type:'mc', difficulty:'mid',
+    question:'젠슨 황이 강조한 AI 팩토리의 핵심 경제 지표는 무엇인가?',
+    options:['칩 1개당 가격','와트당 처리량(Performance per Watt)','데이터센터 면적','직원 1인당 매출'],
+    answer:1,
+    explanation:'1GW 발전 용량은 고정이므로, 같은 전력으로 더 많은 토큰을 뽑는 쪽이 더 많은 매출을 냅니다. 그는 "컴퓨팅이 곧 매출이고, 와트당 성능이 곧 매출"이라고 반복했습니다.'
+  },
+  {
+    id:7, type:'mc', difficulty:'easy',
+    question:'베라(Vera) CPU의 설계 철학을 가장 잘 요약한 것은?',
+    options:['사람의 멀티태스킹을 위한 CPU','게임 그래픽 전용 CPU','성급한 "에이전트"를 위한 저지연 CPU','암호화폐 채굴용 CPU'],
+    answer:2,
+    explanation:'젠슨 황은 "지금까지 모든 CPU는 사람을 위해 만들어졌다. 베라는 에이전트를 위한 CPU"라고 했습니다. 나노초 단위로 사는 성급한 에이전트를 위해 단일 스레드 성능과 낮은 지연을 최우선으로 설계했습니다.'
+  },
+  {
+    id:8, type:'sa', difficulty:'hard',
+    question:'케이던스(Cadence)와의 협업으로 칩 설계 검증(verification) 속도가 몇 배 빨라졌다고 했나? 숫자만 적으세요. (예: 40)',
+    answer:['40','40배','40x','40times'],
+    explanation:'코덱스가 지휘하고 케이던스 ChipStack이 RTL 검증 루프를 돌리는 슈퍼에이전트로, 몇 주 걸리던 검증이 몇 시간으로 단축됐습니다. 키노트는 이를 "40배 이상 빠르다"고 표현했습니다.'
+  },
+  {
+    id:9, type:'mc', difficulty:'hard',
+    question:'차세대 오픈 모델 NemoTron 3 Ultra의 아키텍처에 대한 설명으로 옳은 것은?',
+    options:['순수 CNN(합성곱 신경망) 기반','세계 최초 SSM(상태공간모델) + MoE(전문가 혼합) 하이브리드','단일 트랜스포머만 사용','GPU 없이 CPU로만 학습'],
+    answer:1,
+    explanation:'NemoTron 3 Ultra는 세계 최초로 SSM(상태공간모델)과 MoE(전문가 혼합)를 결합한 하이브리드 아키텍처입니다. 5배 빠르고 30% 저렴하며, 모델·데이터·학습 스크립트를 모두 공개합니다.'
+  },
+  {
+    id:10, type:'ox', difficulty:'hard',
+    question:'RTX Spark의 N1X 칩은 엔비디아가 미디어텍(MediaTek)과 공동 설계했다.',
+    answer:'O',
+    explanation:'맞습니다. RTX Spark의 핵심 N1X 칩은 미디어텍과 공동 설계됐으며, 블랙웰 RTX GPU(6,144 CUDA 코어)와 20코어 그레이스 CPU를 NVLink로 융합했습니다. 128GB 통합 메모리, TSMC 3nm, 700억 트랜지스터입니다.'
+  }
+];
+
+let state = { solved:0, correct:0, done:new Set() };
+
+const typeLabel = { mc:'객관식', sa:'단답형', ox:'O / X' };
+const diffLabel = { easy:'쉬움', mid:'보통', hard:'어려움' };
+const diffClass = { easy:'easy', mid:'mid', hard:'hard' };
+
+function buildQuiz(){
+  const quiz = document.getElementById('quiz');
+  quiz.innerHTML = '';
+  QUIZ_DATA.forEach((q, idx) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = 'card-'+q.id;
+
+    let body = '';
+    if(q.type === 'mc'){
+      body = '<div class="options">' + q.options.map((opt,i)=>
+        `<button class="opt" data-i="${i}">
+          <span class="marker">${String.fromCharCode(65+i)}</span>
+          <span>${opt}</span>
+        </button>`).join('') + '</div>';
+    } else if(q.type === 'sa'){
+      body = `<div class="sa-row">
+        <input type="text" placeholder="답을 입력하세요" id="sa-${q.id}">
+        <button class="sa-submit" data-submit>제출</button>
+      </div><div class="sa-feedback" id="saf-${q.id}"></div>`;
+    } else if(q.type === 'ox'){
+      body = `<div class="ox-row">
+        <button class="ox-btn" data-ox="O">O</button>
+        <button class="ox-btn" data-ox="X">X</button>
+      </div>`;
+    }
+
+    card.innerHTML = `
+      <div class="q-top">
+        <span class="q-no">Q${idx+1}</span>
+        <span class="q-type">${typeLabel[q.type]}</span>
+        <span class="q-diff ${diffClass[q.difficulty]}">${diffLabel[q.difficulty]}</span>
+      </div>
+      <div class="q-text">${q.question}</div>
+      ${body}
+      <div class="explain" id="exp-${q.id}">
+        <div class="et">💡 해설</div>
+        <div class="ec">${q.explanation}</div>
+      </div>`;
+    quiz.appendChild(card);
+
+    // bind events
+    if(q.type === 'mc'){
+      card.querySelectorAll('.opt').forEach(btn=>{
+        btn.addEventListener('click', ()=> handleMC(q, card, parseInt(btn.dataset.i)));
+      });
+    } else if(q.type === 'sa'){
+      const input = card.querySelector('input');
+      const submit = card.querySelector('[data-submit]');
+      submit.addEventListener('click', ()=> handleSA(q, card));
+      input.addEventListener('keydown', e=>{ if(e.key==='Enter') handleSA(q, card); });
+    } else if(q.type === 'ox'){
+      card.querySelectorAll('.ox-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=> handleOX(q, card, btn.dataset.ox));
+      });
+    }
+  });
+}
+
+function lockAndScore(q, isCorrect){
+  state.done.add(q.id);
+  state.solved++;
+  if(isCorrect) state.correct++;
+  updateBoard();
+  document.getElementById('exp-'+q.id).classList.add('show');
+  if(state.solved === QUIZ_DATA.length) setTimeout(showResult, 600);
+}
+
+function handleMC(q, card, chosen){
+  if(state.done.has(q.id)) return;
+  const opts = card.querySelectorAll('.opt');
+  opts.forEach(o=>o.disabled=true);
+  const isCorrect = chosen === q.answer;
+  const chosenBtn = opts[chosen];
+  if(isCorrect){
+    chosenBtn.classList.add('correct');
+    chosenBtn.insertAdjacentHTML('beforeend','<span class="badge-res ok">✓ 정답!</span>');
+  } else {
+    chosenBtn.classList.add('wrong');
+    chosenBtn.insertAdjacentHTML('beforeend','<span class="badge-res no">✗ 오답</span>');
+    opts[q.answer].classList.add('correct');
+    opts[q.answer].insertAdjacentHTML('beforeend','<span class="badge-res ok">정답</span>');
+  }
+  lockAndScore(q, isCorrect);
+}
+
+function handleSA(q, card){
+  if(state.done.has(q.id)) return;
+  const input = card.querySelector('input');
+  const val = (input.value||'').trim().toLowerCase().replace(/\s+/g,' ');
+  if(!val){ input.focus(); return; }
+  const fb = card.querySelector('.sa-feedback');
+  const norm = a => a.toLowerCase().replace(/\s+/g,'');
+  const isCorrect = q.answer.some(a => norm(val) === norm(a) || norm(val).includes(norm(a)) || norm(a).includes(norm(val)) && norm(val).length>=2);
+  input.disabled = true;
+  card.querySelector('.sa-submit').disabled = true;
+  if(isCorrect){
+    fb.textContent = '✓ 정답입니다!';
+    fb.className = 'sa-feedback ok';
+    input.style.borderColor = 'var(--green)';
+    input.style.background = 'var(--green-bg)';
+  } else {
+    fb.textContent = '✗ 오답입니다. 정답: ' + q.answer[0];
+    fb.className = 'sa-feedback no';
+    input.style.borderColor = 'var(--red)';
+    input.style.background = 'var(--red-bg)';
+  }
+  lockAndScore(q, isCorrect);
+}
+
+function handleOX(q, card, choice){
+  if(state.done.has(q.id)) return;
+  const btns = card.querySelectorAll('.ox-btn');
+  btns.forEach(b=>b.disabled=true);
+  const isCorrect = choice === q.answer;
+  const chosenBtn = [...btns].find(b=>b.dataset.ox===choice);
+  if(isCorrect){
+    chosenBtn.classList.add('correct');
+  } else {
+    chosenBtn.classList.add('wrong');
+    [...btns].find(b=>b.dataset.ox===q.answer).classList.add('correct');
+  }
+  lockAndScore(q, isCorrect);
+}
+
+function updateBoard(){
+  document.getElementById('sbSolved').textContent = state.solved;
+  document.getElementById('sbCorrect').textContent = state.correct;
+  const rate = state.solved ? Math.round(state.correct/state.solved*100) : 0;
+  document.getElementById('sbRate').textContent = rate+'%';
+  const bar = document.getElementById('sbBar');
+  bar.style.width = (state.solved/QUIZ_DATA.length*100)+'%';
+  bar.style.background = rate>=70 ? 'var(--green)' : rate>=40 ? '#f59e0b' : 'var(--red)';
+}
+
+function showResult(){
+  const score = state.correct, total = QUIZ_DATA.length;
+  const pct = score/total*100;
+  let grade, msg;
+  if(pct>=90){ grade='A'; msg='완벽합니다! 키노트 핵심을 완전히 이해했네요. 🎉'; }
+  else if(pct>=70){ grade='B'; msg='훌륭해요! 대부분의 핵심을 잘 파악했습니다. 👏'; }
+  else if(pct>=50){ grade='C'; msg='괜찮아요. 해설을 다시 보면 더 탄탄해질 거예요. 💪'; }
+  else { grade='D'; msg='아직 어렵죠? 해설과 함께 한 번 더 도전해 보세요! 📚'; }
+  document.getElementById('mGrade').textContent = grade;
+  document.getElementById('mScore').textContent = score+' / '+total + ' (' + Math.round(pct) + '%)';
+  document.getElementById('mMsg').textContent = msg;
+  document.getElementById('modalBg').classList.add('show');
+}
+
+document.getElementById('mRetry').addEventListener('click', ()=>{
+  state = { solved:0, correct:0, done:new Set() };
+  document.getElementById('modalBg').classList.remove('show');
+  buildQuiz();
+  updateBoard();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+buildQuiz();
+updateBoard();
+</script>
+</body>
+</html>
